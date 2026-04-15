@@ -1,7 +1,8 @@
 package com.kworkerharmony.backend.checklist.domain;
 
 public enum ChecklistStatus {
-    PENDING,
+    NOT_STARTED,
     IN_PROGRESS,
-    COMPLETED
+    COMPLETED,
+    REVIEW_REQUIRED
 }

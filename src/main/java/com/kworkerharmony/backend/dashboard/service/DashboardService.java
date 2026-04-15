@@ -3,7 +3,7 @@ package com.kworkerharmony.backend.dashboard.service;
 import com.kworkerharmony.backend.alert.domain.AlertRepository;
 import com.kworkerharmony.backend.cases.domain.CaseRepository;
 import com.kworkerharmony.backend.cases.domain.CaseStatus;
-import com.kworkerharmony.backend.checklist.domain.ChecklistRepository;
+import com.kworkerharmony.backend.checklist.domain.CaseChecklistItemRepository;
 import com.kworkerharmony.backend.checklist.domain.ChecklistStatus;
 import com.kworkerharmony.backend.dashboard.domain.dto.response.DashboardSummaryResponse;
 import com.kworkerharmony.backend.global.exception.CustomException;
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DashboardService {
 
     private final CaseRepository caseRepository;
-    private final ChecklistRepository checklistRepository;
+    private final CaseChecklistItemRepository caseChecklistItemRepository;
     private final AlertRepository alertRepository;
     private final UserRepository userRepository;
 
@@ -34,8 +34,8 @@ public class DashboardService {
                 user.getId(),
                 user.getUserType(),
                 caseRepository.countByWorkerIdAndStatus(user.getId(), CaseStatus.ACTIVE),
-                checklistRepository.countByCaseEntityWorkerId(user.getId()),
-                checklistRepository.countByCaseEntityWorkerIdAndStatus(user.getId(), ChecklistStatus.COMPLETED),
+                caseChecklistItemRepository.countByCaseEntityWorkerId(user.getId()),
+                caseChecklistItemRepository.countByCaseEntityWorkerIdAndStatus(user.getId(), ChecklistStatus.COMPLETED),
                 alertRepository.countByUserIdAndIsReadFalse(user.getId())
         );
     }
@@ -49,8 +49,8 @@ public class DashboardService {
                 user.getId(),
                 user.getUserType(),
                 caseRepository.countByEmployerIdAndStatus(user.getId(), CaseStatus.ACTIVE),
-                checklistRepository.countByCaseEntityEmployerId(user.getId()),
-                checklistRepository.countByCaseEntityEmployerIdAndStatus(user.getId(), ChecklistStatus.COMPLETED),
+                caseChecklistItemRepository.countByCaseEntityEmployerId(user.getId()),
+                caseChecklistItemRepository.countByCaseEntityEmployerIdAndStatus(user.getId(), ChecklistStatus.COMPLETED),
                 alertRepository.countByUserIdAndIsReadFalse(user.getId())
         );
     }
