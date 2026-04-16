@@ -26,7 +26,7 @@ public class DocumentController {
     }
 
     @GetMapping("/{documentId}")
-    public ApiResponse<DocumentResponse> getDocument(@PathVariable Long documentId) {
+    public ApiResponse<DocumentResponse> getDocument(@PathVariable String documentId) {
         return ApiResponse.success(documentService.getDocument(documentId));
     }
 

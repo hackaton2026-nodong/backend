@@ -26,7 +26,7 @@ public class DocumentService {
     }
 
     @Transactional(readOnly = true)
-    public DocumentResponse getDocument(Long documentId) {
+    public DocumentResponse getDocument(String documentId) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document not found"));
         return DocumentResponse.from(document);
@@ -37,13 +37,14 @@ public class DocumentService {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "User not found"));
 
-        Document document = documentRepository.save(new Document(
-                request.issueDate(),
-                request.expiryDate(),
+        Document uploadedDocument = Document.createUploaded(
+                user.getId(),
                 request.documentType(),
-                request.rawData(),
-                user
-        ));
+                request.issueDate(),
+                request.expiryDate()
+        );
+
+        Document document = documentRepository.save(uploadedDocument);
 
         return DocumentResponse.from(document);
     }
