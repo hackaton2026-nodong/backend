@@ -30,8 +30,11 @@ public class CaseController {
     }
 
     @GetMapping("/{caseId}")
-    public ApiResponse<CaseResponse> getCase(@PathVariable String caseId) {
-        return ApiResponse.success(caseService.getCase(caseId));
+    public ApiResponse<CaseResponse> getCase(
+            @PathVariable String caseId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(caseService.getCase(caseId, userPrincipal));
     }
 
     @PostMapping
@@ -45,8 +48,9 @@ public class CaseController {
     @PostMapping("/{caseId}/members")
     public ApiResponse<CaseResponse> connectMembers(
             @PathVariable String caseId,
-            @Valid @RequestBody ConnectCaseMembersRequest request
+            @Valid @RequestBody ConnectCaseMembersRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        return ApiResponse.success(caseService.connectMembers(caseId, request));
+        return ApiResponse.success(caseService.connectMembers(caseId, request, userPrincipal));
     }
 }

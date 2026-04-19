@@ -19,3 +19,7 @@ jwt:
   secret: test-secret-key-for-jwt-signing-1234567890
   access-token-expiration-seconds: 3600
   refresh-token-expiration-seconds: 1209600
+
+app:
+  document:
+    storage-root: build/test-uploads

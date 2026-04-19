@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 public record CaseResponse(
         String id,
+        Long companyId,
         Long employerId,
         Long workerId,
         CaseStatus status,
@@ -18,6 +19,7 @@ public record CaseResponse(
     public static CaseResponse from(Case foundCase) {
         return new CaseResponse(
                 foundCase.getId(),
+                foundCase.getEnterprise() != null ? foundCase.getEnterprise().getId() : null,
                 foundCase.getEmployer() != null ? foundCase.getEmployer().getId() : null,
                 foundCase.getWorker() != null ? foundCase.getWorker().getId() : null,
                 foundCase.getStatus(),

@@ -6,10 +6,13 @@ public record CreateEnterpriseRequest(
         @NotBlank(message = "Name is required")
         String name,
 
-        @NotBlank(message = "Contact is required")
-        String contact,
+        @NotBlank(message = "Business number is required")
+        String businessNumber,
 
-        @NotBlank(message = "Location is required")
-        String location
+        @NotBlank(message = "Industry is required")
+        String industry,
+
+        @NotBlank(message = "Country is required")
+        String country
 ) {
 }

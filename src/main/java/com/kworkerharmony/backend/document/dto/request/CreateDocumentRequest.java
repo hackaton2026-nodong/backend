@@ -1,7 +1,6 @@
 package com.kworkerharmony.backend.document.dto.request;
 
 import com.kworkerharmony.backend.document.DocumentType;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
@@ -15,10 +14,7 @@ public record CreateDocumentRequest(
         @NotNull(message = "Document type is required")
         DocumentType documentType,
 
-        @NotBlank(message = "Raw data is required")
-        String rawData,
-
-        @NotNull(message = "User id is required")
-        Long userId
+        @NotNull(message = "Case id is required")
+        String caseId
 ) {
 }

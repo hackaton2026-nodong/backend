@@ -1,6 +1,7 @@
 package com.kworkerharmony.backend.cases.entity;
 
 import com.kworkerharmony.backend.cases.domain.CaseStatus;
+import com.kworkerharmony.backend.enterprise.Enterprise;
 import com.kworkerharmony.backend.global.entity.BaseEntity;
 import com.kworkerharmony.backend.user.User;
 import jakarta.persistence.Column;
@@ -37,6 +38,10 @@ public class Case extends BaseEntity {
     @JoinColumn(name = "worker_id")
     private User worker;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enterprise_id", nullable = false)
+    private Enterprise enterprise;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private CaseStatus status;
@@ -47,7 +52,8 @@ public class Case extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String region;
 
-    public Case(User employer, User worker, CaseStatus status, String industry, String region) {
+    public Case(Enterprise enterprise, User employer, User worker, CaseStatus status, String industry, String region) {
+        this.enterprise = enterprise;
         this.employer = employer;
         this.worker = worker;
         this.status = status;

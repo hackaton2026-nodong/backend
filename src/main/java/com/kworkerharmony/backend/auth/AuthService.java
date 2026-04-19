@@ -8,6 +8,11 @@ import com.kworkerharmony.backend.auth.dto.response.LoginResponse;
 import com.kworkerharmony.backend.auth.dto.response.ReissueResponse;
 import com.kworkerharmony.backend.country.Country;
 import com.kworkerharmony.backend.country.CountryRepository;
+import com.kworkerharmony.backend.enterprise.CompanyInviteCode;
+import com.kworkerharmony.backend.enterprise.CompanyInviteCodeRepository;
+import com.kworkerharmony.backend.enterprise.Enterprise;
+import com.kworkerharmony.backend.enterprise.EnterpriseRepository;
+import com.kworkerharmony.backend.enterprise.EnterpriseStatus;
 import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
 import com.kworkerharmony.backend.global.security.JwtProperties;
@@ -16,7 +21,10 @@ import com.kworkerharmony.backend.global.security.RedisTokenRepository;
 import com.kworkerharmony.backend.user.Role;
 import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserRepository;
+import com.kworkerharmony.backend.user.UserStatus;
+import com.kworkerharmony.backend.user.UserType;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +36,8 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final CountryRepository countryRepository;
+    private final EnterpriseRepository enterpriseRepository;
+    private final CompanyInviteCodeRepository companyInviteCodeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
@@ -42,16 +52,52 @@ public class AuthService {
         Country country = countryRepository.findByCountryCode(request.countryCode())
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Country not found"));
 
+        SignupTarget signupTarget = resolveSignupTarget(request);
+
         User user = new User(
                 request.email(),
                 passwordEncoder.encode(request.password()),
                 request.name(),
-                Role.USER,
-                request.userType(),
-                country
+                signupTarget.role(),
+                signupTarget.userType(),
+                UserStatus.ACTIVE,
+                country,
+                signupTarget.enterprise()
         );
 
         userRepository.save(user);
+    }
+
+    private SignupTarget resolveSignupTarget(SignupRequest request) {
+        if (request.inviteCode() != null && !request.inviteCode().isBlank()) {
+            CompanyInviteCode inviteCode = companyInviteCodeRepository.findByCode(request.inviteCode())
+                    .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Invite code not found"));
+
+            if (!inviteCode.isUsableAt(LocalDateTime.now())) {
+                throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Invite code is expired or exhausted");
+            }
+
+            Role role = inviteCode.getDefaultRole();
+            UserType userType = toUserType(role);
+            inviteCode.use();
+            return new SignupTarget(inviteCode.getEnterprise(), role, userType);
+        }
+
+        Enterprise enterprise = enterpriseRepository.save(new Enterprise(
+                request.companyName(),
+                request.companyBusinessNumber(),
+                request.companyIndustry(),
+                request.companyCountry(),
+                EnterpriseStatus.ACTIVE
+        ));
+        return new SignupTarget(enterprise, Role.ADMIN, UserType.EMPLOYER);
+    }
+
+    private UserType toUserType(Role role) {
+        return switch (role) {
+            case EMPLOYER, ADMIN -> UserType.EMPLOYER;
+            case WORKER -> UserType.WORKER;
+        };
     }
 
     @Transactional
@@ -104,5 +150,12 @@ public class AuthService {
                 request.accessToken(),
                 jwtProvider.getRemainingValidity(request.accessToken())
         );
+    }
+
+    private record SignupTarget(
+            Enterprise enterprise,
+            Role role,
+            UserType userType
+    ) {
     }
 }

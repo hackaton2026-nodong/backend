@@ -38,3 +38,7 @@ jwt:
   secret: ${JWT_SECRET:change-me-to-a-secure-secret-key-for-jwt-signing}
   access-token-expiration-seconds: ${JWT_ACCESS_TOKEN_EXPIRATION_SECONDS:3600}
   refresh-token-expiration-seconds: ${JWT_REFRESH_TOKEN_EXPIRATION_SECONDS:1209600}
+
+app:
+  document:
+    storage-root: ${DOCUMENT_STORAGE_ROOT:/tmp/backend-documents}

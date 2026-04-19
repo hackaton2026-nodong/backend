@@ -1,6 +1,7 @@
 package com.kworkerharmony.backend.user;
 
 import com.kworkerharmony.backend.country.Country;
+import com.kworkerharmony.backend.enterprise.Enterprise;
 import com.kworkerharmony.backend.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,16 +45,51 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 20)
     private UserType userType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UserStatus status;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id", nullable = false)
     private Country country;
 
-    public User(String email, String passwordHash, String name, Role role, UserType userType, Country country) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enterprise_id")
+    private Enterprise enterprise;
+
+    public User(
+            String email,
+            String passwordHash,
+            String name,
+            Role role,
+            UserType userType,
+            UserStatus status,
+            Country country,
+            Enterprise enterprise
+    ) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.name = name;
         this.role = role;
         this.userType = userType;
+        this.status = status;
         this.country = country;
+        this.enterprise = enterprise;
+    }
+
+    public void assignEnterprise(Enterprise enterprise) {
+        this.enterprise = enterprise;
+    }
+
+    public void changeRole(Role role) {
+        this.role = role;
+    }
+
+    public void changeUserType(UserType userType) {
+        this.userType = userType;
+    }
+
+    public void activate() {
+        this.status = UserStatus.ACTIVE;
     }
 }

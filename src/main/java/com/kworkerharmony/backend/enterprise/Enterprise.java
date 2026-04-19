@@ -25,14 +25,23 @@ public class Enterprise extends BaseEntity {
     private String name;
 
     @Column(nullable = false, length = 100)
-    private String contact;
+    private String businessNumber;
 
     @Column(nullable = false, length = 255)
-    private String location;
+    private String industry;
 
-    public Enterprise(String name, String contact, String location) {
+    @Column(nullable = false, length = 100)
+    private String country;
+
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private EnterpriseStatus status;
+
+    public Enterprise(String name, String businessNumber, String industry, String country, EnterpriseStatus status) {
         this.name = name;
-        this.contact = contact;
-        this.location = location;
+        this.businessNumber = businessNumber;
+        this.industry = industry;
+        this.country = country;
+        this.status = status;
     }
 }

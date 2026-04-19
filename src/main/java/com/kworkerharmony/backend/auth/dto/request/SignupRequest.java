@@ -1,9 +1,9 @@
 package com.kworkerharmony.backend.auth.dto.request;
 
 import com.kworkerharmony.backend.user.UserType;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record SignupRequest(
@@ -19,10 +19,34 @@ public record SignupRequest(
         @Size(max = 100)
         String name,
 
-        @NotNull
         UserType userType,
 
         @NotBlank
-        String countryCode
+        String countryCode,
+
+        String inviteCode,
+
+        String companyName,
+
+        String companyBusinessNumber,
+
+        String companyIndustry,
+
+        String companyCountry
 ) {
+
+    @AssertTrue(message = "Provide either inviteCode or all company fields")
+    public boolean isSignupFlowValid() {
+        boolean hasInviteCode = inviteCode != null && !inviteCode.isBlank();
+        boolean hasCompanyFields = hasText(companyName)
+                && hasText(companyBusinessNumber)
+                && hasText(companyIndustry)
+                && hasText(companyCountry);
+
+        return hasInviteCode ^ hasCompanyFields;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
 }
