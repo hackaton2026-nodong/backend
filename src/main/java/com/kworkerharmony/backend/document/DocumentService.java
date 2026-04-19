@@ -35,7 +35,7 @@ public class DocumentService {
         Case caseEntity = getAccessibleCase(caseId, userPrincipal);
         validateCasePartyAccess(caseEntity, getUser(userPrincipal.getId()));
         return documentRepository.findAllByCaseIdOrderByCreatedAtDesc(caseEntity.getId()).stream()
-                .map(DocumentResponse::from)
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -44,7 +44,7 @@ public class DocumentService {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document not found"));
         validateDocumentAccess(document, userPrincipal);
-        return DocumentResponse.from(document);
+        return toResponse(document);
     }
 
     @Transactional
@@ -82,11 +82,15 @@ public class DocumentService {
                     storedFile.fileSize()
             );
             document.markHashed(documentHashPort.hash(storedFile.absolutePath()));
-            return DocumentResponse.from(document);
+            return toResponse(document);
         } catch (RuntimeException ex) {
             document.markFailed();
             throw ex;
         }
+    }
+
+    private DocumentResponse toResponse(Document document) {
+        return DocumentResponse.from(document, fileStoragePort.exists(document.getStorageKey()));
     }
 
     private Case getAccessibleCase(String caseId, UserPrincipal userPrincipal) {

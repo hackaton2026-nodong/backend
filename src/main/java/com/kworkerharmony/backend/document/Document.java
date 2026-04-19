@@ -26,36 +26,47 @@ public class Document extends BaseEntity {
     @Column(nullable = false, updatable = false, length = 36)
     private String id;
 
+    @Column(name = "case_id", length = 36)
     private String caseId;
 
+    @Column(name = "uploader_user_id")
     private Long uploaderUserId;
 
-    @Column(length = 50)
+    @Column(name = "document_type", length = 50)
     private String documentType;
 
+    @Column(name = "original_file_name")
     private String originalFileName;
 
+    @Column(name = "storage_key")
     private String storageKey;
 
+    @Column(name = "mime_type")
     private String mimeType;
 
+    @Column(name = "file_size")
     private Long fileSize;
 
-    @Column(length = 64)
+    @Column(name = "sha256_hash", length = 64)
     private String sha256Hash;
 
+    @Column(name = "anchored_tx_id")
     private String anchoredTxId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private DocumentStatus status;
 
+    @Column(name = "issued_at")
     private LocalDate issuedAt;
 
+    @Column(name = "expires_at")
     private LocalDate expiresAt;
 
+    @Column(name = "ocr_completed_at")
     private LocalDateTime ocrCompletedAt;
 
+    @Column(name = "analyzed_at")
     private LocalDateTime analyzedAt;
 
     public Document(

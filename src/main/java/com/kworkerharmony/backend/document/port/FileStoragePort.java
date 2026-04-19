@@ -6,6 +6,8 @@ public interface FileStoragePort {
 
     StoredFile store(String caseId, String documentId, MultipartFile file);
 
+    boolean exists(String storageKey);
+
     record StoredFile(
             String originalFileName,
             String storageKey,

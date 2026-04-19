@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Upload Test</title>
+  <style>
+    :root {
+      --bg: #f4efe7;
+      --panel: #fffaf2;
+      --line: #d8c7ac;
+      --text: #1f1a14;
+      --muted: #6a5d4f;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --danger: #b42318;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 28%),
+        linear-gradient(135deg, #f7f1e8, #efe5d5);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+
+    .hero {
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    .panel {
+      background: rgba(255, 250, 242, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 24px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 14px 40px rgba(45, 33, 18, 0.08);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #cbb99b;
+      background: #fffdf8;
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 118px;
+      resize: vertical;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      background: var(--accent);
+      color: #f6fffd;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #dfd1bd;
+      color: #352a1f;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #fcf7ef;
+      border: 1px dashed var(--line);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .status.error {
+      color: var(--danger);
+      border-color: rgba(180, 35, 24, 0.3);
+      background: rgba(180, 35, 24, 0.05);
+    }
+
+    .result {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fffdf8;
+    }
+
+    .card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.86rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    code {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: "Cascadia Code", "Consolas", monospace;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 760px) {
+      .grid,
+      .result {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <h1>Document Upload Test</h1>
+    <p>JWT access token, case ID, and a file are enough to verify that the upload API works and that the document is saved on the server's local storage.</p>
+  </section>
+
+  <section class="panel">
+    <div class="grid">
+      <div class="field full">
+        <label for="token">Access Token</label>
+        <textarea id="token" placeholder="Paste Bearer token value without the Bearer prefix"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="caseId">Case ID</label>
+        <input id="caseId" type="text" placeholder="UUID case id">
+      </div>
+
+      <div class="field">
+        <label for="documentType">Document Type</label>
+        <select id="documentType">
+          <option value="EMPLOYMENT_CONTRACT">EMPLOYMENT_CONTRACT</option>
+          <option value="PAYSLIP">PAYSLIP</option>
+          <option value="VISA">VISA</option>
+          <option value="RESIDENCE_PROOF">RESIDENCE_PROOF</option>
+          <option value="OTHER">OTHER</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="issuedAt">Issued At</label>
+        <input id="issuedAt" type="date">
+      </div>
+
+      <div class="field">
+        <label for="expiresAt">Expires At</label>
+        <input id="expiresAt" type="date">
+      </div>
+
+      <div class="field full">
+        <label for="file">File</label>
+        <input id="file" type="file">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="uploadButton" type="button">Upload Document</button>
+      <button id="resetButton" class="secondary" type="button">Reset</button>
+    </div>
+
+    <div id="status" class="status">Ready. Provide token, case ID, dates, and a file to start.</div>
+
+    <div class="result">
+      <div class="card">
+        <strong>Upload Summary</strong>
+        <code id="summary">No upload yet.</code>
+      </div>
+      <div class="card">
+        <strong>Raw Response</strong>
+        <code id="response">No response yet.</code>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const tokenInput = document.getElementById("token");
+  const caseIdInput = document.getElementById("caseId");
+  const documentTypeInput = document.getElementById("documentType");
+  const issuedAtInput = document.getElementById("issuedAt");
+  const expiresAtInput = document.getElementById("expiresAt");
+  const fileInput = document.getElementById("file");
+  const uploadButton = document.getElementById("uploadButton");
+  const resetButton = document.getElementById("resetButton");
+  const statusBox = document.getElementById("status");
+  const summaryBox = document.getElementById("summary");
+  const responseBox = document.getElementById("response");
+
+  const today = new Date().toISOString().slice(0, 10);
+  issuedAtInput.value = today;
+  expiresAtInput.value = today;
+
+  function setStatus(message, isError = false) {
+    statusBox.textContent = message;
+    statusBox.className = isError ? "status error" : "status";
+  }
+
+  function resetForm() {
+    caseIdInput.value = "";
+    documentTypeInput.value = "EMPLOYMENT_CONTRACT";
+    fileInput.value = "";
+    summaryBox.textContent = "No upload yet.";
+    responseBox.textContent = "No response yet.";
+    setStatus("Ready. Provide token, case ID, dates, and a file to start.");
+  }
+
+  async function upload() {
+    const token = tokenInput.value.trim();
+    const caseId = caseIdInput.value.trim();
+    const file = fileInput.files[0];
+
+    if (!token || !caseId || !file || !issuedAtInput.value || !expiresAtInput.value) {
+      setStatus("Token, case ID, issuedAt, expiresAt, and file are required.", true);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("documentType", documentTypeInput.value);
+    formData.append("issuedAt", issuedAtInput.value);
+    formData.append("expiresAt", expiresAtInput.value);
+
+    uploadButton.disabled = true;
+    setStatus("Uploading document...");
+
+    try {
+      const response = await fetch(`/api/cases/${encodeURIComponent(caseId)}/documents`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const payload = await response.json();
+      responseBox.textContent = JSON.stringify(payload, null, 2);
+
+      if (!response.ok || !payload.success) {
+        const message = payload?.error?.message || `Upload failed with status ${response.status}`;
+        summaryBox.textContent = "Upload failed.";
+        setStatus(message, true);
+        return;
+      }
+
+      const data = payload.data;
+      summaryBox.textContent = [
+        `documentId: ${data.id}`,
+        `status: ${data.status}`,
+        `stored: ${data.stored}`,
+        `storageKey: ${data.storageKey}`,
+        `sha256Hash: ${data.sha256Hash}`,
+        `fileSize: ${data.fileSize}`,
+        `mimeType: ${data.mimeType}`
+      ].join("\n");
+      setStatus("Upload completed. Check stored=true and the storageKey field.");
+    } catch (error) {
+      summaryBox.textContent = "Upload failed.";
+      setStatus(`Request failed: ${error.message}`, true);
+    } finally {
+      uploadButton.disabled = false;
+    }
+  }
+
+  uploadButton.addEventListener("click", upload);
+  resetButton.addEventListener("click", resetForm);
+</script>
+</body>
+</html>

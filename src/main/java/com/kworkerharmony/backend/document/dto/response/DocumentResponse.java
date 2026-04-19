@@ -12,6 +12,7 @@ public record DocumentResponse(
         String documentType,
         String originalFileName,
         String storageKey,
+        boolean stored,
         String mimeType,
         Long fileSize,
         String sha256Hash,
@@ -23,7 +24,7 @@ public record DocumentResponse(
         LocalDateTime analyzedAt
 ) {
 
-    public static DocumentResponse from(Document document) {
+    public static DocumentResponse from(Document document, boolean stored) {
         return new DocumentResponse(
                 document.getId(),
                 document.getCaseId(),
@@ -31,6 +32,7 @@ public record DocumentResponse(
                 document.getDocumentType(),
                 document.getOriginalFileName(),
                 document.getStorageKey(),
+                stored,
                 document.getMimeType(),
                 document.getFileSize(),
                 document.getSha256Hash(),

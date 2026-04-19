@@ -4,18 +4,15 @@ spring:
   datasource:
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/backend?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
     username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:password}
+    password: ${MYSQL_PASSWORD:1234}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: ${JPA_DDL_AUTO:validate}
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
-        boot:
-          allow_jdbc_metadata_access: false
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -41,4 +38,4 @@ jwt:
 
 app:
   document:
-    storage-root: ${DOCUMENT_STORAGE_ROOT:/tmp/backend-documents}
+    storage-root: ${DOCUMENT_STORAGE_ROOT:./storage/documents}

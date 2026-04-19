@@ -41,4 +41,12 @@ public class LocalFileStorageAdapter implements FileStoragePort {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to store uploaded file");
         }
     }
+
+    @Override
+    public boolean exists(String storageKey) {
+        if (storageKey == null || storageKey.isBlank()) {
+            return false;
+        }
+        return Files.exists(rootDirectory.resolve(storageKey).normalize());
+    }
 }

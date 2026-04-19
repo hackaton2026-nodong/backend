@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -121,8 +122,16 @@ class DocumentControllerIntegrationTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.caseId").value(caseEntity.getId()))
                 .andExpect(jsonPath("$.data.status").value(DocumentStatus.HASHED.name()))
+                .andExpect(jsonPath("$.data.stored").value(true))
                 .andExpect(jsonPath("$.data.sha256Hash").isNotEmpty())
                 .andExpect(jsonPath("$.data.storageKey").isNotEmpty());
+    }
+
+    @Test
+    void uploadTestPageIsPubliclyAccessible() throws Exception {
+        mockMvc.perform(get("/document-upload-test.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Document Upload Test")));
     }
 
     @Test

@@ -1,6 +1,6 @@
 # Backend
 
-조직 단위 사용자 관리와 케이스 기반 문서 처리를 담당하는 Spring Boot 백엔드입니다.
+조직 단위 사용자 관리, 케이스 관리, 문서 업로드를 담당하는 Spring Boot 백엔드입니다.
 
 ## 기술 스택
 
@@ -14,6 +14,7 @@
 - H2
 - JWT (`jjwt`)
 - Springdoc OpenAPI
+- Docker Compose
 
 ## 프로젝트 구조
 
@@ -23,6 +24,7 @@ src/main/java/com/kworkerharmony/backend
 ├── cases
 ├── country
 ├── document
+│   ├── dto
 │   ├── infrastructure
 │   └── port
 ├── enterprise
@@ -31,150 +33,79 @@ src/main/java/com/kworkerharmony/backend
 ```
 
 - `auth`: 회원가입, 로그인, 토큰 재발급, 로그아웃
-- `enterprise`: 회사 정보, 초대코드, 회사 사용자 관리
-- `cases`: 케이스 생성, 멤버 연결, 케이스 조회
-- `document`: 문서 업로드, 문서 조회, 저장/해시/앵커 포트
-- `global`: 보안, 공통 응답, 예외 처리, 공통 설정
+- `enterprise`: 회사, 초대코드, 회사 사용자 관리
+- `cases`: 케이스 생성, 멤버 연결, 조회
+- `document`: 문서 업로드, 조회, 로컬 저장, 해시 처리
+- `global`: 보안, 설정, 예외 처리, 공통 응답
 
 ## 핵심 도메인
 
-### Company
+### Enterprise
 
-현재 코드에서는 `Enterprise` 엔티티가 회사 역할을 담당합니다.
-
-- `name`
-- `businessNumber`
-- `industry`
-- `country`
-- `status`
-
-회사 초대코드는 `CompanyInviteCode`로 관리합니다.
-
-- `code`
-- `expiresAt`
-- `maxUses`
-- `usedCount`
-- `active`
-- `defaultRole`
+- 회사 단위 식별 주체
+- 관리자 가입 시 함께 생성
+- 초대코드 가입 시 기존 회사에 연결
 
 ### User
 
-- `email`
-- `passwordHash`
-- `name`
-- `role`
-- `userType`
-- `status`
-- `country`
-- `enterprise`
-
-관리자 가입 시 회사가 함께 생성되고, 초대코드 가입 시 기존 회사에 연결됩니다.
+- 회사 소속 사용자
+- `ADMIN`, `EMPLOYER`, `WORKER` 역할 사용
 
 ### Case
 
-- `enterprise`
-- `employer`
-- `worker`
-- `status`
-- `industry`
-- `region`
-
-케이스는 회사 단위로 생성되고, 같은 회사 사용자만 접근할 수 있습니다.
+- 회사 단위로 생성되는 작업 단위
+- 같은 회사 사용자만 접근 가능
 
 ### Document
 
-- `caseId`
-- `uploaderUserId`
-- `documentType`
-- `status`
-- `originalFileName`
-- `storageKey`
-- `mimeType`
-- `fileSize`
-- `sha256Hash`
-- `anchoredTxId`
-- `issuedAt`
-- `expiresAt`
+- 케이스에 소속되는 문서
+- 업로드 후 로컬 파일 저장
+- 저장 후 SHA-256 해시 생성
 
-문서는 케이스에 소속되며 로컬 파일 저장 후 SHA-256 해시를 생성합니다.
+## 현재 구현 범위
 
-## 구현된 기능
-
-### 인증 및 가입
-
-- 관리자 가입 시 회사 생성과 사용자 연결
+- 관리자 회원가입 및 회사 생성
 - 초대코드 기반 회사 가입
-- JWT access/refresh token 발급
+- JWT access token / refresh token 발급
 - Redis 기반 refresh token 저장
-- 로그아웃 시 refresh token 제거 및 access token 블랙리스트 처리
-
-### 회사 관리
-
-- 회사 생성
-- 초대코드 발급
-- 초대코드 기반 회사 참여
-- 회사 소속 사용자 조회
-
-### 케이스 관리
-
-- 케이스 생성
-- 활성 케이스 조회
-- 케이스 상세 조회
-- 케이스 멤버 연결
-
-### 문서 처리
-
-- 케이스별 문서 업로드
-- 케이스별 문서 목록 조회
-- 문서 상세 조회
-- 로컬 디스크 저장
+- 케이스 생성 및 조회
+- 케이스 문서 업로드
+- 문서 목록 / 상세 조회
+- 로컬 파일 저장
 - SHA-256 해시 생성
-- 문서 상태 전이
-  - `UPLOADED`
-  - `STORED`
-  - `HASHED`
 
-## 권한 규칙
+문서 업로드 완료 시 현재 확인 가능한 상태 전이는 아래와 같습니다.
 
-- 모든 비공개 API는 JWT 인증이 필요합니다.
-- 같은 회사 사용자만 같은 케이스에 접근할 수 있습니다.
-- 문서 업로드와 문서 조회는 케이스 당사자 또는 회사 관리자만 가능합니다.
-- 회사 사용자 조회와 초대코드 발급은 회사 관리자만 가능합니다.
+- `UPLOADED`
+- `STORED`
+- `HASHED`
 
-## API
+## 로컬 실행
 
-### Auth
+인프라 실행:
 
-- `POST /api/auth/signup`
-- `POST /api/auth/login`
-- `POST /api/auth/reissue`
-- `POST /api/auth/logout`
+```bash
+docker compose up -d
+```
 
-### Company
+백엔드 실행:
 
-- `POST /api/companies`
-- `POST /api/companies/invite-codes`
-- `POST /api/companies/join`
-- `GET /api/companies/users`
+```bash
+./gradlew bootRun
+```
 
-### Case
+기본값은 Docker Compose 기준으로 맞춰져 있어 별도 환경변수 없이 실행 가능합니다.
+로컬 MySQL 또는 다른 접속 정보를 사용할 경우 아래 환경 변수를 본인 환경에 맞게 지정하면 됩니다.
 
-- `POST /api/cases`
-- `GET /api/cases/active`
-- `GET /api/cases/{caseId}`
-- `POST /api/cases/{caseId}/members`
+Swagger UI:
 
-### Document
+- `http://localhost:8080/swagger-ui.html`
 
-- `POST /api/cases/{caseId}/documents`
-- `GET /api/cases/{caseId}/documents`
-- `GET /api/documents/{documentId}`
+문서 업로드 테스트 페이지:
 
-## 설정
+- `http://localhost:8080/document-upload-test.html`
 
-기본 설정 파일은 [src/main/resources/application.yml](/mnt/c/Users/user/Desktop/backend/src/main/resources/application.yml:1)입니다.
-
-주요 환경 변수:
+## 주요 환경 변수
 
 - `MYSQL_URL`
 - `MYSQL_USERNAME`
@@ -184,15 +115,7 @@ src/main/java/com/kworkerharmony/backend
 - `JWT_SECRET`
 - `DOCUMENT_STORAGE_ROOT`
 
-## 실행
-
-```bash
-./gradlew bootRun
-```
-
-Swagger UI:
-
-- `http://localhost:8080/swagger-ui.html`
+기본 문서 저장 경로는 프로젝트 루트 기준 `./storage/documents`입니다.
 
 ## 테스트
 
@@ -200,13 +123,58 @@ Swagger UI:
 ./gradlew test
 ```
 
-현재 통합 테스트는 다음 시나리오를 포함합니다.
+테스트는 H2 기반으로 동작하며, 로컬 실행은 MySQL과 Redis를 사용합니다.
 
-- 관리자 가입 시 회사 생성
-- 초대코드 가입 시 회사 연결
-- 문서 업로드 후 저장/해시 처리
-- 다른 회사 사용자의 문서 접근 차단
+## 수동 확인 포인트
+
+- 회원가입 후 사용자와 회사가 생성되는지
+- 로그인 후 access token 발급이 되는지
+- 케이스 생성이 되는지
+- 문서 업로드 후 `documents` 테이블에 데이터가 쌓이는지
+- 업로드 파일이 `storage/documents` 아래 저장되는지
+- 업로드 응답에서 `stored=true`, `status=HASHED`가 반환되는지
+
+## 예시 시나리오
+
+1. `docker compose up -d`
+2. `./gradlew bootRun`
+3. Swagger에서 `POST /api/auth/signup` 호출
+
+```json
+{
+  "email": "admin@test.com",
+  "password": "password123",
+  "name": "Admin User",
+  "userType": "EMPLOYER",
+  "countryCode": "KR",
+  "companyName": "Harmony Co",
+  "companyBusinessNumber": "123-45-67890",
+  "companyIndustry": "Manufacturing",
+  "companyCountry": "KR"
+}
+```
+
+4. Swagger에서 `POST /api/auth/login` 호출
+
+```json
+{
+  "email": "admin@test.com",
+  "password": "password123"
+}
+```
+
+5. Swagger에서 `POST /api/cases` 호출
+
+```json
+{
+  "industry": "Manufacturing",
+  "region": "Seoul"
+}
+```
+
+6. `http://localhost:8080/document-upload-test.html` 접속 후 로그인 응답의 `accessToken`, 케이스 생성 응답의 `data.id`를 넣고 파일 1건 업로드
+7. `storage/documents` 아래 실제 파일 생성 여부 확인
 
 ## 참고 문서
 
-- [docs/current-architecture.md](docs/current-architecture.md)
+- [current-architecture.md](/mnt/c/Users/user/Desktop/backend/docs/current-architecture.md:1)
