@@ -1,0 +1,9 @@
+{
+  "languages": [
+    { "code": "ko", "name": "Korean" },
+    { "code": "en", "name": "English" },
+    { "code": "vi", "name": "Vietnamese" },
+    { "code": "th", "name": "Thai" },
+    { "code": "uz", "name": "Uzbek" }
+  ]
+}

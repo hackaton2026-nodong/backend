@@ -14,15 +14,22 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "case_checklist_items")
+@Table(
+        name = "case_checklist_statuses",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_case_checklist_statuses_case_item_code",
+                columnNames = {"case_id", "checklist_item_code"}
+        )
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CaseChecklistItem extends BaseEntity {
+public class CaseChecklistStatus extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -33,9 +40,8 @@ public class CaseChecklistItem extends BaseEntity {
     @JoinColumn(name = "case_id", nullable = false)
     private Case caseEntity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "checklist_item_id", nullable = false)
-    private ChecklistItem checklistItem;
+    @Column(name = "checklist_item_code", nullable = false, length = 100)
+    private String checklistItemCode;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -44,18 +50,15 @@ public class CaseChecklistItem extends BaseEntity {
     @Column(length = 1000)
     private String note;
 
-    public CaseChecklistItem(Case caseEntity, ChecklistItem checklistItem, ChecklistStatus status, String note) {
+    public CaseChecklistStatus(Case caseEntity, String checklistItemCode, ChecklistStatus status, String note) {
         this.caseEntity = caseEntity;
-        this.checklistItem = checklistItem;
+        this.checklistItemCode = checklistItemCode;
         this.status = status;
         this.note = note;
     }
 
-    public void updateStatus(ChecklistStatus status) {
+    public void update(ChecklistStatus status, String note) {
         this.status = status;
-    }
-
-    public void updateNote(String note) {
         this.note = note;
     }
 }

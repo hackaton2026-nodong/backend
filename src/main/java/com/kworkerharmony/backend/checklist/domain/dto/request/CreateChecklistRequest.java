@@ -1,14 +1,14 @@
 package com.kworkerharmony.backend.checklist.domain.dto.request;
 
 import com.kworkerharmony.backend.checklist.domain.ChecklistStatus;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record CreateChecklistRequest(
-        @NotNull(message = "Case id is required")
+        @NotBlank(message = "Case id is required")
         String caseId,
 
-        @NotNull(message = "Checklist item id is required")
-        String checklistItemId,
+        @NotBlank(message = "Checklist item code is required")
+        String checklistItemCode,
 
         ChecklistStatus status,
 

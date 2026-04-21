@@ -7,7 +7,8 @@ public record EnterpriseResponse(
         String name,
         String businessNumber,
         String industry,
-        String country,
+        String countryCode,
+        String languageCode,
         String status
 ) {
 
@@ -17,7 +18,8 @@ public record EnterpriseResponse(
                 enterprise.getName(),
                 enterprise.getBusinessNumber(),
                 enterprise.getIndustry(),
-                enterprise.getCountry(),
+                enterprise.getCountryCode(),
+                enterprise.getLanguageCode(),
                 enterprise.getStatus().name()
         );
     }

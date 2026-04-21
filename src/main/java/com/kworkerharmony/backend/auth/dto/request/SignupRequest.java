@@ -24,6 +24,9 @@ public record SignupRequest(
         @NotBlank
         String countryCode,
 
+        @NotBlank
+        String languageCode,
+
         String inviteCode,
 
         String companyName,
@@ -32,7 +35,9 @@ public record SignupRequest(
 
         String companyIndustry,
 
-        String companyCountry
+        String companyCountryCode,
+
+        String companyLanguageCode
 ) {
 
     @AssertTrue(message = "Provide either inviteCode or all company fields")
@@ -41,7 +46,8 @@ public record SignupRequest(
         boolean hasCompanyFields = hasText(companyName)
                 && hasText(companyBusinessNumber)
                 && hasText(companyIndustry)
-                && hasText(companyCountry);
+                && hasText(companyCountryCode)
+                && hasText(companyLanguageCode);
 
         return hasInviteCode ^ hasCompanyFields;
     }

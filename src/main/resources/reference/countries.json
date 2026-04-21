@@ -1,0 +1,9 @@
+{
+  "countries": [
+    { "code": "KR", "name": "Korea" },
+    { "code": "VN", "name": "Vietnam" },
+    { "code": "TH", "name": "Thailand" },
+    { "code": "UZ", "name": "Uzbekistan" },
+    { "code": "PH", "name": "Philippines" }
+  ]
+}

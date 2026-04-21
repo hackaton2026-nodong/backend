@@ -30,18 +30,29 @@ public class Enterprise extends BaseEntity {
     @Column(nullable = false, length = 255)
     private String industry;
 
-    @Column(nullable = false, length = 100)
-    private String country;
+    @Column(name = "country_code", nullable = false, length = 10)
+    private String countryCode;
+
+    @Column(name = "language_code", nullable = false, length = 10)
+    private String languageCode;
 
     @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EnterpriseStatus status;
 
-    public Enterprise(String name, String businessNumber, String industry, String country, EnterpriseStatus status) {
+    public Enterprise(
+            String name,
+            String businessNumber,
+            String industry,
+            String countryCode,
+            String languageCode,
+            EnterpriseStatus status
+    ) {
         this.name = name;
         this.businessNumber = businessNumber;
         this.industry = industry;
-        this.country = country;
+        this.countryCode = countryCode;
+        this.languageCode = languageCode;
         this.status = status;
     }
 }

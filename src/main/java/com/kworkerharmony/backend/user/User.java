@@ -1,6 +1,5 @@
 package com.kworkerharmony.backend.user;
 
-import com.kworkerharmony.backend.country.Country;
 import com.kworkerharmony.backend.enterprise.Enterprise;
 import com.kworkerharmony.backend.global.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -49,9 +48,11 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 20)
     private UserStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_id", nullable = false)
-    private Country country;
+    @Column(name = "country_code", nullable = false, length = 10)
+    private String countryCode;
+
+    @Column(name = "language_code", nullable = false, length = 10)
+    private String languageCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enterprise_id")
@@ -64,7 +65,8 @@ public class User extends BaseEntity {
             Role role,
             UserType userType,
             UserStatus status,
-            Country country,
+            String countryCode,
+            String languageCode,
             Enterprise enterprise
     ) {
         this.email = email;
@@ -73,7 +75,8 @@ public class User extends BaseEntity {
         this.role = role;
         this.userType = userType;
         this.status = status;
-        this.country = country;
+        this.countryCode = countryCode;
+        this.languageCode = languageCode;
         this.enterprise = enterprise;
     }
 

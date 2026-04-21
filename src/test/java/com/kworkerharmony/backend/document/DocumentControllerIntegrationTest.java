@@ -9,8 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kworkerharmony.backend.country.Country;
-import com.kworkerharmony.backend.country.CountryRepository;
 import com.kworkerharmony.backend.cases.domain.CaseStatus;
 import com.kworkerharmony.backend.cases.domain.CaseRepository;
 import com.kworkerharmony.backend.cases.entity.Case;
@@ -49,9 +47,6 @@ class DocumentControllerIntegrationTest {
     private JwtProvider jwtProvider;
 
     @Autowired
-    private CountryRepository countryRepository;
-
-    @Autowired
     private EnterpriseRepository enterpriseRepository;
 
     @Autowired
@@ -66,19 +61,16 @@ class DocumentControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         when(redisTokenRepository.isBlacklisted(anyString())).thenReturn(false);
-        if (countryRepository.findByCountryCode("KR").isEmpty()) {
-            countryRepository.save(new Country("KR", "Korea"));
-        }
     }
 
     @Test
     void uploadDocumentStoresFileAndReturnsHashedStatus() throws Exception {
-        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
         Enterprise company = enterpriseRepository.save(new Enterprise(
                 "Harmony Co",
                 "123-45-67890",
                 "Manufacturing",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
         User employer = userRepository.save(new User(
@@ -88,7 +80,8 @@ class DocumentControllerIntegrationTest {
                 Role.EMPLOYER,
                 UserType.EMPLOYER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 company
         ));
         User worker = userRepository.save(new User(
@@ -98,7 +91,8 @@ class DocumentControllerIntegrationTest {
                 Role.WORKER,
                 UserType.WORKER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 company
         ));
         Case caseEntity = caseRepository.save(new Case(
@@ -136,12 +130,12 @@ class DocumentControllerIntegrationTest {
 
     @Test
     void companyAdminCanListDocumentsForSharedCase() throws Exception {
-        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
         Enterprise company = enterpriseRepository.save(new Enterprise(
                 "Harmony Co",
                 "123-45-67890",
                 "Manufacturing",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
         User admin = userRepository.save(new User(
@@ -151,7 +145,8 @@ class DocumentControllerIntegrationTest {
                 Role.ADMIN,
                 UserType.EMPLOYER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 company
         ));
         User employer = userRepository.save(new User(
@@ -161,7 +156,8 @@ class DocumentControllerIntegrationTest {
                 Role.EMPLOYER,
                 UserType.EMPLOYER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 company
         ));
         User worker = userRepository.save(new User(
@@ -171,7 +167,8 @@ class DocumentControllerIntegrationTest {
                 Role.WORKER,
                 UserType.WORKER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 company
         ));
         Case caseEntity = caseRepository.save(new Case(
@@ -205,12 +202,12 @@ class DocumentControllerIntegrationTest {
 
     @Test
     void workerCanGetDocumentDetailForOwnCaseAndUploaderMatchesAuthenticatedUser() throws Exception {
-        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
         Enterprise company = enterpriseRepository.save(new Enterprise(
                 "Harmony Co",
                 "123-45-67890",
                 "Manufacturing",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
         User employer = userRepository.save(new User(
@@ -220,7 +217,8 @@ class DocumentControllerIntegrationTest {
                 Role.EMPLOYER,
                 UserType.EMPLOYER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 company
         ));
         User worker = userRepository.save(new User(
@@ -230,7 +228,8 @@ class DocumentControllerIntegrationTest {
                 Role.WORKER,
                 UserType.WORKER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 company
         ));
         Case caseEntity = caseRepository.save(new Case(
@@ -268,12 +267,12 @@ class DocumentControllerIntegrationTest {
 
     @Test
     void employerCanGetDocumentListForOwnCase() throws Exception {
-        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
         Enterprise company = enterpriseRepository.save(new Enterprise(
                 "Harmony Co",
                 "123-45-67890",
                 "Manufacturing",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
         User employer = userRepository.save(new User(
@@ -283,7 +282,8 @@ class DocumentControllerIntegrationTest {
                 Role.EMPLOYER,
                 UserType.EMPLOYER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 company
         ));
         User worker = userRepository.save(new User(
@@ -293,7 +293,8 @@ class DocumentControllerIntegrationTest {
                 Role.WORKER,
                 UserType.WORKER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 company
         ));
         Case caseEntity = caseRepository.save(new Case(
@@ -323,12 +324,12 @@ class DocumentControllerIntegrationTest {
 
     @Test
     void documentDetailIsForbiddenForAnotherCompanyUser() throws Exception {
-        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
         Enterprise companyA = enterpriseRepository.save(new Enterprise(
                 "Company A",
                 "111-11-11111",
                 "Manufacturing",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
         Enterprise companyB = enterpriseRepository.save(new Enterprise(
@@ -336,6 +337,7 @@ class DocumentControllerIntegrationTest {
                 "222-22-22222",
                 "Logistics",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
         User employer = userRepository.save(new User(
@@ -345,7 +347,8 @@ class DocumentControllerIntegrationTest {
                 Role.EMPLOYER,
                 UserType.EMPLOYER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 companyA
         ));
         User worker = userRepository.save(new User(
@@ -355,7 +358,8 @@ class DocumentControllerIntegrationTest {
                 Role.WORKER,
                 UserType.WORKER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 companyA
         ));
         User outsider = userRepository.save(new User(
@@ -365,7 +369,8 @@ class DocumentControllerIntegrationTest {
                 Role.EMPLOYER,
                 UserType.EMPLOYER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 companyB
         ));
         Case caseEntity = caseRepository.save(new Case(
@@ -400,12 +405,12 @@ class DocumentControllerIntegrationTest {
 
     @Test
     void documentListIsForbiddenForAnotherCompanyUser() throws Exception {
-        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
         Enterprise companyA = enterpriseRepository.save(new Enterprise(
                 "Company A",
                 "111-11-11111",
                 "Manufacturing",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
         Enterprise companyB = enterpriseRepository.save(new Enterprise(
@@ -413,6 +418,7 @@ class DocumentControllerIntegrationTest {
                 "222-22-22222",
                 "Logistics",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
         User employer = userRepository.save(new User(
@@ -422,7 +428,8 @@ class DocumentControllerIntegrationTest {
                 Role.EMPLOYER,
                 UserType.EMPLOYER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 companyA
         ));
         User worker = userRepository.save(new User(
@@ -432,7 +439,8 @@ class DocumentControllerIntegrationTest {
                 Role.WORKER,
                 UserType.WORKER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 companyA
         ));
         User outsider = userRepository.save(new User(
@@ -442,7 +450,8 @@ class DocumentControllerIntegrationTest {
                 Role.EMPLOYER,
                 UserType.EMPLOYER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 companyB
         ));
         Case caseEntity = caseRepository.save(new Case(

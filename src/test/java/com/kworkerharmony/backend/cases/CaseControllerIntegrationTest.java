@@ -8,8 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kworkerharmony.backend.country.Country;
-import com.kworkerharmony.backend.country.CountryRepository;
 import com.kworkerharmony.backend.cases.domain.CaseRepository;
 import com.kworkerharmony.backend.cases.domain.CaseStatus;
 import com.kworkerharmony.backend.cases.entity.Case;
@@ -48,9 +46,6 @@ class CaseControllerIntegrationTest {
     private JwtProvider jwtProvider;
 
     @Autowired
-    private CountryRepository countryRepository;
-
-    @Autowired
     private EnterpriseRepository enterpriseRepository;
 
     @Autowired
@@ -65,9 +60,6 @@ class CaseControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         when(redisTokenRepository.isBlacklisted(anyString())).thenReturn(false);
-        if (countryRepository.findByCountryCode("KR").isEmpty()) {
-            countryRepository.save(new Country("KR", "Korea"));
-        }
     }
 
     @Test
@@ -183,12 +175,12 @@ class CaseControllerIntegrationTest {
                 businessNumber,
                 "Manufacturing",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
     }
 
     private User saveUser(String email, Role role, UserType userType, Enterprise enterprise) {
-        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
         return userRepository.save(new User(
                 email,
                 "encoded",
@@ -196,7 +188,8 @@ class CaseControllerIntegrationTest {
                 role,
                 userType,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 enterprise
         ));
     }

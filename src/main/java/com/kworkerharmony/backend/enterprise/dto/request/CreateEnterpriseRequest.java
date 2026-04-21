@@ -12,7 +12,10 @@ public record CreateEnterpriseRequest(
         @NotBlank(message = "Industry is required")
         String industry,
 
-        @NotBlank(message = "Country is required")
-        String country
+        @NotBlank(message = "Country code is required")
+        String countryCode,
+
+        @NotBlank(message = "Language code is required")
+        String languageCode
 ) {
 }

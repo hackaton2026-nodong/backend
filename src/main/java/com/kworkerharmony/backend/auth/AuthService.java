@@ -6,8 +6,6 @@ import com.kworkerharmony.backend.auth.dto.request.ReissueRequest;
 import com.kworkerharmony.backend.auth.dto.request.SignupRequest;
 import com.kworkerharmony.backend.auth.dto.response.LoginResponse;
 import com.kworkerharmony.backend.auth.dto.response.ReissueResponse;
-import com.kworkerharmony.backend.country.Country;
-import com.kworkerharmony.backend.country.CountryRepository;
 import com.kworkerharmony.backend.enterprise.CompanyInviteCode;
 import com.kworkerharmony.backend.enterprise.CompanyInviteCodeRepository;
 import com.kworkerharmony.backend.enterprise.Enterprise;
@@ -18,6 +16,8 @@ import com.kworkerharmony.backend.global.exception.ErrorCode;
 import com.kworkerharmony.backend.global.security.JwtProperties;
 import com.kworkerharmony.backend.global.security.JwtProvider;
 import com.kworkerharmony.backend.global.security.RedisTokenRepository;
+import com.kworkerharmony.backend.reference.country.CountryCatalog;
+import com.kworkerharmony.backend.reference.language.LanguageCatalog;
 import com.kworkerharmony.backend.user.Role;
 import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserRepository;
@@ -35,9 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final CountryRepository countryRepository;
     private final EnterpriseRepository enterpriseRepository;
     private final CompanyInviteCodeRepository companyInviteCodeRepository;
+    private final CountryCatalog countryCatalog;
+    private final LanguageCatalog languageCatalog;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
@@ -49,8 +50,8 @@ public class AuthService {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "Email already exists");
         }
 
-        Country country = countryRepository.findByCountryCode(request.countryCode())
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Country not found"));
+        validateCountryCode(request.countryCode());
+        validateLanguageCode(request.languageCode());
 
         SignupTarget signupTarget = resolveSignupTarget(request);
 
@@ -61,7 +62,8 @@ public class AuthService {
                 signupTarget.role(),
                 signupTarget.userType(),
                 UserStatus.ACTIVE,
-                country,
+                countryCatalog.normalize(request.countryCode()),
+                languageCatalog.normalize(request.languageCode()),
                 signupTarget.enterprise()
         );
 
@@ -87,7 +89,8 @@ public class AuthService {
                 request.companyName(),
                 request.companyBusinessNumber(),
                 request.companyIndustry(),
-                request.companyCountry(),
+                validatedCountryCode(request.companyCountryCode()),
+                validatedLanguageCode(request.companyLanguageCode()),
                 EnterpriseStatus.ACTIVE
         ));
         return new SignupTarget(enterprise, Role.ADMIN, UserType.EMPLOYER);
@@ -157,5 +160,27 @@ public class AuthService {
             Role role,
             UserType userType
     ) {
+    }
+
+    private void validateCountryCode(String countryCode) {
+        if (!countryCatalog.exists(countryCode)) {
+            throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Country not found");
+        }
+    }
+
+    private void validateLanguageCode(String languageCode) {
+        if (!languageCatalog.exists(languageCode)) {
+            throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Language not found");
+        }
+    }
+
+    private String validatedCountryCode(String countryCode) {
+        validateCountryCode(countryCode);
+        return countryCatalog.normalize(countryCode);
+    }
+
+    private String validatedLanguageCode(String languageCode) {
+        validateLanguageCode(languageCode);
+        return languageCatalog.normalize(languageCode);
     }
 }

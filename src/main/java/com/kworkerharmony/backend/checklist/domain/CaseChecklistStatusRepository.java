@@ -1,12 +1,15 @@
 package com.kworkerharmony.backend.checklist.domain;
 
-import com.kworkerharmony.backend.checklist.entity.CaseChecklistItem;
+import com.kworkerharmony.backend.checklist.entity.CaseChecklistStatus;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CaseChecklistItemRepository extends JpaRepository<CaseChecklistItem, String> {
+public interface CaseChecklistStatusRepository extends JpaRepository<CaseChecklistStatus, String> {
 
-    List<CaseChecklistItem> findByCaseEntityIdOrderByCreatedAtAsc(String caseId);
+    List<CaseChecklistStatus> findByCaseEntityId(String caseId);
+
+    Optional<CaseChecklistStatus> findByCaseEntityIdAndChecklistItemCode(String caseId, String checklistItemCode);
 
     long countByCaseEntityWorkerId(Long workerId);
 

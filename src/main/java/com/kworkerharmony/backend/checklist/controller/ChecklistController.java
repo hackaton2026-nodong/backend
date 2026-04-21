@@ -1,7 +1,6 @@
 package com.kworkerharmony.backend.checklist.controller;
 
 import com.kworkerharmony.backend.checklist.domain.dto.request.CreateChecklistRequest;
-import com.kworkerharmony.backend.checklist.domain.dto.request.CreateChecklistItemRequest;
 import com.kworkerharmony.backend.checklist.domain.dto.response.ChecklistItemResponse;
 import com.kworkerharmony.backend.checklist.domain.dto.response.ChecklistResponse;
 import com.kworkerharmony.backend.checklist.service.ChecklistService;
@@ -42,12 +41,5 @@ public class ChecklistController {
     @GetMapping("/items")
     public ApiResponse<List<ChecklistItemResponse>> getChecklistItems() {
         return ApiResponse.success(checklistService.getChecklistItems());
-    }
-
-    @PostMapping("/items")
-    public ApiResponse<ChecklistItemResponse> createChecklistItem(
-            @Valid @RequestBody CreateChecklistItemRequest request
-    ) {
-        return ApiResponse.success(checklistService.createChecklistItem(request));
     }
 }

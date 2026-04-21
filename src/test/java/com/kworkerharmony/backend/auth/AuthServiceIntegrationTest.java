@@ -3,8 +3,6 @@ package com.kworkerharmony.backend.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kworkerharmony.backend.auth.dto.request.SignupRequest;
-import com.kworkerharmony.backend.country.Country;
-import com.kworkerharmony.backend.country.CountryRepository;
 import com.kworkerharmony.backend.enterprise.CompanyInviteCode;
 import com.kworkerharmony.backend.enterprise.CompanyInviteCodeRepository;
 import com.kworkerharmony.backend.enterprise.Enterprise;
@@ -16,7 +14,6 @@ import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserRepository;
 import com.kworkerharmony.backend.user.UserType;
 import java.time.LocalDateTime;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,18 +36,8 @@ class AuthServiceIntegrationTest {
     @Autowired
     private CompanyInviteCodeRepository companyInviteCodeRepository;
 
-    @Autowired
-    private CountryRepository countryRepository;
-
     @MockitoBean
     private RedisTokenRepository redisTokenRepository;
-
-    @BeforeEach
-    void setUp() {
-        if (countryRepository.findByCountryCode("KR").isEmpty()) {
-            countryRepository.save(new Country("KR", "Korea"));
-        }
-    }
 
     @Test
     void signupAsAdminCreatesCompanyAndAssignsAdminRole() {
@@ -60,11 +47,13 @@ class AuthServiceIntegrationTest {
                 "Admin",
                 null,
                 "KR",
+                "ko",
                 null,
                 "Harmony Co",
                 "123-45-67890",
                 "Manufacturing",
-                "KR"
+                "KR",
+                "ko"
         ));
 
         User savedUser = userRepository.findByEmail("admin@example.com").orElseThrow();
@@ -81,6 +70,7 @@ class AuthServiceIntegrationTest {
                 "999-99-99999",
                 "Construction",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
         companyInviteCodeRepository.save(new CompanyInviteCode(
@@ -99,7 +89,9 @@ class AuthServiceIntegrationTest {
                 "Worker",
                 UserType.WORKER,
                 "KR",
+                "ko",
                 "join-code",
+                null,
                 null,
                 null,
                 null,

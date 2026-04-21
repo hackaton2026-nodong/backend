@@ -1,27 +1,26 @@
 package com.kworkerharmony.backend.checklist.domain.dto.response;
 
-import com.kworkerharmony.backend.checklist.entity.ChecklistItem;
-import java.time.LocalDateTime;
+import com.kworkerharmony.backend.reference.checklist.ChecklistItemDefinition;
 
 public record ChecklistItemResponse(
-        String id,
+        String sectionCode,
+        String sectionTitle,
         String code,
         String title,
         String description,
         boolean required,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        int displayOrder
 ) {
 
-    public static ChecklistItemResponse from(ChecklistItem checklistItem) {
+    public static ChecklistItemResponse from(ChecklistItemDefinition checklistItem) {
         return new ChecklistItemResponse(
-                checklistItem.getId(),
-                checklistItem.getCode(),
-                checklistItem.getTitle(),
-                checklistItem.getDescription(),
-                checklistItem.isRequired(),
-                checklistItem.getCreatedAt(),
-                checklistItem.getUpdatedAt()
+                checklistItem.sectionCode(),
+                checklistItem.sectionTitle(),
+                checklistItem.code(),
+                checklistItem.title(),
+                checklistItem.description(),
+                checklistItem.required(),
+                checklistItem.displayOrder()
         );
     }
 }

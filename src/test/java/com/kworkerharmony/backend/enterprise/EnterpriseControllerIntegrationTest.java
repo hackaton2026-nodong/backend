@@ -9,8 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kworkerharmony.backend.country.Country;
-import com.kworkerharmony.backend.country.CountryRepository;
 import com.kworkerharmony.backend.global.security.JwtProvider;
 import com.kworkerharmony.backend.global.security.RedisTokenRepository;
 import com.kworkerharmony.backend.user.Role;
@@ -45,9 +43,6 @@ class EnterpriseControllerIntegrationTest {
     private JwtProvider jwtProvider;
 
     @Autowired
-    private CountryRepository countryRepository;
-
-    @Autowired
     private EnterpriseRepository enterpriseRepository;
 
     @Autowired
@@ -62,9 +57,6 @@ class EnterpriseControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         when(redisTokenRepository.isBlacklisted(anyString())).thenReturn(false);
-        if (countryRepository.findByCountryCode("KR").isEmpty()) {
-            countryRepository.save(new Country("KR", "Korea"));
-        }
     }
 
     @Test
@@ -176,12 +168,12 @@ class EnterpriseControllerIntegrationTest {
                 businessNumber,
                 "Manufacturing",
                 "KR",
+                "ko",
                 EnterpriseStatus.ACTIVE
         ));
     }
 
     private User saveUser(String email, Role role, UserType userType, Enterprise enterprise) {
-        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
         return userRepository.save(new User(
                 email,
                 "encoded",
@@ -189,13 +181,13 @@ class EnterpriseControllerIntegrationTest {
                 role,
                 userType,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 enterprise
         ));
     }
 
     private User saveUserWithoutCompany(String email) {
-        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
         return userRepository.save(new User(
                 email,
                 "encoded",
@@ -203,7 +195,8 @@ class EnterpriseControllerIntegrationTest {
                 Role.WORKER,
                 UserType.WORKER,
                 UserStatus.ACTIVE,
-                country,
+                "KR",
+                "ko",
                 null
         ));
     }

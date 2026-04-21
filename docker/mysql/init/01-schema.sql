@@ -4,22 +4,13 @@ CREATE DATABASE IF NOT EXISTS backend
 
 USE backend;
 
-CREATE TABLE IF NOT EXISTS countries (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    country_code VARCHAR(10) NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    PRIMARY KEY (id),
-    UNIQUE KEY uk_countries_country_code (country_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 CREATE TABLE IF NOT EXISTS enterprises (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     business_number VARCHAR(100) NOT NULL,
     industry VARCHAR(255) NOT NULL,
-    country VARCHAR(100) NOT NULL,
+    country_code VARCHAR(10) NOT NULL,
+    language_code VARCHAR(10) NOT NULL,
     status VARCHAR(20) NOT NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
@@ -34,14 +25,13 @@ CREATE TABLE IF NOT EXISTS users (
     role VARCHAR(20) NOT NULL,
     user_type VARCHAR(20) NOT NULL,
     status VARCHAR(20) NOT NULL,
-    country_id BIGINT NOT NULL,
+    country_code VARCHAR(10) NOT NULL,
+    language_code VARCHAR(10) NOT NULL,
     enterprise_id BIGINT NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uk_users_email (email),
-    CONSTRAINT fk_users_country
-        FOREIGN KEY (country_id) REFERENCES countries (id),
     CONSTRAINT fk_users_enterprise
         FOREIGN KEY (enterprise_id) REFERENCES enterprises (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -131,31 +121,18 @@ CREATE TABLE IF NOT EXISTS dashboards (
         FOREIGN KEY (user_id) REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS checklist_items (
-    id VARCHAR(36) NOT NULL,
-    code VARCHAR(100) NOT NULL,
-    title VARCHAR(100) NOT NULL,
-    description VARCHAR(1000) NOT NULL,
-    required BIT(1) NOT NULL,
-    created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    PRIMARY KEY (id),
-    UNIQUE KEY uk_checklist_items_code (code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS case_checklist_items (
+CREATE TABLE IF NOT EXISTS case_checklist_statuses (
     id VARCHAR(36) NOT NULL,
     case_id VARCHAR(36) NOT NULL,
-    checklist_item_id VARCHAR(36) NOT NULL,
+    checklist_item_code VARCHAR(100) NOT NULL,
     status VARCHAR(20) NOT NULL,
     note VARCHAR(1000) NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT fk_case_checklist_items_case
-        FOREIGN KEY (case_id) REFERENCES cases (id),
-    CONSTRAINT fk_case_checklist_items_checklist_item
-        FOREIGN KEY (checklist_item_id) REFERENCES checklist_items (id)
+    UNIQUE KEY uk_case_checklist_statuses_case_item_code (case_id, checklist_item_code),
+    CONSTRAINT fk_case_checklist_statuses_case
+        FOREIGN KEY (case_id) REFERENCES cases (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS chatbots (

@@ -1,0 +1,82 @@
+{
+  "catalogCode": "MOEL_FOREIGN_WORKER_EMPLOYMENT_MANAGEMENT",
+  "version": "2020-06-19",
+  "title": "외국인근로자 고용관리 자율점검 체크리스트",
+  "sections": [
+    {
+      "code": "FOREIGN_EMPLOYMENT_ACT",
+      "title": "외국인고용관리법",
+      "displayOrder": 1,
+      "items": [
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용관리법",
+          "code": "EPS_PRE_APPROVAL",
+          "title": "사전 고용허가 절차 준수",
+          "description": "외국인근로자 고용 전 사전허가 절차와 고용허가서 발급 절차를 준수했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 1
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용관리법",
+          "code": "EPS_EMPLOYMENT_CHANGE_REPORT",
+          "title": "고용변동 신고 의무 이행",
+          "description": "외국인근로자의 입퇴사와 주요 고용변동 사항을 관계기관에 적시에 신고했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 2
+        }
+      ]
+    },
+    {
+      "code": "LABOR_RELATIONS_ACTS",
+      "title": "노동관계법",
+      "displayOrder": 2,
+      "items": [
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "노동관계법",
+          "code": "LABOR_WORK_CONTRACT",
+          "title": "근로계약 및 교부 문서 정비",
+          "description": "근로계약, 임금명세, 법정 서류를 외국인근로자에게 적정하게 제공했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 1
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "노동관계법",
+          "code": "LABOR_WAGE_AND_WORKING_HOURS",
+          "title": "임금·근로시간 기준 준수",
+          "description": "최저임금, 연장·야간·휴일근로, 휴게시간과 관련한 기준을 준수했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 2
+        }
+      ]
+    },
+    {
+      "code": "INDUSTRIAL_SAFETY_AND_HEALTH",
+      "title": "산업안전보건",
+      "displayOrder": 3,
+      "items": [
+        {
+          "sectionCode": "INDUSTRIAL_SAFETY_AND_HEALTH",
+          "sectionTitle": "산업안전보건",
+          "code": "SAFETY_EDUCATION_AND_PPE",
+          "title": "안전보건교육 및 보호구 지급",
+          "description": "안전보건교육을 실시하고 필요한 보호구를 지급했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 1
+        },
+        {
+          "sectionCode": "INDUSTRIAL_SAFETY_AND_HEALTH",
+          "sectionTitle": "산업안전보건",
+          "code": "SAFETY_ACCIDENT_RESPONSE",
+          "title": "산업재해 대응 체계 확보",
+          "description": "산재 발생 시 보고, 보호, 재발방지 절차를 갖추고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 2
+        }
+      ]
+    }
+  ]
+}

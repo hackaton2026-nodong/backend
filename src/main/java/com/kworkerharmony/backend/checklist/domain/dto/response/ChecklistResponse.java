@@ -1,13 +1,16 @@
 package com.kworkerharmony.backend.checklist.domain.dto.response;
 
 import com.kworkerharmony.backend.checklist.domain.ChecklistStatus;
-import com.kworkerharmony.backend.checklist.entity.CaseChecklistItem;
+import com.kworkerharmony.backend.checklist.entity.CaseChecklistStatus;
+import com.kworkerharmony.backend.reference.checklist.ChecklistItemDefinition;
 import java.time.LocalDateTime;
 
 public record ChecklistResponse(
         String id,
         String caseId,
-        String checklistItemId,
+        String checklistItemCode,
+        String sectionCode,
+        String sectionTitle,
         String code,
         String title,
         String description,
@@ -18,19 +21,25 @@ public record ChecklistResponse(
         LocalDateTime updatedAt
 ) {
 
-    public static ChecklistResponse from(CaseChecklistItem checklist) {
+    public static ChecklistResponse from(String caseId, ChecklistItemDefinition definition, CaseChecklistStatus checklistStatus) {
         return new ChecklistResponse(
-                checklist.getId(),
-                checklist.getCaseEntity().getId(),
-                checklist.getChecklistItem().getId(),
-                checklist.getChecklistItem().getCode(),
-                checklist.getChecklistItem().getTitle(),
-                checklist.getChecklistItem().getDescription(),
-                checklist.getChecklistItem().isRequired(),
-                checklist.getStatus(),
-                checklist.getNote(),
-                checklist.getCreatedAt(),
-                checklist.getUpdatedAt()
+                checklistStatus == null ? null : checklistStatus.getId(),
+                caseId,
+                definition.code(),
+                definition.sectionCode(),
+                definition.sectionTitle(),
+                definition.code(),
+                definition.title(),
+                definition.description(),
+                definition.required(),
+                checklistStatus == null ? ChecklistStatus.NOT_STARTED : checklistStatus.getStatus(),
+                checklistStatus == null ? null : checklistStatus.getNote(),
+                checklistStatus == null ? null : checklistStatus.getCreatedAt(),
+                checklistStatus == null ? null : checklistStatus.getUpdatedAt()
         );
+    }
+
+    public static ChecklistResponse from(CaseChecklistStatus checklistStatus, ChecklistItemDefinition definition) {
+        return from(checklistStatus.getCaseEntity().getId(), definition, checklistStatus);
     }
 }

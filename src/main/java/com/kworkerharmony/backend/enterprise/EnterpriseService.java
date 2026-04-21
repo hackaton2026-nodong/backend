@@ -9,6 +9,8 @@ import com.kworkerharmony.backend.enterprise.dto.response.EnterpriseResponse;
 import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
 import com.kworkerharmony.backend.global.security.UserPrincipal;
+import com.kworkerharmony.backend.reference.country.CountryCatalog;
+import com.kworkerharmony.backend.reference.language.LanguageCatalog;
 import com.kworkerharmony.backend.user.Role;
 import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserRepository;
@@ -26,6 +28,8 @@ public class EnterpriseService {
     private final EnterpriseRepository enterpriseRepository;
     private final CompanyInviteCodeRepository companyInviteCodeRepository;
     private final UserRepository userRepository;
+    private final CountryCatalog countryCatalog;
+    private final LanguageCatalog languageCatalog;
 
     @Transactional(readOnly = true)
     public List<EnterpriseResponse> getEnterprises() {
@@ -48,7 +52,8 @@ public class EnterpriseService {
                         request.name(),
                         request.businessNumber(),
                         request.industry(),
-                        request.country(),
+                        validatedCountryCode(request.countryCode()),
+                        validatedLanguageCode(request.languageCode()),
                         EnterpriseStatus.ACTIVE
                 )
         );
@@ -130,5 +135,19 @@ public class EnterpriseService {
             case ADMIN, EMPLOYER -> UserType.EMPLOYER;
             case WORKER -> UserType.WORKER;
         };
+    }
+
+    private String validatedCountryCode(String countryCode) {
+        if (!countryCatalog.exists(countryCode)) {
+            throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Country not found");
+        }
+        return countryCatalog.normalize(countryCode);
+    }
+
+    private String validatedLanguageCode(String languageCode) {
+        if (!languageCatalog.exists(languageCode)) {
+            throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Language not found");
+        }
+        return languageCatalog.normalize(languageCode);
     }
 }
