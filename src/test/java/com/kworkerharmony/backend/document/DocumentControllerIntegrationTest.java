@@ -29,8 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +60,7 @@ class DocumentControllerIntegrationTest {
     @Autowired
     private CaseRepository caseRepository;
 
-    @MockBean
+    @MockitoBean
     private RedisTokenRepository redisTokenRepository;
 
     @BeforeEach
@@ -132,6 +132,193 @@ class DocumentControllerIntegrationTest {
         mockMvc.perform(get("/document-upload-test.html"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Document Upload Test")));
+    }
+
+    @Test
+    void companyAdminCanListDocumentsForSharedCase() throws Exception {
+        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
+        Enterprise company = enterpriseRepository.save(new Enterprise(
+                "Harmony Co",
+                "123-45-67890",
+                "Manufacturing",
+                "KR",
+                EnterpriseStatus.ACTIVE
+        ));
+        User admin = userRepository.save(new User(
+                "admin@example.com",
+                "encoded",
+                "Admin",
+                Role.ADMIN,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                country,
+                company
+        ));
+        User employer = userRepository.save(new User(
+                "employer@example.com",
+                "encoded",
+                "Employer",
+                Role.EMPLOYER,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                country,
+                company
+        ));
+        User worker = userRepository.save(new User(
+                "worker@example.com",
+                "encoded",
+                "Worker",
+                Role.WORKER,
+                UserType.WORKER,
+                UserStatus.ACTIVE,
+                country,
+                company
+        ));
+        Case caseEntity = caseRepository.save(new Case(
+                company,
+                employer,
+                worker,
+                CaseStatus.ACTIVE,
+                "Manufacturing",
+                "Seoul"
+        ));
+
+        String ownerToken = jwtProvider.generateAccessToken(employer);
+        String adminToken = jwtProvider.generateAccessToken(admin);
+
+        mockMvc.perform(multipart("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .file(new MockMultipartFile("file", "contract.pdf", "application/pdf", "sample-pdf".getBytes()))
+                        .param("documentType", DocumentType.EMPLOYMENT_CONTRACT.name())
+                        .param("issuedAt", "2026-01-01")
+                        .param("expiresAt", "2027-01-01")
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].caseId").value(caseEntity.getId()))
+                .andExpect(jsonPath("$.data[0].status").value(DocumentStatus.HASHED.name()));
+    }
+
+    @Test
+    void workerCanGetDocumentDetailForOwnCaseAndUploaderMatchesAuthenticatedUser() throws Exception {
+        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
+        Enterprise company = enterpriseRepository.save(new Enterprise(
+                "Harmony Co",
+                "123-45-67890",
+                "Manufacturing",
+                "KR",
+                EnterpriseStatus.ACTIVE
+        ));
+        User employer = userRepository.save(new User(
+                "employer@example.com",
+                "encoded",
+                "Employer",
+                Role.EMPLOYER,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                country,
+                company
+        ));
+        User worker = userRepository.save(new User(
+                "worker@example.com",
+                "encoded",
+                "Worker",
+                Role.WORKER,
+                UserType.WORKER,
+                UserStatus.ACTIVE,
+                country,
+                company
+        ));
+        Case caseEntity = caseRepository.save(new Case(
+                company,
+                employer,
+                worker,
+                CaseStatus.ACTIVE,
+                "Manufacturing",
+                "Seoul"
+        ));
+
+        String responseBody = mockMvc.perform(multipart("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .file(new MockMultipartFile("file", "contract.pdf", "application/pdf", "sample-pdf".getBytes()))
+                        .param("documentType", DocumentType.EMPLOYMENT_CONTRACT.name())
+                        .param("issuedAt", "2026-01-01")
+                        .param("expiresAt", "2027-01-01")
+                        .header("Authorization", "Bearer " + jwtProvider.generateAccessToken(worker)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.uploaderUserId").value(worker.getId()))
+                .andExpect(jsonPath("$.data.status").value(DocumentStatus.HASHED.name()))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String documentId = objectMapper.readTree(responseBody).path("data").path("id").asText();
+
+        mockMvc.perform(get("/api/documents/{documentId}", documentId)
+                        .header("Authorization", "Bearer " + jwtProvider.generateAccessToken(worker)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.caseId").value(caseEntity.getId()))
+                .andExpect(jsonPath("$.data.uploaderUserId").value(worker.getId()));
+    }
+
+    @Test
+    void employerCanGetDocumentListForOwnCase() throws Exception {
+        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
+        Enterprise company = enterpriseRepository.save(new Enterprise(
+                "Harmony Co",
+                "123-45-67890",
+                "Manufacturing",
+                "KR",
+                EnterpriseStatus.ACTIVE
+        ));
+        User employer = userRepository.save(new User(
+                "employer@example.com",
+                "encoded",
+                "Employer",
+                Role.EMPLOYER,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                country,
+                company
+        ));
+        User worker = userRepository.save(new User(
+                "worker@example.com",
+                "encoded",
+                "Worker",
+                Role.WORKER,
+                UserType.WORKER,
+                UserStatus.ACTIVE,
+                country,
+                company
+        ));
+        Case caseEntity = caseRepository.save(new Case(
+                company,
+                employer,
+                worker,
+                CaseStatus.ACTIVE,
+                "Manufacturing",
+                "Seoul"
+        ));
+
+        mockMvc.perform(multipart("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .file(new MockMultipartFile("file", "contract.pdf", "application/pdf", "sample-pdf".getBytes()))
+                        .param("documentType", DocumentType.EMPLOYMENT_CONTRACT.name())
+                        .param("issuedAt", "2026-01-01")
+                        .param("expiresAt", "2027-01-01")
+                        .header("Authorization", "Bearer " + jwtProvider.generateAccessToken(worker)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .header("Authorization", "Bearer " + jwtProvider.generateAccessToken(employer)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].caseId").value(caseEntity.getId()));
     }
 
     @Test
@@ -209,5 +396,68 @@ class DocumentControllerIntegrationTest {
                         .header("Authorization", "Bearer " + outsiderToken))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void documentListIsForbiddenForAnotherCompanyUser() throws Exception {
+        Country country = countryRepository.findByCountryCode("KR").orElseThrow();
+        Enterprise companyA = enterpriseRepository.save(new Enterprise(
+                "Company A",
+                "111-11-11111",
+                "Manufacturing",
+                "KR",
+                EnterpriseStatus.ACTIVE
+        ));
+        Enterprise companyB = enterpriseRepository.save(new Enterprise(
+                "Company B",
+                "222-22-22222",
+                "Logistics",
+                "KR",
+                EnterpriseStatus.ACTIVE
+        ));
+        User employer = userRepository.save(new User(
+                "a@example.com",
+                "encoded",
+                "Employer A",
+                Role.EMPLOYER,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                country,
+                companyA
+        ));
+        User worker = userRepository.save(new User(
+                "aw@example.com",
+                "encoded",
+                "Worker A",
+                Role.WORKER,
+                UserType.WORKER,
+                UserStatus.ACTIVE,
+                country,
+                companyA
+        ));
+        User outsider = userRepository.save(new User(
+                "b@example.com",
+                "encoded",
+                "Employer B",
+                Role.EMPLOYER,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                country,
+                companyB
+        ));
+        Case caseEntity = caseRepository.save(new Case(
+                companyA,
+                employer,
+                worker,
+                CaseStatus.ACTIVE,
+                "Manufacturing",
+                "Seoul"
+        ));
+
+        mockMvc.perform(get("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .header("Authorization", "Bearer " + jwtProvider.generateAccessToken(outsider)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("AUTH_403"));
     }
 }
