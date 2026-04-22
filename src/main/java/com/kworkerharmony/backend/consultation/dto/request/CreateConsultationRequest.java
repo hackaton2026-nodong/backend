@@ -1,9 +1,9 @@
-package com.kworkerharmony.backend.chatbot.dto.request;
+package com.kworkerharmony.backend.consultation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record CreateChatbotRequest(
+public record CreateConsultationRequest(
         @NotBlank(message = "Diagnose is required")
         String diagnose,
 

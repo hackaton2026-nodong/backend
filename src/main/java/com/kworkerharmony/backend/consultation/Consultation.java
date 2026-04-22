@@ -1,4 +1,4 @@
-package com.kworkerharmony.backend.chatbot;
+package com.kworkerharmony.backend.consultation;
 
 import com.kworkerharmony.backend.global.entity.BaseEntity;
 import com.kworkerharmony.backend.user.User;
@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "chatbots")
+@Table(name = "consultations")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Chatbot extends BaseEntity {
+public class Consultation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +32,7 @@ public class Chatbot extends BaseEntity {
     @JoinColumn(name = "uid", nullable = false)
     private User user;
 
-    public Chatbot(String diagnose, User user) {
+    public Consultation(String diagnose, User user) {
         this.diagnose = diagnose;
         this.user = user;
     }

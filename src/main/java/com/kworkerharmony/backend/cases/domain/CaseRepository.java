@@ -2,6 +2,7 @@ package com.kworkerharmony.backend.cases.domain;
 
 import com.kworkerharmony.backend.cases.entity.Case;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -18,4 +19,6 @@ public interface CaseRepository extends JpaRepository<Case, String> {
     long countByEmployerIdAndStatus(Long employerId, CaseStatus status);
 
     long countByWorkerIdAndStatus(Long workerId, CaseStatus status);
+
+    Optional<Case> findFirstByWorkerIdAndStatusOrderByCreatedAtDesc(Long workerId, CaseStatus status);
 }

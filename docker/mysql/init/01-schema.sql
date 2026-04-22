@@ -135,13 +135,13 @@ CREATE TABLE IF NOT EXISTS case_checklist_statuses (
         FOREIGN KEY (case_id) REFERENCES cases (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS chatbots (
+CREATE TABLE IF NOT EXISTS consultations (
     id BIGINT NOT NULL AUTO_INCREMENT,
     diagnose VARCHAR(1000) NOT NULL,
     uid BIGINT NOT NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT fk_chatbots_user
+    CONSTRAINT fk_consultations_user
         FOREIGN KEY (uid) REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
