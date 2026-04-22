@@ -1,9 +1,22 @@
 {
   "countries": [
     { "code": "KR", "name": "Korea" },
-    { "code": "VN", "name": "Vietnam" },
+    { "code": "BD", "name": "Bangladesh" },
+    { "code": "KH", "name": "Cambodia" },
+    { "code": "CN", "name": "China" },
+    { "code": "ID", "name": "Indonesia" },
+    { "code": "KG", "name": "Kyrgyzstan" },
+    { "code": "LA", "name": "Laos" },
+    { "code": "MN", "name": "Mongolia" },
+    { "code": "MM", "name": "Myanmar" },
+    { "code": "NP", "name": "Nepal" },
+    { "code": "PK", "name": "Pakistan" },
+    { "code": "PH", "name": "Philippines" },
+    { "code": "LK", "name": "Sri Lanka" },
+    { "code": "TJ", "name": "Tajikistan" },
     { "code": "TH", "name": "Thailand" },
+    { "code": "TL", "name": "Timor-Leste" },
     { "code": "UZ", "name": "Uzbekistan" },
-    { "code": "PH", "name": "Philippines" }
+    { "code": "VN", "name": "Vietnam" }
   ]
 }

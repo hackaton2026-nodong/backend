@@ -86,7 +86,7 @@ where not exists (
 insert into case_checklist_statuses (id, case_id, checklist_item_code, status, note, created_at, updated_at)
 select '22222222-2222-2222-2222-222222222221',
        '11111111-1111-1111-1111-111111111111',
-       'EPS_PRE_APPROVAL',
+       'FEA_STANDARD_EMPLOYMENT_CONTRACT',
        'COMPLETED',
        '고용허가 사전 절차 확인 완료.',
        current_timestamp,
@@ -100,7 +100,7 @@ where not exists (
 insert into case_checklist_statuses (id, case_id, checklist_item_code, status, note, created_at, updated_at)
 select '22222222-2222-2222-2222-222222222222',
        '11111111-1111-1111-1111-111111111111',
-       'LABOR_WORK_CONTRACT',
+       'LRA_WRITTEN_CONDITIONS',
        'IN_PROGRESS',
        '근로계약 및 교부 문서 검토 진행 중.',
        current_timestamp,
