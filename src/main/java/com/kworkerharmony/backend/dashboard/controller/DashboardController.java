@@ -1,6 +1,6 @@
 package com.kworkerharmony.backend.dashboard.controller;
 
-import com.kworkerharmony.backend.dashboard.domain.dto.response.DashboardSummaryResponse;
+import com.kworkerharmony.backend.dashboard.domain.dto.response.EmployerDashboardResponse;
 import com.kworkerharmony.backend.dashboard.domain.dto.response.WorkerDashboardResponse;
 import com.kworkerharmony.backend.dashboard.service.DashboardService;
 import com.kworkerharmony.backend.global.response.ApiResponse;
@@ -26,7 +26,7 @@ public class DashboardController {
     }
 
     @GetMapping("/employer")
-    public ApiResponse<DashboardSummaryResponse> getEmployerDashboard(
+    public ApiResponse<EmployerDashboardResponse> getEmployerDashboard(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
         return ApiResponse.success(dashboardService.getEmployerDashboard(userPrincipal));

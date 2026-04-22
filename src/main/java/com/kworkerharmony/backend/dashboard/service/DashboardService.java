@@ -6,7 +6,7 @@ import com.kworkerharmony.backend.cases.domain.CaseStatus;
 import com.kworkerharmony.backend.cases.entity.Case;
 import com.kworkerharmony.backend.checklist.domain.CaseChecklistStatusRepository;
 import com.kworkerharmony.backend.checklist.domain.ChecklistStatus;
-import com.kworkerharmony.backend.dashboard.domain.dto.response.DashboardSummaryResponse;
+import com.kworkerharmony.backend.dashboard.domain.dto.response.EmployerDashboardResponse;
 import com.kworkerharmony.backend.dashboard.domain.dto.response.WorkerDashboardResponse;
 import com.kworkerharmony.backend.document.Document;
 import com.kworkerharmony.backend.document.DocumentRepository;
@@ -88,11 +88,11 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
-    public DashboardSummaryResponse getEmployerDashboard(UserPrincipal userPrincipal) {
+    public EmployerDashboardResponse getEmployerDashboard(UserPrincipal userPrincipal) {
         User user = getUser(userPrincipal);
         validateUserType(user, UserType.EMPLOYER, "Employer dashboard is only available for employer accounts");
 
-        return new DashboardSummaryResponse(
+        return new EmployerDashboardResponse(
                 user.getId(),
                 user.getUserType(),
                 caseRepository.countByEmployerIdAndStatus(user.getId(), CaseStatus.ACTIVE),
