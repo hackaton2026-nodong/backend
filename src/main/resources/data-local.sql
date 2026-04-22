@@ -51,7 +51,7 @@ where not exists (
 
 insert into users (email, password_hash, name, role, user_type, status, country_code, language_code, enterprise_id, created_at, updated_at)
 select 'worker.local@kworkerharmony.com',
-       '$2a$10$7EqJtq98hPqEX7fNZaFWoOhiB6H4T6k9KuX3sI5Yucs5cjox96D65',
+       '$2a$10$jUJLnbeDwaNvtNoILkT7dOIC/CPeUKhsGoMa3/ZARc10xrK/kS5.2',
        'Local Worker',
        'WORKER',
        'WORKER',
@@ -65,6 +65,33 @@ where not exists (
     select 1
     from users
     where email = 'worker.local@kworkerharmony.com'
+);
+
+update users
+set password_hash = '$2a$10$jUJLnbeDwaNvtNoILkT7dOIC/CPeUKhsGoMa3/ZARc10xrK/kS5.2',
+    updated_at = current_timestamp
+where email in (
+    'admin.local@kworkerharmony.com',
+    'employer.local@kworkerharmony.com',
+    'worker.local@kworkerharmony.com'
+);
+
+insert into users (email, password_hash, name, role, user_type, status, country_code, language_code, enterprise_id, created_at, updated_at)
+select 'demo.worker.local@kworkerharmony.com',
+       '$2a$10$jUJLnbeDwaNvtNoILkT7dOIC/CPeUKhsGoMa3/ZARc10xrK/kS5.2',
+       'Demo Worker',
+       'WORKER',
+       'WORKER',
+       'ACTIVE',
+       'KR',
+       'ko',
+       (select id from enterprises where business_number = 'LOCAL-BIZ-001'),
+       current_timestamp,
+       current_timestamp
+where not exists (
+    select 1
+    from users
+    where email = 'demo.worker.local@kworkerharmony.com'
 );
 
 insert into cases (id, employer_id, worker_id, enterprise_id, status, industry, region, created_at, updated_at)
@@ -81,6 +108,22 @@ where not exists (
     select 1
     from cases
     where id = '11111111-1111-1111-1111-111111111111'
+);
+
+insert into cases (id, employer_id, worker_id, enterprise_id, status, industry, region, created_at, updated_at)
+select '11111111-1111-1111-1111-111111111112',
+       (select id from users where email = 'employer.local@kworkerharmony.com'),
+       (select id from users where email = 'demo.worker.local@kworkerharmony.com'),
+       (select id from enterprises where business_number = 'LOCAL-BIZ-001'),
+       'ACTIVE',
+       'Manufacturing',
+       'Seoul',
+       current_timestamp,
+       current_timestamp
+where not exists (
+    select 1
+    from cases
+    where id = '11111111-1111-1111-1111-111111111112'
 );
 
 insert into case_checklist_statuses (id, case_id, checklist_item_code, status, note, created_at, updated_at)

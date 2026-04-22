@@ -104,6 +104,13 @@ Swagger UI:
 문서 업로드 테스트 페이지:
 
 - `http://localhost:8080/document-upload-test.html`
+- `http://localhost:8080/dashboard-api-preview.html`
+
+로컬 시드 계정:
+
+- `admin.local@kworkerharmony.com` / `password123`
+- `employer.local@kworkerharmony.com` / `password123`
+- `worker.local@kworkerharmony.com` / `password123`
 
 ## 주요 환경 변수
 
