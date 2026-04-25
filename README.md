@@ -91,11 +91,24 @@ docker compose up -d
 백엔드 실행:
 
 ```bash
-./gradlew bootRun
+./gradlew bootRun --args='--spring.profiles.active=local'
 ```
 
-기본값은 Docker Compose 기준으로 맞춰져 있어 별도 환경변수 없이 실행 가능합니다.
+`local` 프로필의 기본값은 Docker Compose 기준으로 맞춰져 있어 별도 환경변수 없이 실행 가능합니다.
 로컬 MySQL 또는 다른 접속 정보를 사용할 경우 아래 환경 변수를 본인 환경에 맞게 지정하면 됩니다.
+
+```bash
+LOCAL_MYSQL_URL='jdbc:mysql://localhost:3306/backend?serverTimezone=Asia/Seoul&characterEncoding=UTF-8' \
+LOCAL_MYSQL_USERNAME=root \
+LOCAL_MYSQL_PASSWORD=1234 \
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+`dev` 프로필로 실행할 경우:
+
+```bash
+SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
+```
 
 Swagger UI:
 
@@ -114,9 +127,9 @@ Swagger UI:
 
 ## 주요 환경 변수
 
-- `MYSQL_URL`
-- `MYSQL_USERNAME`
-- `MYSQL_PASSWORD`
+- `LOCAL_MYSQL_URL`, `LOCAL_MYSQL_USERNAME`, `LOCAL_MYSQL_PASSWORD`
+- `DEV_MYSQL_URL`, `DEV_MYSQL_USERNAME`, `DEV_MYSQL_PASSWORD`
+- `MYSQL_URL`, `MYSQL_USERNAME`, `MYSQL_PASSWORD` (`dev` 프로필 fallback)
 - `REDIS_HOST`
 - `REDIS_PORT`
 - `JWT_SECRET`
