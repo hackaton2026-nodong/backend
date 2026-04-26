@@ -35,3 +35,9 @@ jwt:
 app:
   document:
     storage-root: ${DOCUMENT_STORAGE_ROOT:./storage/documents}
+    blockchain:
+      chain-id: ${DOCUMENT_CHAIN_ID:11155111}
+      contract-address: ${DOCUMENT_CONTRACT_ADDRESS:0x0000000000000000000000000000000000000000}
+      domain-name: ${DOCUMENT_DOMAIN_NAME:KWorkerHarmonyDocument}
+      domain-version: ${DOCUMENT_DOMAIN_VERSION:1}
+      signature-ttl-seconds: ${DOCUMENT_SIGNATURE_TTL_SECONDS:900}

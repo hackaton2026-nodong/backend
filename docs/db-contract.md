@@ -132,9 +132,82 @@ Enum: `CaseStatus = ACTIVE, PENDING, CLOSED`
 
 Enums:
 - `DocumentType = EMPLOYMENT_CONTRACT, PAYSLIP, VISA, RESIDENCE_PROOF, OTHER`
-- `DocumentStatus = UPLOADED, STORED, HASHED, ANCHORED_ON_CHAIN, OCR_PROCESSING, OCR_COMPLETED, STRUCTURED, ANALYZED, FAILED`
+- `DocumentStatus = UPLOADED, STORED, HASHED, SIGNATURE_REQUESTED, SIGNED, ANCHOR_PENDING, ANCHORED_ON_CHAIN, ANCHOR_FAILED, OCR_PROCESSING, OCR_COMPLETED, STRUCTURED, ANALYZED, FAILED`
 
 현재 업로드 흐름은 파일 저장 후 해시를 계산하며, 정상적으로 끝나면 대체로 `HASHED` 상태를 반환한다.
+
+### `document_signatures`
+
+문서 해시 기반 EIP-712 서명 요청과 제출된 지갑 서명을 저장한다.
+
+| 컬럼 | 타입 | NULL | 키 | 설명 |
+| --- | --- | --- | --- | --- |
+| `id` | `VARCHAR(36)` | NO | PK | UUID 문자열 |
+| `document_id` | `VARCHAR(36)` | NO | FK | `documents.id` |
+| `user_id` | `BIGINT` | NO | FK | 서명 사용자 |
+| `wallet_address` | `VARCHAR(42)` | YES | UNIQUE pair | 제출 지갑 주소 |
+| `chain_id` | `BIGINT` | NO | UNIQUE pair | 체인 ID |
+| `verifying_contract` | `VARCHAR(42)` | NO | UNIQUE pair | EIP-712 verifying contract |
+| `typed_data_hash` | `VARCHAR(66)` | NO | UNIQUE | 서버 재계산 typed data hash |
+| `client_typed_data_hash` | `VARCHAR(66)` | YES |  | 클라이언트 제출 참고값 |
+| `signature` | `TEXT` | YES |  | 지갑 서명값 |
+| `signature_hash` | `VARCHAR(66)` | YES | UNIQUE | 서명값 해시 |
+| `nonce` | `VARCHAR(66)` | NO | UNIQUE pair | 서명 nonce |
+| `deadline` | `DATETIME(6)` | NO |  | 서명 만료 시각 |
+| `status` | `VARCHAR(50)` | NO |  | `DocumentSignatureStatus` |
+| `signed_at` | `DATETIME(6)` | YES |  | 서명 저장 시각 |
+| `created_at` | `DATETIME(6)` | NO |  | 생성 시각 |
+| `updated_at` | `DATETIME(6)` | NO |  | 수정 시각 |
+
+Unique 제약: `(document_id, user_id, wallet_address)`, `(chain_id, verifying_contract, nonce)`, `(typed_data_hash)`, `(signature_hash)`
+
+Enum: `DocumentSignatureStatus = REQUESTED, SIGNED, EXPIRED, REJECTED`
+
+### `document_anchors`
+
+서버 relayer 앵커링 요청과 결과를 저장한다.
+
+| 컬럼 | 타입 | NULL | 키 | 설명 |
+| --- | --- | --- | --- | --- |
+| `id` | `VARCHAR(36)` | NO | PK | UUID 문자열 |
+| `document_id` | `VARCHAR(36)` | NO | FK | `documents.id` |
+| `signature_id` | `VARCHAR(36)` | NO | FK | `document_signatures.id` |
+| `chain_id` | `BIGINT` | NO | UNIQUE pair | 체인 ID |
+| `contract_address` | `VARCHAR(42)` | NO | UNIQUE pair | 컨트랙트 주소 |
+| `anchor_id` | `VARCHAR(66)` | NO | UNIQUE pair | 앵커 ID |
+| `document_hash` | `VARCHAR(66)` | NO |  | 문서 해시 |
+| `case_id_hash` | `VARCHAR(66)` | NO |  | 케이스 ID 해시 |
+| `tx_hash` | `VARCHAR(66)` | YES | UNIQUE | 트랜잭션 해시 |
+| `block_number` | `BIGINT` | YES |  | 블록 번호 |
+| `status` | `VARCHAR(50)` | NO |  | `DocumentAnchorStatus` |
+| `retry_count` | `INT` | NO |  | 재시도 횟수 |
+| `last_error_message` | `VARCHAR(1000)` | YES |  | 마지막 실패 메시지 |
+| `anchored_at` | `DATETIME(6)` | YES |  | 앵커 완료 시각 |
+| `created_at` | `DATETIME(6)` | NO |  | 생성 시각 |
+| `updated_at` | `DATETIME(6)` | NO |  | 수정 시각 |
+
+Unique 제약: `(chain_id, contract_address, anchor_id)`, `(tx_hash)`
+
+Enum: `DocumentAnchorStatus = PENDING, ANCHORED, FAILED`
+
+### `document_analysis_results`
+
+오프체인 분석 결과 placeholder와 향후 OCR/AI 분석 결과 해시를 저장한다.
+
+| 컬럼 | 타입 | NULL | 키 | 설명 |
+| --- | --- | --- | --- | --- |
+| `id` | `VARCHAR(36)` | NO | PK | UUID 문자열 |
+| `document_id` | `VARCHAR(36)` | NO | UNIQUE, FK | `documents.id` |
+| `status` | `VARCHAR(50)` | NO |  | `DocumentAnalysisStatus` |
+| `extracted_text_hash` | `VARCHAR(64)` | YES |  | 추출 텍스트 해시 |
+| `analysis_result_hash` | `VARCHAR(64)` | YES |  | 분석 결과 해시 |
+| `summary` | `TEXT` | YES |  | 요약 |
+| `risk_flags` | `TEXT` | YES |  | 위험 플래그 JSON 문자열 |
+| `analyzed_at` | `DATETIME(6)` | YES |  | 분석 완료 시각 |
+| `created_at` | `DATETIME(6)` | NO |  | 생성 시각 |
+| `updated_at` | `DATETIME(6)` | NO |  | 수정 시각 |
+
+Enum: `DocumentAnalysisStatus = PENDING, COMPLETED, FAILED`
 
 ### `alerts`
 
@@ -564,6 +637,136 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 - `expiresAt`: ISO 날짜. 예: `2027-01-01`
 
 응답 데이터: `DocumentResponse`
+
+#### `GET /documents/{documentId}/signature-request`
+
+인증 필요. 해시 완료 문서에 대해 EIP-712 서명 payload를 생성한다.
+
+응답 데이터: `DocumentSignatureRequestResponse`
+
+```json
+{
+  "documentId": "document-uuid",
+  "expectedChainId": 11155111,
+  "domain": {
+    "name": "KWorkerHarmonyDocument",
+    "version": "1",
+    "chainId": 11155111,
+    "verifyingContract": "0x0000000000000000000000000000000000000000"
+  },
+  "types": {
+    "DocumentConsent": [
+      {"name": "documentId", "type": "string"},
+      {"name": "caseId", "type": "string"},
+      {"name": "documentHash", "type": "bytes32"},
+      {"name": "documentType", "type": "string"},
+      {"name": "signerUserId", "type": "uint256"},
+      {"name": "nonce", "type": "bytes32"},
+      {"name": "deadline", "type": "uint256"}
+    ]
+  },
+  "message": {
+    "documentId": "document-uuid",
+    "caseId": "case-uuid",
+    "documentHash": "0x...",
+    "documentType": "EMPLOYMENT_CONTRACT",
+    "signerUserId": 2,
+    "nonce": "0x...",
+    "deadline": 1770000000
+  },
+  "typedDataHash": "0x..."
+}
+```
+
+현재 MVP는 서버 payload 재계산과 요청 일관성 검증을 제공하며, 실제 ECDSA signer recovery는 후속 작업이다.
+
+#### `POST /documents/{documentId}/signatures`
+
+인증 필요. MetaMask 등 EVM 지갑에서 받은 EIP-712 서명을 제출한다.
+
+요청:
+
+```json
+{
+  "walletAddress": "0x1111111111111111111111111111111111111111",
+  "chainId": 11155111,
+  "signature": "0x...",
+  "typedDataHash": "0x...",
+  "nonce": "0x..."
+}
+```
+
+응답 데이터: `DocumentSignatureResponse`
+
+```json
+{
+  "signatureId": "signature-uuid",
+  "documentId": "document-uuid",
+  "walletAddress": "0x1111111111111111111111111111111111111111",
+  "status": "SIGNED",
+  "signedAt": "2026-04-26T15:00:00"
+}
+```
+
+#### `POST /documents/{documentId}/anchor`
+
+인증 필요. 저장된 서명을 기준으로 Stub relayer 앵커링을 수행한다.
+
+요청:
+
+```json
+{
+  "signatureId": "signature-uuid"
+}
+```
+
+응답 데이터: `DocumentAnchorResponse`
+
+```json
+{
+  "anchorId": "0x...",
+  "documentId": "document-uuid",
+  "status": "ANCHORED_ON_CHAIN",
+  "contractAddress": "0x0000000000000000000000000000000000000000",
+  "chainId": 11155111,
+  "txHash": "0x...",
+  "blockNumber": 1,
+  "anchoredAt": "2026-04-26T15:05:00"
+}
+```
+
+현재 MVP는 실제 Sepolia RPC 전송 대신 Stub tx hash와 block number를 저장한다.
+
+#### `GET /documents/{documentId}/anchor`
+
+인증 필요. 가장 최근 앵커링 결과를 조회한다.
+
+응답 데이터: `DocumentAnchorResponse`
+
+#### `POST /documents/{documentId}/analysis`
+
+인증 필요. 현재는 placeholder 오프체인 분석 결과를 생성 또는 갱신한다.
+
+응답 데이터: `DocumentAnalysisResponse`
+
+```json
+{
+  "id": "analysis-uuid",
+  "documentId": "document-uuid",
+  "status": "COMPLETED",
+  "extractedTextHash": "sha256",
+  "analysisResultHash": "sha256",
+  "summary": "Placeholder analysis result for document document-uuid",
+  "riskFlags": "[]",
+  "analyzedAt": "2026-04-26T15:06:00"
+}
+```
+
+#### `GET /documents/{documentId}/analysis`
+
+인증 필요. 저장된 분석 결과를 조회한다.
+
+응답 데이터: `DocumentAnalysisResponse`
 
 ### Checklists
 

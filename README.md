@@ -61,6 +61,7 @@ src/main/java/com/kworkerharmony/backend
 - 케이스에 소속되는 문서
 - 업로드 후 로컬 파일 저장
 - 저장 후 SHA-256 해시 생성
+- 해시를 기준으로 오프체인 분석과 온체인 증명 플로우가 분기됨
 
 ## 현재 구현 범위
 
@@ -73,12 +74,28 @@ src/main/java/com/kworkerharmony/backend
 - 문서 목록 / 상세 조회
 - 로컬 파일 저장
 - SHA-256 해시 생성
+- 문서 해시 기반 EIP-712 서명 요청/저장 MVP
+- Stub relayer 기반 문서 앵커링 MVP
+- 오프체인 분석 결과 placeholder 저장
 
-문서 업로드 완료 시 현재 확인 가능한 상태 전이는 아래와 같습니다.
+문서 업로드와 앵커링 MVP에서 현재 확인 가능한 주요 상태 전이는 아래와 같습니다.
 
 - `UPLOADED`
 - `STORED`
 - `HASHED`
+- `SIGNATURE_REQUESTED`
+- `SIGNED`
+- `ANCHOR_PENDING`
+- `ANCHORED_ON_CHAIN`
+- `ANCHOR_FAILED`
+
+현재 범위의 중요한 경계는 아래와 같습니다.
+
+- 실제 파일 저장과 SHA-256 해시 생성은 동작합니다.
+- 지갑 서명 요청/제출 API와 Stub 앵커링 API는 동작합니다.
+- 실제 Sepolia 트랜잭션 전송은 아직 구현하지 않았습니다.
+- 오프체인 분석 API는 placeholder이며 실제 OCR/AI 호출은 아직 구현하지 않았습니다.
+- 정적 테스트 페이지는 MVP 검증용이며, 실제 제품 UX에서는 업로드 후 분석 자동 시작과 서명 후 앵커링 자동 진행으로 분리하는 것이 좋습니다.
 
 ## 로컬 실행
 
@@ -134,6 +151,11 @@ Swagger UI:
 - `REDIS_PORT`
 - `JWT_SECRET`
 - `DOCUMENT_STORAGE_ROOT`
+- `DOCUMENT_CHAIN_ID`
+- `DOCUMENT_CONTRACT_ADDRESS`
+- `DOCUMENT_DOMAIN_NAME`
+- `DOCUMENT_DOMAIN_VERSION`
+- `DOCUMENT_SIGNATURE_TTL_SECONDS`
 
 기본 문서 저장 경로는 프로젝트 루트 기준 `./storage/documents`입니다.
 
@@ -153,6 +175,8 @@ Swagger UI:
 - 문서 업로드 후 `documents` 테이블에 데이터가 쌓이는지
 - 업로드 파일이 `storage/documents` 아래 저장되는지
 - 업로드 응답에서 `stored=true`, `status=HASHED`가 반환되는지
+- `document-upload-test.html`에서 `Create Signature Request`, `Connect Wallet`, `Sign EIP-712`, `Submit Signature`, `Anchor Document`, `Get Anchor` 순서로 Stub 앵커링 결과가 반환되는지
+- `Create Analysis`로 placeholder 분석 결과가 저장되는지
 
 ## 예시 시나리오
 
@@ -194,7 +218,11 @@ Swagger UI:
 
 6. `http://localhost:8080/document-upload-test.html` 접속 후 로그인 응답의 `accessToken`, 케이스 생성 응답의 `data.id`를 넣고 파일 1건 업로드
 7. `storage/documents` 아래 실제 파일 생성 여부 확인
+8. MetaMask를 Sepolia로 맞춘 뒤 `Create Signature Request` -> `Connect Wallet` -> `Sign EIP-712` -> `Submit Signature` -> `Anchor Document` -> `Get Anchor` 순서로 Stub 앵커링을 확인
+9. `Create Analysis`로 placeholder 분석 저장 확인
 
 ## 참고 문서
 
 - [current-architecture.md](/mnt/c/Users/user/Desktop/backend/docs/current-architecture.md:1)
+- [db-contract.md](/mnt/c/Users/user/Desktop/backend/docs/db-contract.md:1)
+- [document-onchain-flow.md](/mnt/c/Users/user/Desktop/backend/docs/document-onchain-flow.md:1)

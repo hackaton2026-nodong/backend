@@ -2,10 +2,22 @@ package com.kworkerharmony.backend.document;
 
 import com.kworkerharmony.backend.cases.domain.CaseRepository;
 import com.kworkerharmony.backend.cases.entity.Case;
+import com.kworkerharmony.backend.document.config.DocumentBlockchainProperties;
+import com.kworkerharmony.backend.document.dto.request.AnchorDocumentRequest;
+import com.kworkerharmony.backend.document.dto.request.SubmitDocumentSignatureRequest;
+import com.kworkerharmony.backend.document.dto.response.DocumentAnalysisResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentAnchorResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentSignatureRequestResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentSignatureResponse;
+import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort;
+import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort.AnchorCommand;
+import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort.AnchorReceipt;
 import com.kworkerharmony.backend.document.port.DocumentHashPort;
 import com.kworkerharmony.backend.document.port.FileStoragePort;
 import com.kworkerharmony.backend.document.port.FileStoragePort.StoredFile;
+import com.kworkerharmony.backend.document.support.DocumentCrypto;
+import com.kworkerharmony.backend.document.support.DocumentTypedDataFactory;
 import com.kworkerharmony.backend.enterprise.Enterprise;
 import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
@@ -14,7 +26,10 @@ import com.kworkerharmony.backend.user.Role;
 import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +44,12 @@ public class DocumentService {
     private final CaseRepository caseRepository;
     private final FileStoragePort fileStoragePort;
     private final DocumentHashPort documentHashPort;
+    private final DocumentSignatureRepository documentSignatureRepository;
+    private final DocumentAnchorRepository documentAnchorRepository;
+    private final DocumentAnalysisResultRepository documentAnalysisResultRepository;
+    private final DocumentBlockchainProperties blockchainProperties;
+    private final DocumentTypedDataFactory typedDataFactory;
+    private final DocumentAnchorRelayerPort anchorRelayerPort;
 
     @Transactional(readOnly = true)
     public List<DocumentResponse> getDocuments(String caseId, UserPrincipal userPrincipal) {
@@ -89,8 +110,187 @@ public class DocumentService {
         }
     }
 
+    @Transactional
+    public DocumentSignatureRequestResponse createSignatureRequest(String documentId, UserPrincipal userPrincipal) {
+        Document document = getAccessibleDocument(documentId, userPrincipal);
+        validateDocumentCanRequestSignature(document);
+
+        User user = getUser(userPrincipal.getId());
+        String nonce = DocumentCrypto.randomBytes32Hex();
+        LocalDateTime deadline = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(blockchainProperties.signatureTtlSeconds());
+        String typedDataHash = typedDataFactory.typedDataHash(blockchainProperties, document, user.getId(), nonce, deadline);
+
+        DocumentSignature signature = documentSignatureRepository.save(new DocumentSignature(
+                document.getId(),
+                user.getId(),
+                blockchainProperties.chainId(),
+                blockchainProperties.contractAddress(),
+                typedDataHash,
+                nonce,
+                deadline
+        ));
+        document.markSignatureRequested();
+
+        return new DocumentSignatureRequestResponse(
+                document.getId(),
+                blockchainProperties.chainId(),
+                typedDataFactory.domain(blockchainProperties),
+                typedDataFactory.types(),
+                typedDataFactory.message(document, user.getId(), signature.getNonce(), signature.getDeadline()),
+                signature.getTypedDataHash()
+        );
+    }
+
+    @Transactional
+    public DocumentSignatureResponse submitSignature(
+            String documentId,
+            SubmitDocumentSignatureRequest request,
+            UserPrincipal userPrincipal
+    ) {
+        Document document = getAccessibleDocument(documentId, userPrincipal);
+        User user = getUser(userPrincipal.getId());
+        DocumentSignature signature = documentSignatureRepository
+                .findByDocumentIdAndUserIdAndNonce(document.getId(), user.getId(), normalizedHex(request.nonce()))
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Signature request not found"));
+
+        if (signature.getStatus() != DocumentSignatureStatus.REQUESTED) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Signature request is not active");
+        }
+        if (signature.getDeadline().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
+            signature.markExpired();
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Signature request expired");
+        }
+        if (!request.chainId().equals(signature.getChainId())) {
+            signature.markRejected();
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Unexpected chain id");
+        }
+        validateWalletAddress(request.walletAddress());
+        validateHexSignature(request.signature());
+
+        String recalculatedHash = typedDataFactory.typedDataHash(
+                blockchainProperties,
+                document,
+                user.getId(),
+                signature.getNonce(),
+                signature.getDeadline()
+        );
+        if (!recalculatedHash.equalsIgnoreCase(signature.getTypedDataHash())) {
+            signature.markRejected();
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Typed data payload mismatch");
+        }
+
+        String signatureHash = DocumentCrypto.bytes32HexFromSha256(normalizedHex(request.signature()));
+        signature.markSigned(
+                normalizedAddress(request.walletAddress()),
+                normalizedHex(request.signature()),
+                signatureHash,
+                request.typedDataHash() == null ? null : normalizedHex(request.typedDataHash())
+        );
+        document.markSigned();
+        return DocumentSignatureResponse.from(signature);
+    }
+
+    @Transactional
+    public DocumentAnchorResponse anchorDocument(
+            String documentId,
+            AnchorDocumentRequest request,
+            UserPrincipal userPrincipal
+    ) {
+        Document document = getAccessibleDocument(documentId, userPrincipal);
+        DocumentSignature signature = documentSignatureRepository.findById(request.signatureId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Signature not found"));
+        if (!signature.getDocumentId().equals(document.getId())) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Signature belongs to another document");
+        }
+        if (signature.getStatus() != DocumentSignatureStatus.SIGNED) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document signature is not signed");
+        }
+
+        DocumentAnchor existing = documentAnchorRepository
+                .findFirstByDocumentIdAndStatusInOrderByCreatedAtDesc(
+                        document.getId(),
+                        List.of(DocumentAnchorStatus.PENDING, DocumentAnchorStatus.ANCHORED)
+                )
+                .orElse(null);
+        if (existing != null) {
+            return DocumentAnchorResponse.from(existing);
+        }
+
+        DocumentAnchor anchor = documentAnchorRepository.findByDocumentIdAndSignatureId(document.getId(), signature.getId())
+                .orElseGet(() -> documentAnchorRepository.save(new DocumentAnchor(
+                        document.getId(),
+                        signature.getId(),
+                        signature.getChainId(),
+                        signature.getVerifyingContract(),
+                        anchorId(document, signature),
+                        DocumentCrypto.ensureBytes32Hex(document.getSha256Hash()),
+                        DocumentCrypto.bytes32HexFromSha256(document.getCaseId())
+                )));
+
+        document.markAnchorPending();
+        try {
+            AnchorReceipt receipt = anchorRelayerPort.anchor(new AnchorCommand(
+                    anchor.getDocumentHash(),
+                    anchor.getCaseIdHash(),
+                    signature.getWalletAddress(),
+                    signature.getTypedDataHash(),
+                    signature.getSignature(),
+                    signature.getNonce(),
+                    signature.getDeadline().toEpochSecond(ZoneOffset.UTC),
+                    signature.getChainId(),
+                    signature.getVerifyingContract(),
+                    anchor.getAnchorId()
+            ));
+            anchor.markAnchored(receipt.txHash(), receipt.blockNumber());
+            document.markAnchored(receipt.txHash());
+        } catch (RuntimeException ex) {
+            anchor.markFailed(truncate(ex.getMessage(), 1000));
+            document.markAnchorFailed();
+        }
+
+        return DocumentAnchorResponse.from(anchor);
+    }
+
+    @Transactional(readOnly = true)
+    public DocumentAnchorResponse getAnchor(String documentId, UserPrincipal userPrincipal) {
+        Document document = getAccessibleDocument(documentId, userPrincipal);
+        DocumentAnchor anchor = documentAnchorRepository.findFirstByDocumentIdOrderByCreatedAtDesc(document.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document anchor not found"));
+        return DocumentAnchorResponse.from(anchor);
+    }
+
+    @Transactional
+    public DocumentAnalysisResponse analyzeDocument(String documentId, UserPrincipal userPrincipal) {
+        Document document = getAccessibleDocument(documentId, userPrincipal);
+        DocumentAnalysisResult result = documentAnalysisResultRepository.findByDocumentId(document.getId())
+                .orElseGet(() -> documentAnalysisResultRepository.save(new DocumentAnalysisResult(document.getId())));
+        result.markCompleted(
+                document.getSha256Hash(),
+                DocumentCrypto.sha256Hex("analysis|" + document.getId() + "|" + document.getSha256Hash()),
+                "Placeholder analysis result for document " + document.getId(),
+                "[]"
+        );
+        document.markAnalyzed();
+        return DocumentAnalysisResponse.from(result);
+    }
+
+    @Transactional(readOnly = true)
+    public DocumentAnalysisResponse getAnalysis(String documentId, UserPrincipal userPrincipal) {
+        Document document = getAccessibleDocument(documentId, userPrincipal);
+        DocumentAnalysisResult result = documentAnalysisResultRepository.findByDocumentId(document.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document analysis not found"));
+        return DocumentAnalysisResponse.from(result);
+    }
+
     private DocumentResponse toResponse(Document document) {
         return DocumentResponse.from(document, fileStoragePort.exists(document.getStorageKey()));
+    }
+
+    private Document getAccessibleDocument(String documentId, UserPrincipal userPrincipal) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document not found"));
+        validateDocumentAccess(document, userPrincipal);
+        return document;
     }
 
     private Case getAccessibleCase(String caseId, UserPrincipal userPrincipal) {
@@ -107,6 +307,53 @@ public class DocumentService {
         User user = getUser(userPrincipal.getId());
         validateCompanyAccess(caseEntity, user);
         validateCasePartyAccess(caseEntity, user);
+    }
+
+    private void validateDocumentCanRequestSignature(Document document) {
+        if (document.getSha256Hash() == null || document.getSha256Hash().isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document hash is required");
+        }
+        if (!List.of(DocumentStatus.HASHED, DocumentStatus.SIGNATURE_REQUESTED, DocumentStatus.SIGNED)
+                .contains(document.getStatus())) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document is not ready for signature");
+        }
+    }
+
+    private String anchorId(Document document, DocumentSignature signature) {
+        String canonical = signature.getChainId()
+                + "|" + signature.getVerifyingContract().toLowerCase(Locale.ROOT)
+                + "|" + DocumentCrypto.ensureBytes32Hex(document.getSha256Hash()).toLowerCase(Locale.ROOT)
+                + "|" + DocumentCrypto.bytes32HexFromSha256(document.getCaseId()).toLowerCase(Locale.ROOT)
+                + "|" + signature.getWalletAddress().toLowerCase(Locale.ROOT)
+                + "|" + signature.getNonce().toLowerCase(Locale.ROOT);
+        return DocumentCrypto.bytes32HexFromSha256(canonical);
+    }
+
+    private void validateWalletAddress(String walletAddress) {
+        if (walletAddress == null || !walletAddress.matches("^0x[0-9a-fA-F]{40}$")) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Invalid wallet address");
+        }
+    }
+
+    private void validateHexSignature(String signature) {
+        if (signature == null || !signature.matches("^0x[0-9a-fA-F]+$")) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Invalid signature");
+        }
+    }
+
+    private String normalizedAddress(String value) {
+        return value.toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizedHex(String value) {
+        return value.toLowerCase(Locale.ROOT);
+    }
+
+    private String truncate(String value, int maxLength) {
+        if (value == null) {
+            return null;
+        }
+        return value.length() <= maxLength ? value : value.substring(0, maxLength);
     }
 
     private void validateCompanyAccess(Case caseEntity, User user) {

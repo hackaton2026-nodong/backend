@@ -1,8 +1,15 @@
 package com.kworkerharmony.backend.document;
 
+import com.kworkerharmony.backend.document.dto.request.AnchorDocumentRequest;
+import com.kworkerharmony.backend.document.dto.request.SubmitDocumentSignatureRequest;
+import com.kworkerharmony.backend.document.dto.response.DocumentAnalysisResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentAnchorResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentSignatureRequestResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentSignatureResponse;
 import com.kworkerharmony.backend.global.response.ApiResponse;
 import com.kworkerharmony.backend.global.security.UserPrincipal;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -57,5 +65,55 @@ public class DocumentController {
                 expiresAt,
                 userPrincipal
         ));
+    }
+
+    @GetMapping("/documents/{documentId}/signature-request")
+    public ApiResponse<DocumentSignatureRequestResponse> createSignatureRequest(
+            @PathVariable String documentId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(documentService.createSignatureRequest(documentId, userPrincipal));
+    }
+
+    @PostMapping("/documents/{documentId}/signatures")
+    public ApiResponse<DocumentSignatureResponse> submitSignature(
+            @PathVariable String documentId,
+            @Valid @RequestBody SubmitDocumentSignatureRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(documentService.submitSignature(documentId, request, userPrincipal));
+    }
+
+    @PostMapping("/documents/{documentId}/anchor")
+    public ApiResponse<DocumentAnchorResponse> anchorDocument(
+            @PathVariable String documentId,
+            @Valid @RequestBody AnchorDocumentRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(documentService.anchorDocument(documentId, request, userPrincipal));
+    }
+
+    @GetMapping("/documents/{documentId}/anchor")
+    public ApiResponse<DocumentAnchorResponse> getAnchor(
+            @PathVariable String documentId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(documentService.getAnchor(documentId, userPrincipal));
+    }
+
+    @PostMapping("/documents/{documentId}/analysis")
+    public ApiResponse<DocumentAnalysisResponse> analyzeDocument(
+            @PathVariable String documentId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(documentService.analyzeDocument(documentId, userPrincipal));
+    }
+
+    @GetMapping("/documents/{documentId}/analysis")
+    public ApiResponse<DocumentAnalysisResponse> getAnalysis(
+            @PathVariable String documentId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(documentService.getAnalysis(documentId, userPrincipal));
     }
 }

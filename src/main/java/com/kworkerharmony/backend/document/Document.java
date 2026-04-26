@@ -142,9 +142,25 @@ public class Document extends BaseEntity {
         this.status = DocumentStatus.HASHED;
     }
 
+    public void markSignatureRequested() {
+        this.status = DocumentStatus.SIGNATURE_REQUESTED;
+    }
+
+    public void markSigned() {
+        this.status = DocumentStatus.SIGNED;
+    }
+
+    public void markAnchorPending() {
+        this.status = DocumentStatus.ANCHOR_PENDING;
+    }
+
     public void markAnchored(String anchoredTxId) {
         this.anchoredTxId = anchoredTxId;
         this.status = DocumentStatus.ANCHORED_ON_CHAIN;
+    }
+
+    public void markAnchorFailed() {
+        this.status = DocumentStatus.ANCHOR_FAILED;
     }
 
     public void markOcrProcessing() {

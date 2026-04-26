@@ -152,6 +152,12 @@
       gap: 14px;
     }
 
+    .flow {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
     .card {
       border: 1px solid var(--line);
       border-radius: 16px;
@@ -246,6 +252,40 @@
         <code id="response">No response yet.</code>
       </div>
     </div>
+
+    <div class="flow">
+      <div class="grid">
+        <div class="field">
+          <label for="documentId">Document ID</label>
+          <input id="documentId" type="text" placeholder="Filled after upload or paste an existing document id">
+        </div>
+        <div class="field">
+          <label for="walletAddress">Wallet Address</label>
+          <input id="walletAddress" type="text" placeholder="Connect MetaMask">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="signatureRequestButton" type="button">Create Signature Request</button>
+        <button id="connectWalletButton" class="secondary" type="button">Connect Wallet</button>
+        <button id="signButton" class="secondary" type="button">Sign EIP-712</button>
+        <button id="submitSignatureButton" class="secondary" type="button">Submit Signature</button>
+        <button id="anchorButton" class="secondary" type="button">Anchor Document</button>
+        <button id="getAnchorButton" class="secondary" type="button">Get Anchor</button>
+        <button id="analysisButton" class="secondary" type="button">Create Analysis</button>
+      </div>
+
+      <div class="result">
+        <div class="card">
+          <strong>Signature / Anchor Summary</strong>
+          <code id="chainSummary">No signature flow yet.</code>
+        </div>
+        <div class="card">
+          <strong>Signature / Anchor Raw Response</strong>
+          <code id="chainResponse">No response yet.</code>
+        </div>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -258,9 +298,26 @@
   const fileInput = document.getElementById("file");
   const uploadButton = document.getElementById("uploadButton");
   const resetButton = document.getElementById("resetButton");
+  const documentIdInput = document.getElementById("documentId");
+  const walletAddressInput = document.getElementById("walletAddress");
+  const signatureRequestButton = document.getElementById("signatureRequestButton");
+  const connectWalletButton = document.getElementById("connectWalletButton");
+  const signButton = document.getElementById("signButton");
+  const submitSignatureButton = document.getElementById("submitSignatureButton");
+  const anchorButton = document.getElementById("anchorButton");
+  const getAnchorButton = document.getElementById("getAnchorButton");
+  const analysisButton = document.getElementById("analysisButton");
   const statusBox = document.getElementById("status");
   const summaryBox = document.getElementById("summary");
   const responseBox = document.getElementById("response");
+  const chainSummaryBox = document.getElementById("chainSummary");
+  const chainResponseBox = document.getElementById("chainResponse");
+
+  let signatureRequest = null;
+  let walletAddress = "";
+  let walletChainId = null;
+  let signature = "";
+  let signatureId = "";
 
   const today = new Date().toISOString().slice(0, 10);
   issuedAtInput.value = today;
@@ -273,11 +330,60 @@
 
   function resetForm() {
     caseIdInput.value = "";
+    documentIdInput.value = "";
+    walletAddressInput.value = "";
     documentTypeInput.value = "EMPLOYMENT_CONTRACT";
     fileInput.value = "";
     summaryBox.textContent = "No upload yet.";
     responseBox.textContent = "No response yet.";
+    chainSummaryBox.textContent = "No signature flow yet.";
+    chainResponseBox.textContent = "No response yet.";
+    signatureRequest = null;
+    walletAddress = "";
+    walletChainId = null;
+    signature = "";
+    signatureId = "";
     setStatus("Ready. Provide token, case ID, dates, and a file to start.");
+  }
+
+  function token() {
+    return tokenInput.value.trim();
+  }
+
+  function documentId() {
+    return documentIdInput.value.trim();
+  }
+
+  async function parseJsonResponse(response) {
+    const payload = await response.json();
+    chainResponseBox.textContent = JSON.stringify(payload, null, 2);
+    if (!response.ok || !payload.success) {
+      throw new Error(payload?.error?.message || `Request failed with status ${response.status}`);
+    }
+    return payload.data;
+  }
+
+  function requireTokenAndDocument() {
+    if (!token() || !documentId()) {
+      throw new Error("Access token and document ID are required.");
+    }
+  }
+
+  function ethereumProvider() {
+    if (!window.ethereum) {
+      return null;
+    }
+    if (Array.isArray(window.ethereum.providers)) {
+      return window.ethereum.providers.find((provider) => provider.isMetaMask) || window.ethereum.providers[0];
+    }
+    return window.ethereum;
+  }
+
+  function parseChainId(chainId) {
+    if (typeof chainId === "string" && chainId.startsWith("0x")) {
+      return parseInt(chainId, 16);
+    }
+    return Number(chainId);
   }
 
   async function upload() {
@@ -319,6 +425,7 @@
       }
 
       const data = payload.data;
+      documentIdInput.value = data.id;
       summaryBox.textContent = [
         `documentId: ${data.id}`,
         `status: ${data.status}`,
@@ -337,8 +444,204 @@
     }
   }
 
+  async function createSignatureRequest() {
+    try {
+      requireTokenAndDocument();
+      const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/signature-request`, {
+        headers: {
+          Authorization: `Bearer ${token()}`
+        }
+      });
+      signatureRequest = await parseJsonResponse(response);
+      chainSummaryBox.textContent = [
+        `documentId: ${signatureRequest.documentId}`,
+        `expectedChainId: ${signatureRequest.expectedChainId}`,
+        `nonce: ${signatureRequest.message.nonce}`,
+        `deadline: ${signatureRequest.message.deadline}`,
+        `typedDataHash: ${signatureRequest.typedDataHash}`
+      ].join("\n");
+      setStatus("Signature request created.");
+    } catch (error) {
+      setStatus(error.message, true);
+    }
+  }
+
+  async function connectWallet() {
+    try {
+      setStatus("Requesting wallet connection. Check the MetaMask extension popup.");
+      chainSummaryBox.textContent = "Waiting for MetaMask account approval...";
+      const provider = ethereumProvider();
+      if (!provider) {
+        throw new Error("MetaMask compatible wallet was not detected.");
+      }
+      const accounts = await provider.request({ method: "eth_requestAccounts" });
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No wallet account was returned.");
+      }
+      walletAddress = accounts[0];
+      walletChainId = parseChainId(await provider.request({ method: "eth_chainId" }));
+      walletAddressInput.value = walletAddress;
+      chainSummaryBox.textContent = [
+        `walletAddress: ${walletAddress}`,
+        `chainId: ${walletChainId}`
+      ].join("\n");
+      setStatus("Wallet connected.");
+    } catch (error) {
+      setStatus(error.message, true);
+    }
+  }
+
+  async function signTypedData() {
+    try {
+      if (!signatureRequest) {
+        throw new Error("Create a signature request first.");
+      }
+      const provider = ethereumProvider();
+      if (!provider || !walletAddress) {
+        throw new Error("Connect wallet first.");
+      }
+      setStatus("Requesting EIP-712 signature. Check the MetaMask popup.");
+      const chainId = parseChainId(await provider.request({ method: "eth_chainId" }));
+      if (chainId !== Number(signatureRequest.expectedChainId)) {
+        throw new Error(`Switch wallet network to chainId ${signatureRequest.expectedChainId}. Current chainId is ${chainId}.`);
+      }
+      const typedData = {
+        domain: signatureRequest.domain,
+        types: signatureRequest.types,
+        primaryType: "DocumentConsent",
+        message: signatureRequest.message
+      };
+      signature = await provider.request({
+        method: "eth_signTypedData_v4",
+        params: [walletAddress, JSON.stringify(typedData)]
+      });
+      chainSummaryBox.textContent = [
+        `walletAddress: ${walletAddress}`,
+        `signature: ${signature}`,
+        `nonce: ${signatureRequest.message.nonce}`
+      ].join("\n");
+      setStatus("EIP-712 signature created.");
+    } catch (error) {
+      setStatus(error.message, true);
+    }
+  }
+
+  async function submitSignature() {
+    try {
+      requireTokenAndDocument();
+      if (!signatureRequest || !signature || !walletAddress) {
+        throw new Error("Signature request, wallet address, and signature are required.");
+      }
+      const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/signatures`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token()}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          walletAddress,
+          chainId: signatureRequest.expectedChainId,
+          signature,
+          typedDataHash: signatureRequest.typedDataHash,
+          nonce: signatureRequest.message.nonce
+        })
+      });
+      const data = await parseJsonResponse(response);
+      signatureId = data.signatureId;
+      chainSummaryBox.textContent = [
+        `signatureId: ${data.signatureId}`,
+        `documentId: ${data.documentId}`,
+        `walletAddress: ${data.walletAddress}`,
+        `status: ${data.status}`,
+        `signedAt: ${data.signedAt}`
+      ].join("\n");
+      setStatus("Signature submitted.");
+    } catch (error) {
+      setStatus(error.message, true);
+    }
+  }
+
+  async function anchorDocument() {
+    try {
+      requireTokenAndDocument();
+      if (!signatureId) {
+        throw new Error("Submit signature first.");
+      }
+      const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/anchor`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token()}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ signatureId })
+      });
+      const data = await parseJsonResponse(response);
+      chainSummaryBox.textContent = [
+        `anchorId: ${data.anchorId}`,
+        `status: ${data.status}`,
+        `txHash: ${data.txHash}`,
+        `blockNumber: ${data.blockNumber}`,
+        `anchoredAt: ${data.anchoredAt}`
+      ].join("\n");
+      setStatus("Anchor request completed.");
+    } catch (error) {
+      setStatus(error.message, true);
+    }
+  }
+
+  async function getAnchor() {
+    try {
+      requireTokenAndDocument();
+      const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/anchor`, {
+        headers: {
+          Authorization: `Bearer ${token()}`
+        }
+      });
+      const data = await parseJsonResponse(response);
+      chainSummaryBox.textContent = [
+        `anchorId: ${data.anchorId}`,
+        `status: ${data.status}`,
+        `txHash: ${data.txHash}`,
+        `blockNumber: ${data.blockNumber}`,
+        `anchoredAt: ${data.anchoredAt}`
+      ].join("\n");
+      setStatus("Anchor loaded.");
+    } catch (error) {
+      setStatus(error.message, true);
+    }
+  }
+
+  async function createAnalysis() {
+    try {
+      requireTokenAndDocument();
+      const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/analysis`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token()}`
+        }
+      });
+      const data = await parseJsonResponse(response);
+      chainSummaryBox.textContent = [
+        `analysisId: ${data.id}`,
+        `status: ${data.status}`,
+        `extractedTextHash: ${data.extractedTextHash}`,
+        `analysisResultHash: ${data.analysisResultHash}`
+      ].join("\n");
+      setStatus("Placeholder analysis created.");
+    } catch (error) {
+      setStatus(error.message, true);
+    }
+  }
+
   uploadButton.addEventListener("click", upload);
   resetButton.addEventListener("click", resetForm);
+  signatureRequestButton.addEventListener("click", createSignatureRequest);
+  connectWalletButton.addEventListener("click", connectWallet);
+  signButton.addEventListener("click", signTypedData);
+  submitSignatureButton.addEventListener("click", submitSignature);
+  anchorButton.addEventListener("click", anchorDocument);
+  getAnchorButton.addEventListener("click", getAnchor);
+  analysisButton.addEventListener("click", createAnalysis);
 </script>
 </body>
 </html>

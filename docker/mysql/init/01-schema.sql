@@ -95,6 +95,77 @@ CREATE TABLE IF NOT EXISTS documents (
         FOREIGN KEY (case_id) REFERENCES cases (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS document_signatures (
+    id VARCHAR(36) NOT NULL,
+    document_id VARCHAR(36) NOT NULL,
+    user_id BIGINT NOT NULL,
+    wallet_address VARCHAR(42) NULL,
+    chain_id BIGINT NOT NULL,
+    verifying_contract VARCHAR(42) NOT NULL,
+    typed_data_hash VARCHAR(66) NOT NULL,
+    client_typed_data_hash VARCHAR(66) NULL,
+    signature TEXT NULL,
+    signature_hash VARCHAR(66) NULL,
+    nonce VARCHAR(66) NOT NULL,
+    deadline DATETIME(6) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    signed_at DATETIME(6) NULL,
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_document_signatures_document_user_wallet (document_id, user_id, wallet_address),
+    UNIQUE KEY uk_document_signatures_chain_contract_nonce (chain_id, verifying_contract, nonce),
+    UNIQUE KEY uk_document_signatures_typed_data_hash (typed_data_hash),
+    UNIQUE KEY uk_document_signatures_signature_hash (signature_hash),
+    CONSTRAINT fk_document_signatures_document
+        FOREIGN KEY (document_id) REFERENCES documents (id),
+    CONSTRAINT fk_document_signatures_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS document_anchors (
+    id VARCHAR(36) NOT NULL,
+    document_id VARCHAR(36) NOT NULL,
+    signature_id VARCHAR(36) NOT NULL,
+    chain_id BIGINT NOT NULL,
+    contract_address VARCHAR(42) NOT NULL,
+    anchor_id VARCHAR(66) NOT NULL,
+    document_hash VARCHAR(66) NOT NULL,
+    case_id_hash VARCHAR(66) NOT NULL,
+    tx_hash VARCHAR(66) NULL,
+    block_number BIGINT NULL,
+    status VARCHAR(50) NOT NULL,
+    retry_count INT NOT NULL DEFAULT 0,
+    last_error_message VARCHAR(1000) NULL,
+    anchored_at DATETIME(6) NULL,
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_document_anchors_chain_contract_anchor (chain_id, contract_address, anchor_id),
+    UNIQUE KEY uk_document_anchors_tx_hash (tx_hash),
+    CONSTRAINT fk_document_anchors_document
+        FOREIGN KEY (document_id) REFERENCES documents (id),
+    CONSTRAINT fk_document_anchors_signature
+        FOREIGN KEY (signature_id) REFERENCES document_signatures (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS document_analysis_results (
+    id VARCHAR(36) NOT NULL,
+    document_id VARCHAR(36) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    extracted_text_hash VARCHAR(64) NULL,
+    analysis_result_hash VARCHAR(64) NULL,
+    summary TEXT NULL,
+    risk_flags TEXT NULL,
+    analyzed_at DATETIME(6) NULL,
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_document_analysis_results_document (document_id),
+    CONSTRAINT fk_document_analysis_results_document
+        FOREIGN KEY (document_id) REFERENCES documents (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS alerts (
     id VARCHAR(36) NOT NULL,
     user_id BIGINT NOT NULL,
