@@ -223,6 +223,6 @@ Swagger UI:
 
 ## 참고 문서
 
-- [current-architecture.md](/mnt/c/Users/user/Desktop/backend/docs/current-architecture.md:1)
-- [db-contract.md](/mnt/c/Users/user/Desktop/backend/docs/db-contract.md:1)
-- [document-onchain-flow.md](/mnt/c/Users/user/Desktop/backend/docs/document-onchain-flow.md:1)
+- [current-architecture.md](docs/current-architecture.md)
+- [db-contract.md](docs/db-contract.md)
+- [document-onchain-flow.md](docs/document-onchain-flow.md)
