@@ -192,14 +192,14 @@ Enum: `DocumentAnchorStatus = PENDING, ANCHORED, FAILED`
 
 ### `document_analysis_results`
 
-오프체인 분석 결과 placeholder와 향후 OCR/AI 분석 결과 해시를 저장한다.
+오프체인 분석 결과 placeholder와 향후 OCR/AI 분석 결과 해시를 저장한다. 실제 OCR/parser와 AI 레이어 사이의 payload 규격은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
 
 | 컬럼 | 타입 | NULL | 키 | 설명 |
 | --- | --- | --- | --- | --- |
 | `id` | `VARCHAR(36)` | NO | PK | UUID 문자열 |
 | `document_id` | `VARCHAR(36)` | NO | UNIQUE, FK | `documents.id` |
 | `status` | `VARCHAR(50)` | NO |  | `DocumentAnalysisStatus` |
-| `extracted_text_hash` | `VARCHAR(64)` | YES |  | 추출 텍스트 해시 |
+| `extracted_text_hash` | `VARCHAR(64)` | YES |  | 마스킹/정규화된 AI request 또는 normalized terms 해시 |
 | `analysis_result_hash` | `VARCHAR(64)` | YES |  | 분석 결과 해시 |
 | `summary` | `TEXT` | YES |  | 요약 |
 | `risk_flags` | `TEXT` | YES |  | 위험 플래그 JSON 문자열 |
@@ -208,6 +208,8 @@ Enum: `DocumentAnchorStatus = PENDING, ANCHORED, FAILED`
 | `updated_at` | `DATETIME(6)` | NO |  | 수정 시각 |
 
 Enum: `DocumentAnalysisStatus = PENDING, COMPLETED, FAILED`
+
+필터링 전 raw OCR text 저장 테이블은 만들지 않는다. 원문 파일, `storageKey`, 필터링 전 OCR 전문은 AI request와 로그에 포함하지 않는다.
 
 ### `alerts`
 

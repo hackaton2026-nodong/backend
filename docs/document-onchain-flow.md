@@ -10,11 +10,11 @@
 - 프론트는 `document-upload-test.html`에서 MetaMask 호환 지갑 연결과 EIP-712 서명 요청을 수행한다.
 - 백엔드는 서명 요청 payload를 생성하고, 제출된 서명을 저장하며, 서버 기준 payload로 `typedDataHash`를 재계산한다.
 - 앵커링은 `DocumentAnchorRelayerPort` 뒤의 Stub adapter가 처리한다. 실제 Sepolia 트랜잭션은 아직 전송하지 않는다.
-- 오프체인 분석은 `document_analysis_results` 모델과 API로 placeholder 결과를 저장한다.
+- 오프체인 분석은 `document_analysis_results` 모델과 API로 placeholder 결과를 저장한다. 실제 OCR/parser 및 AI 분석 RPC로 확장할 때의 입력/출력 계약은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
 
 문서 업로드 후 플로우는 의도적으로 두 갈래로 분리한다.
 
-- 오프체인 분석 플로우: `HASHED` 문서를 OCR/parser와 AI 분석 레이어로 넘겨 `document_analysis_results`에 저장한다. 현재는 placeholder다.
+- 오프체인 분석 플로우: `HASHED` 문서를 OCR/parser로 처리한 뒤 필터링/마스킹된 allowlist payload만 AI 분석 레이어로 넘겨 `document_analysis_results`에 저장한다. 현재는 placeholder다.
 - 온체인 증명 플로우: 같은 `documentHash`에 대해 사용자의 EIP-712 서명을 받고, 서버 relayer가 앵커링 결과를 `document_anchors`에 저장한다. 현재는 Stub relayer다.
 
 테스트 페이지는 MVP 검증 편의를 위해 두 갈래를 한 화면에 모아 둔 것이며, 실제 제품 UX에서는 문서 업로드 후 분석은 자동 진행하고 지갑 서명 이후 앵커링은 자동으로 이어지는 형태가 자연스럽다.
@@ -137,6 +137,8 @@
 - `POST /api/documents/{documentId}/analysis`: 오프체인 분석 결과 생성을 시작한다. 현재는 실제 OCR/AI 호출 없이 placeholder 결과를 저장한다.
 - `GET /api/documents/{documentId}/analysis`: 저장된 분석 결과를 조회한다.
 
+실제 분석 구현 시 AI 레이어에는 원문 파일, `storageKey`, 필터링 전 OCR 전문을 전달하지 않는다. OCR/parser 결과는 메모리에서 필터링/마스킹한 뒤 [offchain-analysis-contract.md](offchain-analysis-contract.md)의 AI request schema로만 전달한다.
+
 ## EIP-712 Wallet Flow
 
 프론트의 책임은 지갑 연결과 EIP-712 서명 요청까지다.
@@ -199,6 +201,7 @@ event DocumentAnchored(
 
 - 주요 필드: `document_id`, `status`, `extracted_text_hash`, `analysis_result_hash`, `summary`, `risk_flags`, `analyzed_at`
 - Unique: `(document_id)`
+- `extracted_text_hash`는 필터링 전 OCR 전문의 hash가 아니라, 마스킹/정규화된 AI request 또는 normalized terms의 hash로 사용한다.
 
 ## Local Manual Test
 
@@ -231,7 +234,7 @@ http://localhost:8080/document-upload-test.html
 - 실제 Sepolia RPC 호출과 `web3j` 기반 relayer 어댑터는 아직 구현하지 않았다.
 - 실제 ECDSA signer recovery 검증은 아직 구현하지 않았다.
 - 현재 `typedDataHash`, `caseIdHash`, `anchorId` 계산은 MVP 내부 검증용 SHA-256 helper를 사용한다. 실제 Solidity 검증과 맞추려면 keccak/EIP-712 canonical hashing 구현으로 교체해야 한다.
-- 오프체인 분석은 placeholder이며 OCR, 구조화, AI 분석 호출은 후속 작업이다.
+- 오프체인 분석은 placeholder이며 OCR, 구조화, AI 분석 호출은 후속 작업이다. 후속 구현은 원문 비전달, 필터링 전 OCR 비저장, 마스킹 근거 참조 정책을 먼저 만족해야 한다.
 - DB 변경은 `docker/mysql/init/01-schema.sql`에 반영되어 있으나, 운영 마이그레이션 도구는 아직 없다.
 
 ## Next Development Points

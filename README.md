@@ -95,6 +95,7 @@ src/main/java/com/kworkerharmony/backend
 - 지갑 서명 요청/제출 API와 Stub 앵커링 API는 동작합니다.
 - 실제 Sepolia 트랜잭션 전송은 아직 구현하지 않았습니다.
 - 오프체인 분석 API는 placeholder이며 실제 OCR/AI 호출은 아직 구현하지 않았습니다.
+- 오프체인 분석에서 원문 파일과 필터링 전 OCR 결과는 AI 레이어로 전달하지 않으며, 세부 입력 규격은 `docs/offchain-analysis-contract.md`를 따릅니다.
 - 정적 테스트 페이지는 MVP 검증용이며, 실제 제품 UX에서는 업로드 후 분석 자동 시작과 서명 후 앵커링 자동 진행으로 분리하는 것이 좋습니다.
 
 ## 로컬 실행
@@ -226,3 +227,4 @@ Swagger UI:
 - [current-architecture.md](docs/current-architecture.md)
 - [db-contract.md](docs/db-contract.md)
 - [document-onchain-flow.md](docs/document-onchain-flow.md)
+- [offchain-analysis-contract.md](docs/offchain-analysis-contract.md)
