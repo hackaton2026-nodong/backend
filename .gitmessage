@@ -1,0 +1,6 @@
+# 형식: 타입: 한국어 요약
+# 예시: feat: 근로자 계약서 단계 전환 추가
+#
+# 허용 타입: feat, fix, docs, style, refactor, test, chore, build, ci, perf, revert
+# 제목은 한국어를 포함하고 가능하면 72자 이내로 작성합니다.
+

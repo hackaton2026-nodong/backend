@@ -1,0 +1,25 @@
+#!/bin/sh
+
+commit_msg_file="$1"
+first_line=$(sed -n '1p' "$commit_msg_file")
+
+case "$first_line" in
+  \#*) exit 0 ;;
+esac
+
+if ! printf '%s' "$first_line" | grep -Eq '^(feat|fix|docs|style|refactor|test|chore|build|ci|perf|revert): .+'; then
+  echo "커밋 메시지 형식 오류: '타입: 한국어 요약' 형식으로 작성하세요." >&2
+  echo "예시: feat: 근로자 계약서 단계 전환 추가" >&2
+  exit 1
+fi
+
+if ! printf '%s' "$first_line" | grep -Eq '[가-힣]'; then
+  echo "커밋 메시지 오류: 제목에는 한국어 내용을 포함해야 합니다." >&2
+  exit 1
+fi
+
+subject_length=$(printf '%s' "$first_line" | wc -m | tr -d ' ')
+if [ "$subject_length" -gt 72 ]; then
+  echo "커밋 메시지 오류: 제목은 72자 이내로 작성하세요. 현재 ${subject_length}자입니다." >&2
+  exit 1
+fi
