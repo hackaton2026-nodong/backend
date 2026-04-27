@@ -6,6 +6,7 @@ public final class SecurityPaths {
             "/auth/**",
             "/api/auth/**",
             "/api/ai/health",
+            "/api/references/**",
             "/document-upload-test.html",
             "/dashboard-api-preview.html",
             "/v3/api-docs/**",

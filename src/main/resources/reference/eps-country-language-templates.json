@@ -1,0 +1,140 @@
+{
+  "templates": [
+    {
+      "countryCode": "PH",
+      "countryNameKo": "필리핀",
+      "countryNameEn": "Philippines",
+      "primaryLanguageCode": "fil",
+      "supportedLanguageCodes": ["fil", "en", "ko"],
+      "displayOrder": 10
+    },
+    {
+      "countryCode": "TH",
+      "countryNameKo": "태국",
+      "countryNameEn": "Thailand",
+      "primaryLanguageCode": "th",
+      "supportedLanguageCodes": ["th", "en", "ko"],
+      "displayOrder": 20
+    },
+    {
+      "countryCode": "ID",
+      "countryNameKo": "인도네시아",
+      "countryNameEn": "Indonesia",
+      "primaryLanguageCode": "id",
+      "supportedLanguageCodes": ["id", "en", "ko"],
+      "displayOrder": 30
+    },
+    {
+      "countryCode": "VN",
+      "countryNameKo": "베트남",
+      "countryNameEn": "Vietnam",
+      "primaryLanguageCode": "vi",
+      "supportedLanguageCodes": ["vi", "en", "ko"],
+      "displayOrder": 40
+    },
+    {
+      "countryCode": "LK",
+      "countryNameKo": "스리랑카",
+      "countryNameEn": "Sri Lanka",
+      "primaryLanguageCode": "si",
+      "supportedLanguageCodes": ["si", "ta", "en", "ko"],
+      "displayOrder": 50
+    },
+    {
+      "countryCode": "MN",
+      "countryNameKo": "몽골",
+      "countryNameEn": "Mongolia",
+      "primaryLanguageCode": "mn",
+      "supportedLanguageCodes": ["mn", "en", "ko"],
+      "displayOrder": 60
+    },
+    {
+      "countryCode": "UZ",
+      "countryNameKo": "우즈베키스탄",
+      "countryNameEn": "Uzbekistan",
+      "primaryLanguageCode": "uz",
+      "supportedLanguageCodes": ["uz", "ru", "en", "ko"],
+      "displayOrder": 70
+    },
+    {
+      "countryCode": "PK",
+      "countryNameKo": "파키스탄",
+      "countryNameEn": "Pakistan",
+      "primaryLanguageCode": "ur",
+      "supportedLanguageCodes": ["ur", "en", "ko"],
+      "displayOrder": 80
+    },
+    {
+      "countryCode": "KH",
+      "countryNameKo": "캄보디아",
+      "countryNameEn": "Cambodia",
+      "primaryLanguageCode": "km",
+      "supportedLanguageCodes": ["km", "en", "ko"],
+      "displayOrder": 90
+    },
+    {
+      "countryCode": "CN",
+      "countryNameKo": "중국",
+      "countryNameEn": "China",
+      "primaryLanguageCode": "zh",
+      "supportedLanguageCodes": ["zh", "en", "ko"],
+      "displayOrder": 100
+    },
+    {
+      "countryCode": "BD",
+      "countryNameKo": "방글라데시",
+      "countryNameEn": "Bangladesh",
+      "primaryLanguageCode": "bn",
+      "supportedLanguageCodes": ["bn", "en", "ko"],
+      "displayOrder": 110
+    },
+    {
+      "countryCode": "KG",
+      "countryNameKo": "키르기스스탄",
+      "countryNameEn": "Kyrgyzstan",
+      "primaryLanguageCode": "ky",
+      "supportedLanguageCodes": ["ky", "ru", "en", "ko"],
+      "displayOrder": 120
+    },
+    {
+      "countryCode": "NP",
+      "countryNameKo": "네팔",
+      "countryNameEn": "Nepal",
+      "primaryLanguageCode": "ne",
+      "supportedLanguageCodes": ["ne", "en", "ko"],
+      "displayOrder": 130
+    },
+    {
+      "countryCode": "MM",
+      "countryNameKo": "미얀마",
+      "countryNameEn": "Myanmar",
+      "primaryLanguageCode": "my",
+      "supportedLanguageCodes": ["my", "en", "ko"],
+      "displayOrder": 140
+    },
+    {
+      "countryCode": "TL",
+      "countryNameKo": "동티모르",
+      "countryNameEn": "Timor-Leste",
+      "primaryLanguageCode": "tet",
+      "supportedLanguageCodes": ["tet", "pt", "en", "ko"],
+      "displayOrder": 150
+    },
+    {
+      "countryCode": "LA",
+      "countryNameKo": "라오스",
+      "countryNameEn": "Laos",
+      "primaryLanguageCode": "lo",
+      "supportedLanguageCodes": ["lo", "en", "ko"],
+      "displayOrder": 160
+    },
+    {
+      "countryCode": "TJ",
+      "countryNameKo": "타지키스탄",
+      "countryNameEn": "Tajikistan",
+      "primaryLanguageCode": "tg",
+      "supportedLanguageCodes": ["tg", "ru", "en", "ko"],
+      "displayOrder": 170
+    }
+  ]
+}
