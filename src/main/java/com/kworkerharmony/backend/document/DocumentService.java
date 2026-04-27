@@ -1,5 +1,7 @@
 package com.kworkerharmony.backend.document;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kworkerharmony.backend.cases.domain.CaseRepository;
 import com.kworkerharmony.backend.cases.entity.Case;
 import com.kworkerharmony.backend.document.config.DocumentBlockchainProperties;
@@ -13,6 +15,12 @@ import com.kworkerharmony.backend.document.dto.response.DocumentSignatureRespons
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort;
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort.AnchorCommand;
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort.AnchorReceipt;
+import com.kworkerharmony.backend.document.port.DocumentAnalysisPort;
+import com.kworkerharmony.backend.document.port.DocumentAnalysisPort.AnalysisCommand;
+import com.kworkerharmony.backend.document.port.DocumentAnalysisPort.CaseContextPayload;
+import com.kworkerharmony.backend.document.port.DocumentAnalysisPort.ChecklistContextPayload;
+import com.kworkerharmony.backend.document.port.DocumentAnalysisPort.DocumentPayload;
+import com.kworkerharmony.backend.document.port.DocumentAnalysisPort.OutputRequestPayload;
 import com.kworkerharmony.backend.document.port.DocumentHashPort;
 import com.kworkerharmony.backend.document.port.FileStoragePort;
 import com.kworkerharmony.backend.document.port.FileStoragePort.StoredFile;
@@ -30,6 +38,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +59,8 @@ public class DocumentService {
     private final DocumentBlockchainProperties blockchainProperties;
     private final DocumentTypedDataFactory typedDataFactory;
     private final DocumentAnchorRelayerPort anchorRelayerPort;
+    private final DocumentAnalysisPort documentAnalysisPort;
+    private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
     public List<DocumentResponse> getDocuments(String caseId, UserPrincipal userPrincipal) {
@@ -262,15 +273,32 @@ public class DocumentService {
     @Transactional
     public DocumentAnalysisResponse analyzeDocument(String documentId, UserPrincipal userPrincipal) {
         Document document = getAccessibleDocument(documentId, userPrincipal);
+        validateDocumentCanBeAnalyzed(document);
+        Case caseEntity = caseRepository.findById(document.getCaseId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Case not found"));
+        User user = getUser(userPrincipal.getId());
         DocumentAnalysisResult result = documentAnalysisResultRepository.findByDocumentId(document.getId())
                 .orElseGet(() -> documentAnalysisResultRepository.save(new DocumentAnalysisResult(document.getId())));
-        result.markCompleted(
-                document.getSha256Hash(),
-                DocumentCrypto.sha256Hex("analysis|" + document.getId() + "|" + document.getSha256Hash()),
-                "Placeholder analysis result for document " + document.getId(),
-                "[]"
-        );
-        document.markAnalyzed();
+
+        AnalysisCommand command = buildAnalysisCommand(document, caseEntity, user);
+        String requestHash = DocumentCrypto.sha256Hex(toJson(command));
+        try {
+            DocumentAnalysisPort.AnalysisResult analysis = documentAnalysisPort.analyze(command);
+            String resultHash = DocumentCrypto.sha256Hex(analysis.responseBodyJson());
+            if (analysis.status() == DocumentAnalysisStatus.COMPLETED) {
+                result.markCompleted(
+                        requestHash,
+                        resultHash,
+                        analysis.summary(),
+                        analysis.riskFlagsJson()
+                );
+                document.markAnalyzed();
+            } else {
+                result.markFailed(analysis.summary());
+            }
+        } catch (RuntimeException ex) {
+            result.markFailed(truncate(ex.getMessage(), 1000));
+        }
         return DocumentAnalysisResponse.from(result);
     }
 
@@ -313,9 +341,55 @@ public class DocumentService {
         if (document.getSha256Hash() == null || document.getSha256Hash().isBlank()) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document hash is required");
         }
-        if (!List.of(DocumentStatus.HASHED, DocumentStatus.SIGNATURE_REQUESTED, DocumentStatus.SIGNED)
+        if (!List.of(DocumentStatus.HASHED, DocumentStatus.SIGNATURE_REQUESTED, DocumentStatus.SIGNED, DocumentStatus.ANALYZED)
                 .contains(document.getStatus())) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document is not ready for signature");
+        }
+    }
+
+    private void validateDocumentCanBeAnalyzed(Document document) {
+        if (document.getSha256Hash() == null || document.getSha256Hash().isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document hash is required");
+        }
+    }
+
+    private AnalysisCommand buildAnalysisCommand(Document document, Case caseEntity, User user) {
+        String languageCode = user.getLanguageCode() == null || user.getLanguageCode().isBlank()
+                ? "ko"
+                : user.getLanguageCode();
+        return new AnalysisCommand(
+                UUID.randomUUID().toString(),
+                new DocumentPayload(
+                        document.getId(),
+                        document.getCaseId(),
+                        document.getSha256Hash(),
+                        document.getDocumentType(),
+                        document.getIssuedAt(),
+                        document.getExpiresAt()
+                ),
+                new CaseContextPayload(
+                        caseEntity.getIndustry(),
+                        caseEntity.getRegion(),
+                        languageCode,
+                        "FOREIGN_WORKER"
+                ),
+                new ChecklistContextPayload(
+                        "MOEL_FOREIGN_WORKER_EMPLOYMENT_MANAGEMENT",
+                        List.of()
+                ),
+                new OutputRequestPayload(
+                        languageCode,
+                        true,
+                        true
+                )
+        );
+    }
+
+    private String toJson(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (JsonProcessingException ex) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to serialize analysis payload");
         }
     }
 

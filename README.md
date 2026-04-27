@@ -94,7 +94,7 @@ src/main/java/com/kworkerharmony/backend
 - 실제 파일 저장과 SHA-256 해시 생성은 동작합니다.
 - 지갑 서명 요청/제출 API와 Stub 앵커링 API는 동작합니다.
 - 실제 Sepolia 트랜잭션 전송은 아직 구현하지 않았습니다.
-- 오프체인 분석 API는 placeholder이며 실제 OCR/AI 호출은 아직 구현하지 않았습니다.
+- 오프체인 분석 API는 Spring 포트 구조로 분리되어 있으며, `DOCUMENT_ANALYSIS_AI_ENABLED=true`일 때 외부 AI 분석 HTTP API를 호출합니다.
 - 오프체인 분석에서 원문 파일과 필터링 전 OCR 결과는 AI 레이어로 전달하지 않으며, 세부 입력 규격은 `docs/offchain-analysis-contract.md`를 따릅니다.
 - 정적 테스트 페이지는 MVP 검증용이며, 실제 제품 UX에서는 업로드 후 분석 자동 시작과 서명 후 앵커링 자동 진행으로 분리하는 것이 좋습니다.
 
@@ -152,6 +152,11 @@ Swagger UI:
 - `REDIS_PORT`
 - `JWT_SECRET`
 - `DOCUMENT_STORAGE_ROOT`
+- `DOCUMENT_ANALYSIS_AI_ENABLED`
+- `DOCUMENT_ANALYSIS_AI_BASE_URL`
+- `DOCUMENT_ANALYSIS_AI_ENDPOINT_PATH`
+- `DOCUMENT_ANALYSIS_AI_HEALTH_PATH`
+- `DOCUMENT_ANALYSIS_AI_HEALTH_TIMEOUT_MILLIS`
 - `DOCUMENT_CHAIN_ID`
 - `DOCUMENT_CONTRACT_ADDRESS`
 - `DOCUMENT_DOMAIN_NAME`
@@ -159,6 +164,17 @@ Swagger UI:
 - `DOCUMENT_SIGNATURE_TTL_SECONDS`
 
 기본 문서 저장 경로는 프로젝트 루트 기준 `./storage/documents`입니다.
+AI 분석 서비스는 기본적으로 비활성화되어 로컬 Stub 응답을 반환합니다. 실제 AI 서버를 붙일 때는 예를 들어 아래처럼 실행합니다.
+
+```bash
+DOCUMENT_ANALYSIS_AI_ENABLED=true \
+DOCUMENT_ANALYSIS_AI_BASE_URL='http://localhost:8000' \
+DOCUMENT_ANALYSIS_AI_ENDPOINT_PATH='/document-analysis' \
+DOCUMENT_ANALYSIS_AI_HEALTH_PATH='/health' \
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+프론트에서는 `GET /api/ai/health`로 AI 연결 상태를 확인합니다. AI 분석이 비활성화된 로컬 환경에서는 `STUB`, 실제 AI 서버를 붙인 환경에서는 `HTTP` 상태를 반환합니다.
 
 ## 테스트
 
@@ -177,7 +193,7 @@ Swagger UI:
 - 업로드 파일이 `storage/documents` 아래 저장되는지
 - 업로드 응답에서 `stored=true`, `status=HASHED`가 반환되는지
 - `document-upload-test.html`에서 `Create Signature Request`, `Connect Wallet`, `Sign EIP-712`, `Submit Signature`, `Anchor Document`, `Get Anchor` 순서로 Stub 앵커링 결과가 반환되는지
-- `Create Analysis`로 placeholder 분석 결과가 저장되는지
+- `Create Analysis`로 AI 분석 결과 또는 로컬 Stub 분석 결과가 저장되는지
 
 ## 예시 시나리오
 

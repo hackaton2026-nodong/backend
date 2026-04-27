@@ -70,6 +70,10 @@ public class DocumentAnalysisResult extends BaseEntity {
 
     public void markFailed(String summary) {
         this.status = DocumentAnalysisStatus.FAILED;
+        this.extractedTextHash = null;
+        this.analysisResultHash = null;
         this.summary = summary;
+        this.riskFlags = "[]";
+        this.analyzedAt = LocalDateTime.now();
     }
 }

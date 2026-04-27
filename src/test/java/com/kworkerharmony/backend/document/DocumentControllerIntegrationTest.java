@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -122,10 +123,99 @@ class DocumentControllerIntegrationTest {
     }
 
     @Test
+    void createAnalysisCallsAnalysisPortAndPersistsResult() throws Exception {
+        Enterprise company = enterpriseRepository.save(new Enterprise(
+                "Harmony Co",
+                "123-45-67890",
+                "Manufacturing",
+                "KR",
+                "ko",
+                EnterpriseStatus.ACTIVE
+        ));
+        User employer = userRepository.save(new User(
+                "employer@example.com",
+                "encoded",
+                "Employer",
+                Role.EMPLOYER,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        User worker = userRepository.save(new User(
+                "worker@example.com",
+                "encoded",
+                "Worker",
+                Role.WORKER,
+                UserType.WORKER,
+                UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        Case caseEntity = caseRepository.save(new Case(
+                company,
+                employer,
+                worker,
+                CaseStatus.ACTIVE,
+                "Manufacturing",
+                "Seoul"
+        ));
+
+        String accessToken = jwtProvider.generateAccessToken(employer);
+        String responseBody = mockMvc.perform(multipart("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .file(new MockMultipartFile("file", "contract.pdf", "application/pdf", "sample-pdf".getBytes()))
+                        .param("documentType", DocumentType.EMPLOYMENT_CONTRACT.name())
+                        .param("issuedAt", "2026-01-01")
+                        .param("expiresAt", "2027-01-01")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String documentId = objectMapper.readTree(responseBody).path("data").path("id").asText();
+
+        mockMvc.perform(post("/api/documents/{documentId}/analysis", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.documentId").value(documentId))
+                .andExpect(jsonPath("$.data.status").value(DocumentAnalysisStatus.COMPLETED.name()))
+                .andExpect(jsonPath("$.data.extractedTextHash").isNotEmpty())
+                .andExpect(jsonPath("$.data.analysisResultHash").isNotEmpty())
+                .andExpect(jsonPath("$.data.summary").isNotEmpty())
+                .andExpect(jsonPath("$.data.riskFlags").value(org.hamcrest.Matchers.containsString("AI_ANALYSIS_STUB")));
+
+        mockMvc.perform(get("/api/documents/{documentId}/analysis", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.documentId").value(documentId))
+                .andExpect(jsonPath("$.data.status").value(DocumentAnalysisStatus.COMPLETED.name()));
+
+        mockMvc.perform(get("/api/documents/{documentId}/signature-request", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.documentId").value(documentId));
+    }
+
+    @Test
     void uploadTestPageIsPubliclyAccessible() throws Exception {
         mockMvc.perform(get("/document-upload-test.html"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Document Upload Test")));
+    }
+
+    @Test
+    void aiHealthIsPubliclyAccessible() throws Exception {
+        mockMvc.perform(get("/api/ai/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.mode").value("STUB"))
+                .andExpect(jsonPath("$.data.status").value("AVAILABLE"))
+                .andExpect(jsonPath("$.data.available").value(true));
     }
 
     @Test

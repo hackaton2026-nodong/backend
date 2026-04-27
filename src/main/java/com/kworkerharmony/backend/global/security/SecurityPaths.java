@@ -5,6 +5,7 @@ public final class SecurityPaths {
     public static final String[] PUBLIC_URLS = {
             "/auth/**",
             "/api/auth/**",
+            "/api/ai/health",
             "/document-upload-test.html",
             "/dashboard-api-preview.html",
             "/v3/api-docs/**",

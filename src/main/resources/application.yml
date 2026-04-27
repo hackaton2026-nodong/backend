@@ -35,6 +35,13 @@ jwt:
 app:
   document:
     storage-root: ${DOCUMENT_STORAGE_ROOT:./storage/documents}
+    analysis:
+      ai:
+        enabled: ${DOCUMENT_ANALYSIS_AI_ENABLED:false}
+        base-url: ${DOCUMENT_ANALYSIS_AI_BASE_URL:http://localhost:8000}
+        endpoint-path: ${DOCUMENT_ANALYSIS_AI_ENDPOINT_PATH:/document-analysis}
+        health-path: ${DOCUMENT_ANALYSIS_AI_HEALTH_PATH:/health}
+        health-timeout-millis: ${DOCUMENT_ANALYSIS_AI_HEALTH_TIMEOUT_MILLIS:2000}
     blockchain:
       chain-id: ${DOCUMENT_CHAIN_ID:11155111}
       contract-address: ${DOCUMENT_CONTRACT_ADDRESS:0x0000000000000000000000000000000000000000}
