@@ -9,7 +9,7 @@ public record CorsProperties(
         List<String> allowedMethods,
         List<String> allowedHeaders,
         List<String> exposedHeaders,
-        boolean allowCredentials,
+        Boolean allowCredentials,
         long maxAgeSeconds
 ) {
 
@@ -30,6 +30,9 @@ public record CorsProperties(
         }
         if (exposedHeaders == null) {
             exposedHeaders = List.of();
+        }
+        if (allowCredentials == null) {
+            allowCredentials = true;
         }
         if (maxAgeSeconds <= 0) {
             maxAgeSeconds = 3600L;
