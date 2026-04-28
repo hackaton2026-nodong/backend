@@ -1,9 +1,13 @@
 package com.kworkerharmony.backend.document;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +21,7 @@ import com.kworkerharmony.backend.enterprise.EnterpriseRepository;
 import com.kworkerharmony.backend.enterprise.EnterpriseStatus;
 import com.kworkerharmony.backend.global.security.JwtProvider;
 import com.kworkerharmony.backend.global.security.RedisTokenRepository;
+import com.kworkerharmony.backend.document.port.DocumentOcrPort;
 import com.kworkerharmony.backend.user.Role;
 import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserRepository;
@@ -28,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +63,9 @@ class DocumentControllerIntegrationTest {
 
     @MockitoBean
     private RedisTokenRepository redisTokenRepository;
+
+    @MockitoBean
+    private DocumentOcrPort documentOcrPort;
 
     @BeforeEach
     void setUp() {
@@ -126,6 +135,13 @@ class DocumentControllerIntegrationTest {
         mockMvc.perform(get("/document-upload-test.html"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Document Upload Test")));
+    }
+
+    @Test
+    void extractionTestPageIsPubliclyAccessible() throws Exception {
+        mockMvc.perform(get("/extraction-test.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("OCR Extraction Test")));
     }
 
     @Test
@@ -468,5 +484,205 @@ class DocumentControllerIntegrationTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("AUTH_403"));
+    }
+
+    @Test
+    void createGetAndCorrectExtractionStoresOnlySanitizedPayload() throws Exception {
+        Enterprise company = enterpriseRepository.save(new Enterprise(
+                "Harmony Co",
+                "123-45-67890",
+                "Manufacturing",
+                "KR",
+                "ko",
+                EnterpriseStatus.ACTIVE
+        ));
+        User employer = userRepository.save(new User(
+                "employer@example.com",
+                "encoded",
+                "Employer",
+                Role.EMPLOYER,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        User worker = userRepository.save(new User(
+                "worker@example.com",
+                "encoded",
+                "Worker",
+                Role.WORKER,
+                UserType.WORKER,
+                UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        Case caseEntity = caseRepository.save(new Case(
+                company,
+                employer,
+                worker,
+                CaseStatus.ACTIVE,
+                "Manufacturing",
+                "Seoul"
+        ));
+        String accessToken = jwtProvider.generateAccessToken(employer);
+
+        String uploadResponse = mockMvc.perform(multipart("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .file(new MockMultipartFile("file", "contract.pdf", "application/pdf", "sample-pdf".getBytes()))
+                        .param("documentType", DocumentType.EMPLOYMENT_CONTRACT.name())
+                        .param("issuedAt", "2026-01-01")
+                        .param("expiresAt", "2027-01-01")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String documentId = objectMapper.readTree(uploadResponse).path("data").path("id").asText();
+
+        String ocrRequest = """
+                {
+                  "ocrResult": {
+                    "layoutParsingResults": [
+                      {
+                        "markdown": {
+                          "text": "## 표준근로계약서 Standard Labor Contract\\n한국제조 031-555-1290 김민수 Identification number 214-86-73951 MARIA LUZ SANTOS 1998-07-21 26년 06월 01일 ~ 27년 05월 31일 - 수습기간: [√] 활용(입국일부터 [√] 1개월) - 업종: 제조업 - 사업내용: 자동차 금속부품 생산 - 직무내용: 금속부품 조립, 품질검사, 포장작업 08시 30분 ~ 17시 30분 -1일 평균 시간외 근로시간: 1시간 (사업장 사정에 따라 변동 가능: 2시간 이내) 5. 휴게시간 1일 60분 6. 휴일 [√]일요일 [√]공휴일([√]유급 [ ]무급) [√]매주 토요일 7. 임금 1) 월 통상임금 ( 2,300,000 )원- 기본급[ 월급 ] ( 2,150,000 )원- 고정적 수당: ( 생산 수당: 100,000 )원), ( 식대 수당: 50,000 )원)- 상여금 ( 0 )원) 8) 임금지급일 매월 ( 10 )일 9) 지급방법 [ ]직접 지급, [ √ ]통장 임금 1) 숙박시설 제공- 숙박시설 제공 여부: [ √ ]제공 [ ]미제공 기타주택형태 시설( 기숙사 ))10) 숙박시설 제공 시 근로자 부담금액: 매월 150,000 원2) 식사 제공- 식사 제공 여부: 제공([ ]조식, [ √ ]중식, [ ]석식), [ ]미제공- 식사 제공시 근로자 부담금액:매월 0 )원 2026.06.01. 사용자:김민수 근로자 : MARIA LUZ SANTOS"
+                        }
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        mockMvc.perform(post("/api/documents/{documentId}/extraction/paddle-ocr", documentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(ocrRequest)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value(DocumentExtractionStatus.EXTRACTED.name()))
+                .andExpect(jsonPath("$.data.sourceEngine").value("PADDLE_OCR"))
+                .andExpect(jsonPath("$.data.sourceResultHash").isNotEmpty())
+                .andExpect(jsonPath("$.data.extractedPayload.contractTerms.wage.amount").value(2300000))
+                .andExpect(jsonPath("$.data.extractedPayload.contractTerms.workingHours.startTime").value("08:30"))
+                .andExpect(jsonPath("$.data.extractedPayload.contractTerms.dormitory.deductionAmount").value(150000))
+                .andExpect(jsonPath("$.data.extractedPayload.layoutParsingResults").doesNotExist())
+                .andExpect(jsonPath("$.data.extractedPayload.markdown").doesNotExist());
+
+        mockMvc.perform(get("/api/documents/{documentId}/extraction", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.extractedPayload.contractTerms.wage.paymentDay").value(10));
+
+        String correctionRequest = """
+                {
+                  "correctedPayload": {
+                    "schemaVersion": "employment-contract-v1",
+                    "contractTerms": {
+                      "wage": {
+                        "status": "FOUND",
+                        "amount": 2400000,
+                        "currency": "KRW",
+                        "period": "MONTHLY"
+                      }
+                    }
+                  }
+                }
+                """;
+
+        mockMvc.perform(put("/api/documents/{documentId}/extraction/correction", documentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(correctionRequest)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value(DocumentExtractionStatus.CORRECTED.name()))
+                .andExpect(jsonPath("$.data.correctedPayload.contractTerms.wage.amount").value(2400000));
+    }
+
+    @Test
+    void uploadCreatesPendingExtractionAndCallbackStoresExtractedPayload() throws Exception {
+        Enterprise company = enterpriseRepository.save(new Enterprise(
+                "Harmony Co",
+                "123-45-67890",
+                "Manufacturing",
+                "KR",
+                "ko",
+                EnterpriseStatus.ACTIVE
+        ));
+        User employer = userRepository.save(new User(
+                "employer-callback@example.com",
+                "encoded",
+                "Employer",
+                Role.EMPLOYER,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        User worker = userRepository.save(new User(
+                "worker-callback@example.com",
+                "encoded",
+                "Worker",
+                Role.WORKER,
+                UserType.WORKER,
+                UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        Case caseEntity = caseRepository.save(new Case(
+                company,
+                employer,
+                worker,
+                CaseStatus.ACTIVE,
+                "Manufacturing",
+                "Seoul"
+        ));
+        String accessToken = jwtProvider.generateAccessToken(employer);
+
+        String uploadResponse = mockMvc.perform(multipart("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .file(new MockMultipartFile("file", "contract.pdf", "application/pdf", "sample-pdf".getBytes()))
+                        .param("documentType", DocumentType.EMPLOYMENT_CONTRACT.name())
+                        .param("issuedAt", "2026-01-01")
+                        .param("expiresAt", "2027-01-01")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String documentId = objectMapper.readTree(uploadResponse).path("data").path("id").asText();
+
+        verify(documentOcrPort).requestOcr(argThat(command ->
+                command.documentId().equals(documentId)
+                        && command.caseId().equals(caseEntity.getId())
+                        && command.documentType().equals(DocumentType.EMPLOYMENT_CONTRACT.name())
+                        && command.callbackUrl().contains("/api/internal/documents/" + documentId + "/ocr-result")
+        ));
+
+        mockMvc.perform(get("/api/documents/{documentId}/extraction", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value(DocumentExtractionStatus.PENDING.name()));
+
+        String callbackRequest = """
+                {
+                  "ocrResult": {
+                    "layoutParsingResults": [
+                      {
+                        "markdown": {
+                          "text": "표준근로계약서 26년 06월 01일 ~ 27년 05월 31일 08시 30분 ~ 17시 30분 5. 휴게시간 1일 60분 월 통상임금 ( 2,300,000 )원"
+                        }
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        mockMvc.perform(post("/api/internal/documents/{documentId}/ocr-result", documentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(callbackRequest))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value(DocumentExtractionStatus.EXTRACTED.name()))
+                .andExpect(jsonPath("$.data.extractedPayload.contractTerms.wage.amount").value(2300000));
     }
 }

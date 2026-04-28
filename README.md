@@ -94,7 +94,8 @@ src/main/java/com/kworkerharmony/backend
 - 실제 파일 저장과 SHA-256 해시 생성은 동작합니다.
 - 지갑 서명 요청/제출 API와 Stub 앵커링 API는 동작합니다.
 - 실제 Sepolia 트랜잭션 전송은 아직 구현하지 않았습니다.
-- 오프체인 분석 API는 placeholder이며 실제 OCR/AI 호출은 아직 구현하지 않았습니다.
+- `local` 프로필은 Docker Compose의 OCR mock worker로 업로드 후 OCR callback과 필드 추출 저장까지 검증할 수 있습니다.
+- 오프체인 분석 API는 placeholder이며 실제 AI 호출은 아직 구현하지 않았습니다.
 - 오프체인 분석에서 원문 파일과 필터링 전 OCR 결과는 AI 레이어로 전달하지 않으며, 세부 입력 규격은 `docs/offchain-analysis-contract.md`를 따릅니다.
 - 정적 테스트 페이지는 MVP 검증용이며, 실제 제품 UX에서는 업로드 후 분석 자동 시작과 서명 후 앵커링 자동 진행으로 분리하는 것이 좋습니다.
 
@@ -106,13 +107,15 @@ src/main/java/com/kworkerharmony/backend
 docker compose up -d
 ```
 
+Compose에는 MySQL, Redis, 로컬 검증용 OCR mock worker가 포함됩니다. OCR mock worker는 `http://localhost:9000/ocr/jobs`에서 요청을 받고 백엔드 callback API로 샘플 PaddleOCR JSON을 전송합니다.
+
 백엔드 실행:
 
 ```bash
 ./gradlew bootRun --args='--spring.profiles.active=local'
 ```
 
-`local` 프로필의 기본값은 Docker Compose 기준으로 맞춰져 있어 별도 환경변수 없이 실행 가능합니다.
+`local` 프로필의 기본값은 Docker Compose 기준으로 맞춰져 있어 별도 환경변수 없이 실행 가능합니다. 실제 PaddleOCR worker를 붙일 때만 `DOCUMENT_OCR_ENDPOINT`, `DOCUMENT_OCR_CALLBACK_TOKEN`, `DOCUMENT_OCR_CALLBACK_BASE_URL`을 재정의하면 됩니다.
 로컬 MySQL 또는 다른 접속 정보를 사용할 경우 아래 환경 변수를 본인 환경에 맞게 지정하면 됩니다.
 
 ```bash
@@ -135,6 +138,7 @@ Swagger UI:
 문서 업로드 테스트 페이지:
 
 - `http://localhost:8080/document-upload-test.html`
+- `http://localhost:8080/extraction-test.html`
 - `http://localhost:8080/dashboard-api-preview.html`
 
 로컬 시드 계정:
@@ -155,6 +159,10 @@ Swagger UI:
 - `REDIS_PORT`
 - `JWT_SECRET`
 - `DOCUMENT_STORAGE_ROOT`
+- `DOCUMENT_OCR_ENABLED`
+- `DOCUMENT_OCR_ENDPOINT`
+- `DOCUMENT_OCR_CALLBACK_TOKEN`
+- `DOCUMENT_OCR_CALLBACK_BASE_URL`
 - `DOCUMENT_CHAIN_ID`
 - `DOCUMENT_CONTRACT_ADDRESS`
 - `DOCUMENT_DOMAIN_NAME`
@@ -185,7 +193,7 @@ Swagger UI:
 ## 예시 시나리오
 
 1. `docker compose up -d`
-2. `./gradlew bootRun`
+2. `./gradlew bootRun --args='--spring.profiles.active=local'`
 3. Swagger에서 `POST /api/auth/signup` 호출
 
 ```json
@@ -226,10 +234,11 @@ Swagger UI:
 }
 ```
 
-6. `http://localhost:8080/document-upload-test.html` 접속 후 로그인 응답의 `accessToken`, 케이스 생성 응답의 `data.id`를 넣고 파일 1건 업로드
-7. `storage/documents` 아래 실제 파일 생성 여부 확인
-8. MetaMask를 Sepolia로 맞춘 뒤 `Create Signature Request` -> `Connect Wallet` -> `Sign EIP-712` -> `Submit Signature` -> `Anchor Document` -> `Get Anchor` 순서로 Stub 앵커링을 확인
-9. `Create Analysis`로 placeholder 분석 저장 확인
+6. `http://localhost:8080/extraction-test.html` 접속 후 근로계약서 PDF만 선택하고 업로드
+7. 로컬 OCR mock worker callback 이후 `Refresh Extraction`으로 추출 필드와 sanitized JSON 저장 결과 확인
+8. `storage/documents` 아래 실제 파일 생성 여부 확인
+9. MetaMask를 Sepolia로 맞춘 뒤 `document-upload-test.html`에서 `Create Signature Request` -> `Connect Wallet` -> `Sign EIP-712` -> `Submit Signature` -> `Anchor Document` -> `Get Anchor` 순서로 Stub 앵커링을 확인
+10. `Create Analysis`로 OCR 추출 payload hash 기반 placeholder 분석 저장 확인
 
 ## 참고 문서
 

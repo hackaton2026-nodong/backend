@@ -173,6 +173,27 @@ CREATE TABLE IF NOT EXISTS document_analysis_results (
         FOREIGN KEY (document_id) REFERENCES documents (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS document_extractions (
+    id VARCHAR(36) NOT NULL,
+    document_id VARCHAR(36) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    schema_version VARCHAR(100) NOT NULL,
+    source_engine VARCHAR(100) NOT NULL,
+    source_result_hash VARCHAR(64) NULL,
+    extracted_payload TEXT NULL,
+    corrected_payload TEXT NULL,
+    ai_payload_hash VARCHAR(64) NULL,
+    review_required_reason VARCHAR(1000) NULL,
+    extracted_at DATETIME(6) NULL,
+    corrected_at DATETIME(6) NULL,
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_document_extractions_document (document_id),
+    CONSTRAINT fk_document_extractions_document
+        FOREIGN KEY (document_id) REFERENCES documents (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS alerts (
     id VARCHAR(36) NOT NULL,
     user_id BIGINT NOT NULL,

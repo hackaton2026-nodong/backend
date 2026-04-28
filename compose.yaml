@@ -31,6 +31,27 @@ services:
       timeout: 3s
       retries: 20
 
+  ocr-mock:
+    image: python:3.12-alpine
+    container_name: backend-ocr-mock
+    ports:
+      - "9000:9000"
+    environment:
+      OCR_MOCK_PORT: 9000
+      OCR_CALLBACK_TOKEN: local-ocr-token
+      OCR_BACKEND_BASE_URL: http://host.docker.internal:8080
+    volumes:
+      - ./docker/ocr-mock:/app:ro
+    working_dir: /app
+    command: ["python", "mock_ocr_worker.py"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/health', timeout=2).read()"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
 volumes:
   mysql-data:
   redis-data:

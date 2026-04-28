@@ -220,6 +220,31 @@ Enum: `DocumentAnalysisStatus = PENDING, COMPLETED, FAILED`
 
 필터링 전 raw OCR text 저장 테이블은 만들지 않는다. 원문 파일, `storageKey`, 필터링 전 OCR 전문은 AI request와 로그에 포함하지 않는다.
 
+### `document_extractions`
+
+OCR 결과에서 근로계약서 분석에 필요한 필드만 추출해 저장하는 테이블이다. PaddleOCR 원본 JSON, raw markdown, raw table HTML, raw OCR 전문은 저장하지 않는다.
+
+| 컬럼 | 타입 | NULL | 키 | 설명 |
+| --- | --- | --- | --- | --- |
+| `id` | `VARCHAR(36)` | NO | PK | UUID 문자열 |
+| `document_id` | `VARCHAR(36)` | NO | UNIQUE, FK | `documents.id` |
+| `status` | `VARCHAR(50)` | NO |  | `DocumentExtractionStatus` |
+| `schema_version` | `VARCHAR(100)` | NO |  | 추출 payload 스키마 버전 |
+| `source_engine` | `VARCHAR(100)` | NO |  | OCR/parser 엔진명. 예: `PADDLE_OCR` |
+| `source_result_hash` | `VARCHAR(64)` | YES |  | 저장하지 않는 원본 OCR JSON의 canonical hash |
+| `extracted_payload` | `TEXT` | YES |  | 민감정보 제거 후 구조화한 계약 필드 JSON |
+| `corrected_payload` | `TEXT` | YES |  | 사용자 보정 후 최종 계약 필드 JSON |
+| `ai_payload_hash` | `VARCHAR(64)` | YES |  | AI 전달 기준 payload hash |
+| `review_required_reason` | `VARCHAR(1000)` | YES |  | 보정 필요 사유 |
+| `extracted_at` | `DATETIME(6)` | YES |  | 추출 완료 시각 |
+| `corrected_at` | `DATETIME(6)` | YES |  | 보정 완료 시각 |
+| `created_at` | `DATETIME(6)` | NO |  | 생성 시각 |
+| `updated_at` | `DATETIME(6)` | NO |  | 수정 시각 |
+
+Enum: `DocumentExtractionStatus = PENDING, EXTRACTED, NEEDS_REVIEW, CORRECTED, FAILED`
+
+AI 요청은 `corrected_payload`가 있으면 이를 우선 사용하고, 없으면 `extracted_payload`를 사용한다. 두 payload 모두 이름, 전화번호, 이메일, 사업자등록번호, 상세주소, 본국 주소, 원문 OCR 전문, `storageKey`를 포함하면 안 된다.
+
 ### `alerts`
 
 사용자 알림 테이블.
@@ -788,7 +813,7 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 
 #### `POST /documents/{documentId}/analysis`
 
-인증 필요. 현재는 placeholder 오프체인 분석 결과를 생성 또는 갱신한다.
+인증 필요. 오프체인 분석 결과를 생성 또는 갱신한다. `document_extractions.corrected_payload`가 있으면 이를 우선 사용하고, 없으면 `extracted_payload`의 hash를 분석 입력 hash로 사용한다. 현재 AI 호출은 placeholder다.
 
 응답 데이터: `DocumentAnalysisResponse`
 
@@ -810,6 +835,61 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 인증 필요. 저장된 분석 결과를 조회한다.
 
 응답 데이터: `DocumentAnalysisResponse`
+
+#### `POST /documents/{documentId}/extraction/paddle-ocr`
+
+인증 필요. 개발/수동 검증용 API다. PaddleOCR 원본 JSON을 받아 근로계약서 분석에 필요한 필드만 추출한다. 제품 플로우에서는 업로드 후 OCR worker가 내부 callback API로 결과를 제출한다.
+
+요청:
+
+```json
+{
+  "ocrResult": {
+    "layoutParsingResults": []
+  }
+}
+```
+
+응답 데이터: `DocumentExtractionResponse`
+
+#### `POST /internal/documents/{documentId}/ocr-result`
+
+OCR worker callback API다. JWT 인증 대신 `X-OCR-Callback-Token` 헤더를 `DOCUMENT_OCR_CALLBACK_TOKEN`과 비교한다. 토큰 설정값이 비어 있으면 로컬 개발 편의를 위해 토큰 검증을 생략한다.
+
+요청:
+
+```json
+{
+  "ocrResult": {
+    "layoutParsingResults": []
+  }
+}
+```
+
+응답 데이터: `DocumentExtractionResponse`
+
+#### `GET /documents/{documentId}/extraction`
+
+인증 필요. 저장된 추출/보정 payload를 조회한다. 응답에는 정제된 JSON만 포함되며 raw OCR 결과는 포함되지 않는다.
+
+응답 데이터: `DocumentExtractionResponse`
+
+#### `PUT /documents/{documentId}/extraction/correction`
+
+인증 필요. 사용자가 보정한 최종 계약 필드 JSON을 저장한다. raw OCR 필드명, 이메일, 전화번호, 사업자등록번호 등 민감 식별자가 포함되면 거부한다.
+
+요청:
+
+```json
+{
+  "correctedPayload": {
+    "schemaVersion": "employment-contract-v1",
+    "contractTerms": {}
+  }
+}
+```
+
+응답 데이터: `DocumentExtractionResponse`
 
 ### Checklists
 

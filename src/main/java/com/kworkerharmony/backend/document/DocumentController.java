@@ -1,9 +1,13 @@
 package com.kworkerharmony.backend.document;
 
 import com.kworkerharmony.backend.document.dto.request.AnchorDocumentRequest;
+import com.kworkerharmony.backend.document.dto.request.CorrectDocumentExtractionRequest;
+import com.kworkerharmony.backend.document.dto.request.CreatePaddleOcrExtractionRequest;
+import com.kworkerharmony.backend.document.dto.request.ReceivePaddleOcrResultRequest;
 import com.kworkerharmony.backend.document.dto.request.SubmitDocumentSignatureRequest;
 import com.kworkerharmony.backend.document.dto.response.DocumentAnalysisResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentAnchorResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentExtractionResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentSignatureRequestResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentSignatureResponse;
@@ -16,9 +20,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -115,5 +121,40 @@ public class DocumentController {
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
         return ApiResponse.success(documentService.getAnalysis(documentId, userPrincipal));
+    }
+
+    @PostMapping("/documents/{documentId}/extraction/paddle-ocr")
+    public ApiResponse<DocumentExtractionResponse> createPaddleOcrExtraction(
+            @PathVariable String documentId,
+            @Valid @RequestBody CreatePaddleOcrExtractionRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(documentService.createPaddleOcrExtraction(documentId, request, userPrincipal));
+    }
+
+    @GetMapping("/documents/{documentId}/extraction")
+    public ApiResponse<DocumentExtractionResponse> getExtraction(
+            @PathVariable String documentId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(documentService.getExtraction(documentId, userPrincipal));
+    }
+
+    @PutMapping("/documents/{documentId}/extraction/correction")
+    public ApiResponse<DocumentExtractionResponse> correctExtraction(
+            @PathVariable String documentId,
+            @Valid @RequestBody CorrectDocumentExtractionRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(documentService.correctExtraction(documentId, request, userPrincipal));
+    }
+
+    @PostMapping("/internal/documents/{documentId}/ocr-result")
+    public ApiResponse<DocumentExtractionResponse> receivePaddleOcrResult(
+            @PathVariable String documentId,
+            @Valid @RequestBody ReceivePaddleOcrResultRequest request,
+            @RequestHeader(name = "X-OCR-Callback-Token", required = false) String callbackToken
+    ) {
+        return ApiResponse.success(documentService.receivePaddleOcrResult(documentId, request, callbackToken));
     }
 }
