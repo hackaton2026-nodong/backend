@@ -1,0 +1,1962 @@
+﻿[
+    {
+        "region_cd":  "27260",
+        "name_ko":  "대구 수성구",
+        "name_en":  "Suseong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大邱城",
+        "name_ru":  "Сусон-гу"
+    },
+    {
+        "region_cd":  "27290",
+        "name_ko":  "대구 달서구",
+        "name_en":  "Dalseo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大邱西",
+        "name_ru":  "Далсео-гу"
+    },
+    {
+        "region_cd":  "27710",
+        "name_ko":  "대구 달성군",
+        "name_en":  "Dalseong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "大邱城郡",
+        "name_ru":  "Далсон-гун"
+    },
+    {
+        "region_cd":  "28000",
+        "name_ko":  "인천",
+        "name_en":  "Incheon",
+        "use_yn":  "Y",
+        "name_zh":  "仁川",
+        "name_ru":  "Инчхон"
+    },
+    {
+        "region_cd":  "28140",
+        "name_ko":  "인천 동구",
+        "name_en":  "Dong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "仁川",
+        "name_ru":  "Донг-гу"
+    },
+    {
+        "region_cd":  "28170",
+        "name_ko":  "인천 남구",
+        "name_en":  "Nam-gu",
+        "use_yn":  "Y",
+        "name_zh":  "仁川南",
+        "name_ru":  "Нам-гу"
+    },
+    {
+        "region_cd":  "28185",
+        "name_ko":  "인천 연수구",
+        "name_en":  "Yeonsu-gu",
+        "use_yn":  "Y",
+        "name_zh":  "仁川延",
+        "name_ru":  "Ёнсу-гу"
+    },
+    {
+        "region_cd":  "28200",
+        "name_ko":  "인천 남동구",
+        "name_en":  "Namdong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "仁川南洞",
+        "name_ru":  "Намдонг-гу"
+    },
+    {
+        "region_cd":  "28237",
+        "name_ko":  "인천 부평구",
+        "name_en":  "Bupyeong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "仁川富平",
+        "name_ru":  "Бупхён-гу"
+    },
+    {
+        "region_cd":  "28245",
+        "name_ko":  "인천 계양구",
+        "name_en":  "Gyeyang-gu",
+        "use_yn":  "Y",
+        "name_zh":  "仁川桂",
+        "name_ru":  "Кеянг-гу"
+    },
+    {
+        "region_cd":  "28260",
+        "name_ko":  "인천 서구",
+        "name_en":  "Seo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "仁川西",
+        "name_ru":  "Со-гу"
+    },
+    {
+        "region_cd":  "28710",
+        "name_ko":  "인천 강화군",
+        "name_en":  "Ganghwa-gun",
+        "use_yn":  "Y",
+        "name_zh":  "仁川江郡",
+        "name_ru":  "Канхва-гун"
+    },
+    {
+        "region_cd":  "28720",
+        "name_ko":  "인천 옹진군",
+        "name_en":  "Ongjin-gun",
+        "use_yn":  "Y",
+        "name_zh":  "仁川瓮津郡",
+        "name_ru":  "Онджин-гун"
+    },
+    {
+        "region_cd":  "45750",
+        "name_ko":  "전북 임실군",
+        "name_en":  "Imsil-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全北任郡",
+        "name_ru":  "Имсил-гун"
+    },
+    {
+        "region_cd":  "45790",
+        "name_ko":  "전북 고창군",
+        "name_en":  "Gochang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全北高敞郡",
+        "name_ru":  "Гочан-гун"
+    },
+    {
+        "region_cd":  "45800",
+        "name_ko":  "전북 부안군",
+        "name_en":  "Buan-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全北扶安郡",
+        "name_ru":  "Буан-гун"
+    },
+    {
+        "region_cd":  "46000",
+        "name_ko":  "전남",
+        "name_en":  "Jeollanam-do",
+        "use_yn":  "Y",
+        "name_zh":  "全南",
+        "name_ru":  "Чоннам"
+    },
+    {
+        "region_cd":  "46150",
+        "name_ko":  "전남 순천시",
+        "name_en":  "Suncheon-si",
+        "use_yn":  "Y",
+        "name_zh":  "全南天市",
+        "name_ru":  "Сунчхон"
+    },
+    {
+        "region_cd":  "46170",
+        "name_ko":  "전남 나주시",
+        "name_en":  "Naju-si",
+        "use_yn":  "Y",
+        "name_zh":  "全南州市",
+        "name_ru":  "Наджу"
+    },
+    {
+        "region_cd":  "46730",
+        "name_ko":  "전남 구례군",
+        "name_en":  "Gurye-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南求郡",
+        "name_ru":  "Курье-гун"
+    },
+    {
+        "region_cd":  "46790",
+        "name_ko":  "전남 화순군",
+        "name_en":  "Hwasun-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南和郡",
+        "name_ru":  "Хвасун-гун"
+    },
+    {
+        "region_cd":  "46830",
+        "name_ko":  "전남 영암군",
+        "name_en":  "Yeongam-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南岩郡",
+        "name_ru":  "Ёнгам-гун"
+    },
+    {
+        "region_cd":  "46870",
+        "name_ko":  "전남 영광군",
+        "name_en":  "Yeonggwang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南光郡",
+        "name_ru":  "Ёнгван-гун"
+    },
+    {
+        "region_cd":  "46890",
+        "name_ko":  "전남 완도군",
+        "name_en":  "Wando-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南莞郡",
+        "name_ru":  "Вандо-гун"
+    },
+    {
+        "region_cd":  "46910",
+        "name_ko":  "전남 신안군",
+        "name_en":  "Sinan-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南新安郡",
+        "name_ru":  "Синан-гун"
+    },
+    {
+        "region_cd":  "47000",
+        "name_ko":  "경북",
+        "name_en":  "Gyeongsangbuk-do",
+        "use_yn":  "Y",
+        "name_zh":  "北",
+        "name_ru":  "Кёнбук"
+    },
+    {
+        "region_cd":  "49720",
+        "name_ko":  "제주 남제주군",
+        "name_en":  "Namjeju-gun",
+        "use_yn":  "Y",
+        "name_zh":  "州南州郡",
+        "name_ru":  "Намчеджу-гун"
+    },
+    {
+        "region_cd":  "43745",
+        "name_ko":  "충북 증평군",
+        "name_en":  "Jeungpyeong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠北曾坪郡",
+        "name_ru":  "Чынпён-гун"
+    },
+    {
+        "region_cd":  "30230",
+        "name_ko":  "대전 대덕구",
+        "name_en":  "Daedeok-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大田大德",
+        "name_ru":  "Дэдок-гу"
+    },
+    {
+        "region_cd":  "31710",
+        "name_ko":  "울산 울주군",
+        "name_en":  "Ulju-gun",
+        "use_yn":  "Y",
+        "name_zh":  "蔚山蔚州郡",
+        "name_ru":  "Улджу-гун"
+    },
+    {
+        "region_cd":  "41290",
+        "name_ko":  "경기 과천시",
+        "name_en":  "Gwacheon-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿果川市",
+        "name_ru":  "Квачхон"
+    },
+    {
+        "region_cd":  "41430",
+        "name_ko":  "경기 의왕시",
+        "name_en":  "Uiwang-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿王市",
+        "name_ru":  "Ыванг"
+    },
+    {
+        "region_cd":  "45710",
+        "name_ko":  "전북 완주군",
+        "name_en":  "Wanju-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全北完州郡",
+        "name_ru":  "Ванджу-гун"
+    },
+    {
+        "region_cd":  "46130",
+        "name_ko":  "전남 여수시",
+        "name_en":  "Yeosu-si",
+        "use_yn":  "Y",
+        "name_zh":  "全南水市",
+        "name_ru":  "Йосу"
+    },
+    {
+        "region_cd":  "46720",
+        "name_ko":  "전남 곡성군",
+        "name_en":  "Gokseong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南谷城郡",
+        "name_ru":  "Коксон-гун"
+    },
+    {
+        "region_cd":  "46800",
+        "name_ko":  "전남 장흥군",
+        "name_en":  "Jangheung-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南郡",
+        "name_ru":  "Джангхын-гун"
+    },
+    {
+        "region_cd":  "46860",
+        "name_ko":  "전남 함평군",
+        "name_en":  "Hampyeong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南咸平郡",
+        "name_ru":  "Хампхён-гун"
+    },
+    {
+        "region_cd":  "29000",
+        "name_ko":  "광주",
+        "name_en":  "Gwangju",
+        "use_yn":  "Y",
+        "name_zh":  "光州",
+        "name_ru":  "Кванджу"
+    },
+    {
+        "region_cd":  "29110",
+        "name_ko":  "광주 동구",
+        "name_en":  "Dong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "光州",
+        "name_ru":  "Донг-гу"
+    },
+    {
+        "region_cd":  "29140",
+        "name_ko":  "광주 서구",
+        "name_en":  "Seo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "光州西",
+        "name_ru":  "Со-гу"
+    },
+    {
+        "region_cd":  "29170",
+        "name_ko":  "광주 북구",
+        "name_en":  "Buk-gu",
+        "use_yn":  "Y",
+        "name_zh":  "光州北",
+        "name_ru":  "Бук-гу"
+    },
+    {
+        "region_cd":  "30000",
+        "name_ko":  "대전",
+        "name_en":  "Daejeon",
+        "use_yn":  "Y",
+        "name_zh":  "大田",
+        "name_ru":  "Дэджон"
+    },
+    {
+        "region_cd":  "30110",
+        "name_ko":  "대전 동구",
+        "name_en":  "Dong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大田",
+        "name_ru":  "Донг-гу"
+    },
+    {
+        "region_cd":  "30170",
+        "name_ko":  "대전 서구",
+        "name_en":  "Seo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大田西",
+        "name_ru":  "Со-гу"
+    },
+    {
+        "region_cd":  "31000",
+        "name_ko":  "울산",
+        "name_en":  "Ulsan",
+        "use_yn":  "Y",
+        "name_zh":  "蔚山",
+        "name_ru":  "Ульсан"
+    },
+    {
+        "region_cd":  "31140",
+        "name_ko":  "울산 남구",
+        "name_en":  "Nam-gu",
+        "use_yn":  "Y",
+        "name_zh":  "蔚山南",
+        "name_ru":  "Нам-гу"
+    },
+    {
+        "region_cd":  "31170",
+        "name_ko":  "울산 동구",
+        "name_en":  "Dong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "蔚山",
+        "name_ru":  "Донг-гу"
+    },
+    {
+        "region_cd":  "41000",
+        "name_ko":  "경기",
+        "name_en":  "Gyeonggi-do",
+        "use_yn":  "Y",
+        "name_zh":  "京畿",
+        "name_ru":  "Кёнгги"
+    },
+    {
+        "region_cd":  "47130",
+        "name_ko":  "경북 경주시",
+        "name_en":  "Gyeongju-si",
+        "use_yn":  "Y",
+        "name_zh":  "北州市",
+        "name_ru":  "Кёнджу"
+    },
+    {
+        "region_cd":  "47150",
+        "name_ko":  "경북 김천시",
+        "name_en":  "Gimcheon-si",
+        "use_yn":  "Y",
+        "name_zh":  "北金泉市",
+        "name_ru":  "Кимчон"
+    },
+    {
+        "region_cd":  "47210",
+        "name_ko":  "경북 영주시",
+        "name_en":  "Yeongju-si",
+        "use_yn":  "Y",
+        "name_zh":  "北州市",
+        "name_ru":  "Йонджу"
+    },
+    {
+        "region_cd":  "47280",
+        "name_ko":  "경북 문경시",
+        "name_en":  "Mungyeong-si",
+        "use_yn":  "Y",
+        "name_zh":  "北市",
+        "name_ru":  "Мунгён"
+    },
+    {
+        "region_cd":  "47290",
+        "name_ko":  "경북 경산시",
+        "name_en":  "Gyeongsan-si",
+        "use_yn":  "Y",
+        "name_zh":  "北山市",
+        "name_ru":  "Кёнсан"
+    },
+    {
+        "region_cd":  "47750",
+        "name_ko":  "경북 청송군",
+        "name_en":  "Cheongsong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北松郡",
+        "name_ru":  "Чонсон-гун"
+    },
+    {
+        "region_cd":  "47760",
+        "name_ko":  "경북 영양군",
+        "name_en":  "Yeongyang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北英郡",
+        "name_ru":  "Йонгянг-гун"
+    },
+    {
+        "region_cd":  "47830",
+        "name_ko":  "경북 고령군",
+        "name_en":  "Goryeong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北高郡",
+        "name_ru":  "Корён-гун"
+    },
+    {
+        "region_cd":  "47850",
+        "name_ko":  "경북 칠곡군",
+        "name_en":  "Chilgok-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北漆谷郡",
+        "name_ru":  "Чильгок-гун"
+    },
+    {
+        "region_cd":  "47930",
+        "name_ko":  "경북 울진군",
+        "name_en":  "Uljin-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北蔚珍郡",
+        "name_ru":  "Ульджин-гун"
+    },
+    {
+        "region_cd":  "41210",
+        "name_ko":  "경기 광명시",
+        "name_en":  "Gwangmyeong-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿光明市",
+        "name_ru":  "Кванмён"
+    },
+    {
+        "region_cd":  "41220",
+        "name_ko":  "경기 평택시",
+        "name_en":  "Pyeongtaek-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿平市",
+        "name_ru":  "Пхёнтэк"
+    },
+    {
+        "region_cd":  "47230",
+        "name_ko":  "경북 영천시",
+        "name_en":  "Yeongcheon-si",
+        "use_yn":  "Y",
+        "name_zh":  "北永川市",
+        "name_ru":  "Йоннчхон"
+    },
+    {
+        "region_cd":  "47820",
+        "name_ko":  "경북 청도군",
+        "name_en":  "Cheongdo-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北道郡",
+        "name_ru":  "Чондо-гун"
+    },
+    {
+        "region_cd":  "47920",
+        "name_ko":  "경북 봉화군",
+        "name_en":  "Bonghwa-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北奉化郡",
+        "name_ru":  "Бонхва-гун"
+    },
+    {
+        "region_cd":  "48000",
+        "name_ko":  "경남",
+        "name_en":  "Gyeongsangnam-do",
+        "use_yn":  "Y",
+        "name_zh":  "南",
+        "name_ru":  "Кённам"
+    },
+    {
+        "region_cd":  "41610",
+        "name_ko":  "경기 광주시",
+        "name_en":  "Gwangju-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿州市",
+        "name_ru":  "Кванджу"
+    },
+    {
+        "region_cd":  "41730",
+        "name_ko":  "경기 여주군",
+        "name_en":  "Yeoju-gun",
+        "use_yn":  "Y",
+        "name_zh":  "京畿州郡",
+        "name_ru":  "Йоджу-гун"
+    },
+    {
+        "region_cd":  "41650",
+        "name_ko":  "경기 포천시",
+        "name_en":  "Pocheon-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿抱川市",
+        "name_ru":  "Пхочон"
+    },
+    {
+        "region_cd":  "41820",
+        "name_ko":  "경기 가평군",
+        "name_en":  "Gapyeong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "京畿加平郡",
+        "name_ru":  "Каппхён-гун"
+    },
+    {
+        "region_cd":  "42000",
+        "name_ko":  "강원",
+        "name_en":  "Gangwon-do",
+        "use_yn":  "Y",
+        "name_zh":  "江原",
+        "name_ru":  "Канвон"
+    },
+    {
+        "region_cd":  "42110",
+        "name_ko":  "강원 춘천시",
+        "name_en":  "Chuncheon-si",
+        "use_yn":  "Y",
+        "name_zh":  "江原春川市",
+        "name_ru":  "Чунчхон"
+    },
+    {
+        "region_cd":  "42170",
+        "name_ko":  "강원 동해시",
+        "name_en":  "Donghae-si",
+        "use_yn":  "Y",
+        "name_zh":  "江原海市",
+        "name_ru":  "Донхэ"
+    },
+    {
+        "region_cd":  "42210",
+        "name_ko":  "강원 속초시",
+        "name_en":  "Sokcho-si",
+        "use_yn":  "Y",
+        "name_zh":  "江原束草市",
+        "name_ru":  "Сокчо"
+    },
+    {
+        "region_cd":  "42230",
+        "name_ko":  "강원 삼척시",
+        "name_en":  "Samcheok-si",
+        "use_yn":  "Y",
+        "name_zh":  "江原三陟市",
+        "name_ru":  "Самчок"
+    },
+    {
+        "region_cd":  "41310",
+        "name_ko":  "경기 구리시",
+        "name_en":  "Guri-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿九里市",
+        "name_ru":  "Гури"
+    },
+    {
+        "region_cd":  "41370",
+        "name_ko":  "경기 오산시",
+        "name_en":  "Osan-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿山市",
+        "name_ru":  "Осан"
+    },
+    {
+        "region_cd":  "41390",
+        "name_ko":  "경기 시흥시",
+        "name_en":  "Siheung-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿始市",
+        "name_ru":  "Сихынг"
+    },
+    {
+        "region_cd":  "41460",
+        "name_ko":  "경기 용인시",
+        "name_en":  "Yongin-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿仁市",
+        "name_ru":  "Ёнгин"
+    },
+    {
+        "region_cd":  "41480",
+        "name_ko":  "경기 파주시",
+        "name_en":  "Paju-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿坡州市",
+        "name_ru":  "Паджу"
+    },
+    {
+        "region_cd":  "41550",
+        "name_ko":  "경기 안성시",
+        "name_en":  "Anseong-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿安城市",
+        "name_ru":  "Ансонг"
+    },
+    {
+        "region_cd":  "0",
+        "name_ko":  "지역무관",
+        "name_en":  "No Relation",
+        "use_yn":  "Y",
+        "name_zh":  "地无",
+        "name_ru":  "Не имеет значение по регионам"
+    },
+    {
+        "region_cd":  "11000",
+        "name_ko":  "서울",
+        "name_en":  "Seoul",
+        "use_yn":  "Y",
+        "name_zh":  "首",
+        "name_ru":  "Сеул"
+    },
+    {
+        "region_cd":  "11110",
+        "name_ko":  "서울 종로구",
+        "name_en":  "Jongno-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首路",
+        "name_ru":  "Джонно-гу"
+    },
+    {
+        "region_cd":  "11140",
+        "name_ko":  "서울 중구",
+        "name_en":  "Jung-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首中",
+        "name_ru":  "Чжунг-гу"
+    },
+    {
+        "region_cd":  "11170",
+        "name_ko":  "서울 용산구",
+        "name_en":  "Yongsan-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首山",
+        "name_ru":  "Ёнсан-гу"
+    },
+    {
+        "region_cd":  "11200",
+        "name_ko":  "서울 성동구",
+        "name_en":  "Seongdong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首城",
+        "name_ru":  "Сондон-гу"
+    },
+    {
+        "region_cd":  "11215",
+        "name_ko":  "서울 광진구",
+        "name_en":  "Gwangjin-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首津",
+        "name_ru":  "Кванджин-гу"
+    },
+    {
+        "region_cd":  "11230",
+        "name_ko":  "서울 동대문구",
+        "name_en":  "Dongdaemun-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首大",
+        "name_ru":  "Дондэмун-гу"
+    },
+    {
+        "region_cd":  "11260",
+        "name_ko":  "서울 중랑구",
+        "name_en":  "Jungnang-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首中浪",
+        "name_ru":  "Джуннан-гу"
+    },
+    {
+        "region_cd":  "11290",
+        "name_ko":  "서울 성북구",
+        "name_en":  "Seongbuk-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首城北",
+        "name_ru":  "Сонбук-гу"
+    },
+    {
+        "region_cd":  "42730",
+        "name_ko":  "강원 횡성군",
+        "name_en":  "Hoengseong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原城郡",
+        "name_ru":  "Хоенсонг-гун"
+    },
+    {
+        "region_cd":  "42750",
+        "name_ko":  "강원 영월군",
+        "name_en":  "Yeongwol-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原越郡",
+        "name_ru":  "Ёнволь-гун"
+    },
+    {
+        "region_cd":  "42770",
+        "name_ko":  "강원 정선군",
+        "name_en":  "Jeongseon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原旌善郡",
+        "name_ru":  "Чжонсон-гун"
+    },
+    {
+        "region_cd":  "42790",
+        "name_ko":  "강원 화천군",
+        "name_en":  "Hwacheon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原川郡",
+        "name_ru":  "Хвачхон-гун"
+    },
+    {
+        "region_cd":  "42820",
+        "name_ko":  "강원 고성군",
+        "name_en":  "Goseong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原高城郡",
+        "name_ru":  "Косон-гун"
+    },
+    {
+        "region_cd":  "42830",
+        "name_ko":  "강원 양양군",
+        "name_en":  "Yangyang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原襄郡",
+        "name_ru":  "Янъян-гун"
+    },
+    {
+        "region_cd":  "43000",
+        "name_ko":  "충북",
+        "name_en":  "Chungcheongbuk-do",
+        "use_yn":  "Y",
+        "name_zh":  "忠北",
+        "name_ru":  "Чунгбук"
+    },
+    {
+        "region_cd":  "43130",
+        "name_ko":  "충북 충주시",
+        "name_en":  "Chungju-si",
+        "use_yn":  "Y",
+        "name_zh":  "忠北忠州市",
+        "name_ru":  "Чунджу"
+    },
+    {
+        "region_cd":  "43150",
+        "name_ko":  "충북 제천시",
+        "name_en":  "Jecheon-si",
+        "use_yn":  "Y",
+        "name_zh":  "忠北堤川市",
+        "name_ru":  "Джечхон"
+    },
+    {
+        "region_cd":  "43720",
+        "name_ko":  "충북 보은군",
+        "name_en":  "Boeun-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠北恩郡",
+        "name_ru":  "Боын-гун"
+    },
+    {
+        "region_cd":  "43730",
+        "name_ko":  "충북 옥천군",
+        "name_en":  "Okcheon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠北沃川郡",
+        "name_ru":  "Окчон-гун"
+    },
+    {
+        "region_cd":  "43750",
+        "name_ko":  "충북 진천군",
+        "name_en":  "Jincheon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠北川郡",
+        "name_ru":  "Джинчхон-гун"
+    },
+    {
+        "region_cd":  "11305",
+        "name_ko":  "서울 강북구",
+        "name_en":  "Gangbuk-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首江北",
+        "name_ru":  "Кангбук-гу"
+    },
+    {
+        "region_cd":  "11320",
+        "name_ko":  "서울 도봉구",
+        "name_en":  "Dobong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首道峰",
+        "name_ru":  "Добонг-гу"
+    },
+    {
+        "region_cd":  "11350",
+        "name_ko":  "서울 노원구",
+        "name_en":  "Nowon-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首芦原",
+        "name_ru":  "Новон-гу"
+    },
+    {
+        "region_cd":  "11380",
+        "name_ko":  "서울 은평구",
+        "name_en":  "Eunpyeong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首恩平",
+        "name_ru":  "Ынпён-гу"
+    },
+    {
+        "region_cd":  "43800",
+        "name_ko":  "충북 단양군",
+        "name_en":  "Danyang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠北丹郡",
+        "name_ru":  "Даньян-гун"
+    },
+    {
+        "region_cd":  "44000",
+        "name_ko":  "충남",
+        "name_en":  "Chungcheongnam-do",
+        "use_yn":  "Y",
+        "name_zh":  "忠南",
+        "name_ru":  "Чунгнам"
+    },
+    {
+        "region_cd":  "44130",
+        "name_ko":  "충남 천안시",
+        "name_en":  "Cheonan-si",
+        "use_yn":  "Y",
+        "name_zh":  "忠南天安市",
+        "name_ru":  "Чхонан"
+    },
+    {
+        "region_cd":  "48120",
+        "name_ko":  "경남 창원시",
+        "name_en":  "Changwon-si",
+        "use_yn":  "Y",
+        "name_zh":  "南昌原市",
+        "name_ru":  "Чангвон"
+    },
+    {
+        "region_cd":  "11410",
+        "name_ko":  "서울 서대문구",
+        "name_en":  "Seodaemun-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首西大",
+        "name_ru":  "Содэмун-гу"
+    },
+    {
+        "region_cd":  "11440",
+        "name_ko":  "서울 마포구",
+        "name_en":  "Mapo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首麻浦",
+        "name_ru":  "Мапхо-гу"
+    },
+    {
+        "region_cd":  "11470",
+        "name_ko":  "서울 양천구",
+        "name_en":  "Yangcheon-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首川",
+        "name_ru":  "Янчхон-гу"
+    },
+    {
+        "region_cd":  "11500",
+        "name_ko":  "서울 강서구",
+        "name_en":  "Gangseo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首江西",
+        "name_ru":  "Кангсо-гу"
+    },
+    {
+        "region_cd":  "11530",
+        "name_ko":  "서울 구로구",
+        "name_en":  "Guro-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首九老",
+        "name_ru":  "Гуро-гу"
+    },
+    {
+        "region_cd":  "11545",
+        "name_ko":  "서울 금천구",
+        "name_en":  "Geumcheon-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首衿川",
+        "name_ru":  "Кымчхон-гу"
+    },
+    {
+        "region_cd":  "11560",
+        "name_ko":  "서울 영등포구",
+        "name_en":  "Yeongdeungpo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首永登浦",
+        "name_ru":  "Ендынгпхо-гу"
+    },
+    {
+        "region_cd":  "11590",
+        "name_ko":  "서울 동작구",
+        "name_en":  "Dongjak-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首雀",
+        "name_ru":  "Донджак-гу"
+    },
+    {
+        "region_cd":  "11620",
+        "name_ko":  "서울 관악구",
+        "name_en":  "Gwanak-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首冠岳",
+        "name_ru":  "Кванак-гу"
+    },
+    {
+        "region_cd":  "11650",
+        "name_ko":  "서울 서초구",
+        "name_en":  "Seocho-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首瑞草",
+        "name_ru":  "Сеочо-гу"
+    },
+    {
+        "region_cd":  "11680",
+        "name_ko":  "서울 강남구",
+        "name_en":  "Gangnam-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首江南",
+        "name_ru":  "Каннам-гу"
+    },
+    {
+        "region_cd":  "11710",
+        "name_ko":  "서울 송파구",
+        "name_en":  "Songpa-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首松坡",
+        "name_ru":  "Сонгпха-гу"
+    },
+    {
+        "region_cd":  "11740",
+        "name_ko":  "서울 강동구",
+        "name_en":  "Gangdong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "首江",
+        "name_ru":  "Кангдон-гу"
+    },
+    {
+        "region_cd":  "26000",
+        "name_ko":  "부산",
+        "name_en":  "Busan",
+        "use_yn":  "Y",
+        "name_zh":  "釜山",
+        "name_ru":  "Бусан"
+    },
+    {
+        "region_cd":  "26110",
+        "name_ko":  "부산 중구",
+        "name_en":  "Jung-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山中",
+        "name_ru":  "Чжунг-гу"
+    },
+    {
+        "region_cd":  "26140",
+        "name_ko":  "부산 서구",
+        "name_en":  "Seo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山西",
+        "name_ru":  "Со-гу"
+    },
+    {
+        "region_cd":  "26200",
+        "name_ko":  "부산 영도구",
+        "name_en":  "Yeongdo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山影",
+        "name_ru":  "Ендо-гу"
+    },
+    {
+        "region_cd":  "26230",
+        "name_ko":  "부산 부산진구",
+        "name_en":  "Busanjin-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山釜山",
+        "name_ru":  "Бусанджин-гу"
+    },
+    {
+        "region_cd":  "26290",
+        "name_ko":  "부산 남구",
+        "name_en":  "Nam-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山南",
+        "name_ru":  "Нам-гу"
+    },
+    {
+        "region_cd":  "26350",
+        "name_ko":  "부산 해운대구",
+        "name_en":  "Haeundae-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山海云台",
+        "name_ru":  "Хэундэ-гу"
+    },
+    {
+        "region_cd":  "26380",
+        "name_ko":  "부산 사하구",
+        "name_en":  "Saha-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山沙下",
+        "name_ru":  "Саха-гу"
+    },
+    {
+        "region_cd":  "44200",
+        "name_ko":  "충남 아산시",
+        "name_en":  "Asan-si",
+        "use_yn":  "Y",
+        "name_zh":  "忠南牙山市",
+        "name_ru":  "Асан"
+    },
+    {
+        "region_cd":  "44210",
+        "name_ko":  "충남 서산시",
+        "name_en":  "Seosan-si",
+        "use_yn":  "Y",
+        "name_zh":  "忠南瑞山市",
+        "name_ru":  "Сосан"
+    },
+    {
+        "region_cd":  "44730",
+        "name_ko":  "충남 연기군",
+        "name_en":  "Yeongi-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠南燕岐郡",
+        "name_ru":  "Ёнки-гун"
+    },
+    {
+        "region_cd":  "44760",
+        "name_ko":  "충남 부여군",
+        "name_en":  "Buyeo-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠南扶余郡",
+        "name_ru":  "байео"
+    },
+    {
+        "region_cd":  "44800",
+        "name_ko":  "충남 홍성군",
+        "name_en":  "Hongseong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠南洪城郡",
+        "name_ru":  "Хонсон-гун"
+    },
+    {
+        "region_cd":  "44810",
+        "name_ko":  "충남 예산군",
+        "name_en":  "Yesan-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠南山郡",
+        "name_ru":  "Есан-гун"
+    },
+    {
+        "region_cd":  "44825",
+        "name_ko":  "충남 태안군",
+        "name_en":  "Taean-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠南泰安郡",
+        "name_ru":  "Тэан-гун"
+    },
+    {
+        "region_cd":  "45000",
+        "name_ko":  "전북",
+        "name_en":  "Jeonlabuk-do",
+        "use_yn":  "Y",
+        "name_zh":  "全北",
+        "name_ru":  "Чонбук"
+    },
+    {
+        "region_cd":  "45130",
+        "name_ko":  "전북 군산시",
+        "name_en":  "Gunsan-si",
+        "use_yn":  "Y",
+        "name_zh":  "全北群山市",
+        "name_ru":  "Кунсан"
+    },
+    {
+        "region_cd":  "45140",
+        "name_ko":  "전북 익산시",
+        "name_en":  "Iksan-si",
+        "use_yn":  "Y",
+        "name_zh":  "全北益山市",
+        "name_ru":  "Иксан"
+    },
+    {
+        "region_cd":  "45190",
+        "name_ko":  "전북 남원시",
+        "name_en":  "Namwon-si",
+        "use_yn":  "Y",
+        "name_zh":  "全北南原市",
+        "name_ru":  "Намвон"
+    },
+    {
+        "region_cd":  "45720",
+        "name_ko":  "전북 진안군",
+        "name_en":  "Jinan-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全北安郡",
+        "name_ru":  "Джинан-гун"
+    },
+    {
+        "region_cd":  "45730",
+        "name_ko":  "전북 무주군",
+        "name_en":  "Muju-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全北茂朱郡",
+        "name_ru":  "Муджу-гун"
+    },
+    {
+        "region_cd":  "45740",
+        "name_ko":  "전북 장수군",
+        "name_en":  "Jangsu-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全北水郡",
+        "name_ru":  "Джангсу-гун"
+    },
+    {
+        "region_cd":  "48220",
+        "name_ko":  "경남 통영시",
+        "name_en":  "Tongyeong-si",
+        "use_yn":  "Y",
+        "name_zh":  "南市",
+        "name_ru":  "Тонгьён"
+    },
+    {
+        "region_cd":  "48270",
+        "name_ko":  "경남 밀양시",
+        "name_en":  "Miryang-si",
+        "use_yn":  "Y",
+        "name_zh":  "南密市",
+        "name_ru":  "Мирьянг"
+    },
+    {
+        "region_cd":  "48330",
+        "name_ko":  "경남 양산시",
+        "name_en":  "Yangsan-si",
+        "use_yn":  "Y",
+        "name_zh":  "南梁山市",
+        "name_ru":  "Янсан"
+    },
+    {
+        "region_cd":  "48720",
+        "name_ko":  "경남 의령군",
+        "name_en":  "Uiryeong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "南宜郡",
+        "name_ru":  "Ырён-гун"
+    },
+    {
+        "region_cd":  "48740",
+        "name_ko":  "경남 창녕군",
+        "name_en":  "Changnyeong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "南昌郡",
+        "name_ru":  "Чаннён-гун"
+    },
+    {
+        "region_cd":  "48820",
+        "name_ko":  "경남 고성군",
+        "name_en":  "Goseong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "南固城郡",
+        "name_ru":  "Косен-гун"
+    },
+    {
+        "region_cd":  "48850",
+        "name_ko":  "경남 하동군",
+        "name_en":  "Hadong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "南河郡",
+        "name_ru":  "Хадонг-гун"
+    },
+    {
+        "region_cd":  "48870",
+        "name_ko":  "경남 함양군",
+        "name_en":  "Hamyang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "南咸郡",
+        "name_ru":  "Хамьянг-гун"
+    },
+    {
+        "region_cd":  "49000",
+        "name_ko":  "제주",
+        "name_en":  "Jeju-do",
+        "use_yn":  "Y",
+        "name_zh":  "州",
+        "name_ru":  "Чеджу"
+    },
+    {
+        "region_cd":  "49110",
+        "name_ko":  "제주 제주시",
+        "name_en":  "Jeju-si",
+        "use_yn":  "Y",
+        "name_zh":  "州州市",
+        "name_ru":  "Чеджу"
+    },
+    {
+        "region_cd":  "44132",
+        "name_ko":  "충남 천안시 서북구",
+        "name_en":  "Cheonan-si Seobuk-gu",
+        "use_yn":  "Y",
+        "name_zh":  "忠南天安市西北",
+        "name_ru":  "Сеобук-гу"
+    },
+    {
+        "region_cd":  "41461",
+        "name_ko":  "경기 용인시 기흥구",
+        "name_en":  "Yongin-si Giheung-gu",
+        "use_yn":  "Y",
+        "name_zh":  "京畿仁市器",
+        "name_ru":  "Гихынг-гу"
+    },
+    {
+        "region_cd":  "26410",
+        "name_ko":  "부산 금정구",
+        "name_en":  "Geumjeong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山金井",
+        "name_ru":  "Кымджон-гу"
+    },
+    {
+        "region_cd":  "26440",
+        "name_ko":  "부산 강서구",
+        "name_en":  "Gangseo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山江西",
+        "name_ru":  "Кангсо-гу"
+    },
+    {
+        "region_cd":  "26470",
+        "name_ko":  "부산 연제구",
+        "name_en":  "Yeonje-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山堤",
+        "name_ru":  "Ёнже-гу"
+    },
+    {
+        "region_cd":  "26500",
+        "name_ko":  "부산 수영구",
+        "name_en":  "Suyeong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山水",
+        "name_ru":  "Суёнг-гу"
+    },
+    {
+        "region_cd":  "26710",
+        "name_ko":  "부산 기장군",
+        "name_en":  "Gijang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "釜山机郡",
+        "name_ru":  "Киджан-гун"
+    },
+    {
+        "region_cd":  "27000",
+        "name_ko":  "대구",
+        "name_en":  "Daegu",
+        "use_yn":  "Y",
+        "name_zh":  "大邱",
+        "name_ru":  "Дэгу"
+    },
+    {
+        "region_cd":  "27110",
+        "name_ko":  "대구 중구",
+        "name_en":  "Jung-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大邱中",
+        "name_ru":  "Чжунг-гу"
+    },
+    {
+        "region_cd":  "27170",
+        "name_ko":  "대구 서구",
+        "name_en":  "Seo-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大邱西",
+        "name_ru":  "Со-гу"
+    },
+    {
+        "region_cd":  "27200",
+        "name_ko":  "대구 남구",
+        "name_en":  "Nam-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大邱南",
+        "name_ru":  "Нам-гу"
+    },
+    {
+        "region_cd":  "43740",
+        "name_ko":  "충북 영동군",
+        "name_en":  "Yeongdong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠北永同郡",
+        "name_ru":  "Ёндон-гун"
+    },
+    {
+        "region_cd":  "43710",
+        "name_ko":  "충북 청원군",
+        "name_en":  "Cheongwon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠北原郡",
+        "name_ru":  "Чхонвон-гун"
+    },
+    {
+        "region_cd":  "43770",
+        "name_ko":  "충북 음성군",
+        "name_en":  "Eumseong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠北城郡",
+        "name_ru":  "Ымсон-гун"
+    },
+    {
+        "region_cd":  "44790",
+        "name_ko":  "충남 청양군",
+        "name_en":  "Cheongyang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠南郡",
+        "name_ru":  "Чхоньян-гун"
+    },
+    {
+        "region_cd":  "44710",
+        "name_ko":  "충남 금산군",
+        "name_en":  "Geumsan-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠南山郡",
+        "name_ru":  "Гымсан-гун"
+    },
+    {
+        "region_cd":  "44180",
+        "name_ko":  "충남 보령시",
+        "name_en":  "Boryeong-si",
+        "use_yn":  "Y",
+        "name_zh":  "忠南保市",
+        "name_ru":  "Борьёнг"
+    },
+    {
+        "region_cd":  "44150",
+        "name_ko":  "충남 공주시",
+        "name_en":  "Gongju-si",
+        "use_yn":  "Y",
+        "name_zh":  "忠南公州市",
+        "name_ru":  "Конджу"
+    },
+    {
+        "region_cd":  "44830",
+        "name_ko":  "충남 당진군",
+        "name_en":  "Dangjin-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠南唐津郡",
+        "name_ru":  "Данджин-гун"
+    },
+    {
+        "region_cd":  "44770",
+        "name_ko":  "충남 서천군",
+        "name_en":  "Seocheon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠南舒川郡",
+        "name_ru":  "Сочхон-гун"
+    },
+    {
+        "region_cd":  "44250",
+        "name_ko":  "충남 계룡시",
+        "name_en":  "Gyeryong-si",
+        "use_yn":  "Y",
+        "name_zh":  "忠南市",
+        "name_ru":  "Кьерён"
+    },
+    {
+        "region_cd":  "44230",
+        "name_ko":  "충남 논산시",
+        "name_en":  "Nonsan-si",
+        "use_yn":  "Y",
+        "name_zh":  "忠南山市",
+        "name_ru":  "Нонсан"
+    },
+    {
+        "region_cd":  "44131",
+        "name_ko":  "충남 천안시 동남구",
+        "name_en":  "Cheonan-si Dongnam-gu",
+        "use_yn":  "Y",
+        "name_zh":  "忠南天安市南",
+        "name_ru":  "Доннам-гу"
+    },
+    {
+        "region_cd":  "45770",
+        "name_ko":  "전북 순창군",
+        "name_en":  "Sunchang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全北淳昌郡",
+        "name_ru":  "Сунчан-гун"
+    },
+    {
+        "region_cd":  "45210",
+        "name_ko":  "전북 김제시",
+        "name_en":  "Gimje-si",
+        "use_yn":  "Y",
+        "name_zh":  "全北金堤市",
+        "name_ru":  "Кимдже"
+    },
+    {
+        "region_cd":  "45180",
+        "name_ko":  "전북 정읍시",
+        "name_en":  "Jeongeup-si",
+        "use_yn":  "Y",
+        "name_zh":  "全北井邑市",
+        "name_ru":  "Чонып"
+    },
+    {
+        "region_cd":  "46900",
+        "name_ko":  "전남 진도군",
+        "name_en":  "Jindo-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南珍郡",
+        "name_ru":  "Джиндо-гун"
+    },
+    {
+        "region_cd":  "46840",
+        "name_ko":  "전남 무안군",
+        "name_en":  "Muan-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南安郡",
+        "name_ru":  "Муан-гун"
+    },
+    {
+        "region_cd":  "46810",
+        "name_ko":  "전남 강진군",
+        "name_en":  "Gangjin-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南康津郡",
+        "name_ru":  "Кангджин-гун"
+    },
+    {
+        "region_cd":  "46770",
+        "name_ko":  "전남 고흥군",
+        "name_en":  "Goheung-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南高郡",
+        "name_ru":  "Кохын-гун"
+    },
+    {
+        "region_cd":  "46230",
+        "name_ko":  "전남 광양시",
+        "name_en":  "Gwangyang-si",
+        "use_yn":  "Y",
+        "name_zh":  "全南光市",
+        "name_ru":  "Кваньян"
+    },
+    {
+        "region_cd":  "46110",
+        "name_ko":  "전남 목포시",
+        "name_en":  "Mokpo-si",
+        "use_yn":  "Y",
+        "name_zh":  "全南木浦市",
+        "name_ru":  "Мокпхо"
+    },
+    {
+        "region_cd":  "46880",
+        "name_ko":  "전남 장성군",
+        "name_en":  "Jangseong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南城郡",
+        "name_ru":  "Чжангсон-гун"
+    },
+    {
+        "region_cd":  "46820",
+        "name_ko":  "전남 해남군",
+        "name_en":  "Haenam-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南海南郡",
+        "name_ru":  "Хэнам-гун"
+    },
+    {
+        "region_cd":  "46780",
+        "name_ko":  "전남 보성군",
+        "name_en":  "Boseong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南城郡",
+        "name_ru":  "Босонг-гун"
+    },
+    {
+        "region_cd":  "46710",
+        "name_ko":  "전남 담양군",
+        "name_en":  "Damyang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "全南潭郡",
+        "name_ru":  "Дамьянг-гун"
+    },
+    {
+        "region_cd":  "47940",
+        "name_ko":  "경북 울릉군",
+        "name_en":  "Ulleung-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北郁陵郡",
+        "name_ru":  "Улынг-гун"
+    },
+    {
+        "region_cd":  "47900",
+        "name_ko":  "경북 예천군",
+        "name_en":  "Yecheon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北醴泉郡",
+        "name_ru":  "Ечон-гун"
+    },
+    {
+        "region_cd":  "47840",
+        "name_ko":  "경북 성주군",
+        "name_en":  "Seongju-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北星州郡",
+        "name_ru":  "Сонджу-гун"
+    },
+    {
+        "region_cd":  "47770",
+        "name_ko":  "경북 영덕군",
+        "name_en":  "Yeongdeok-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北盈德郡",
+        "name_ru":  "Йонгдок-гун"
+    },
+    {
+        "region_cd":  "47730",
+        "name_ko":  "경북 의성군",
+        "name_en":  "Uiseong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北城郡",
+        "name_ru":  "Ысон-гун"
+    },
+    {
+        "region_cd":  "47720",
+        "name_ko":  "경북 군위군",
+        "name_en":  "Gunwi-gun",
+        "use_yn":  "Y",
+        "name_zh":  "北威郡",
+        "name_ru":  "Кунуы-гун"
+    },
+    {
+        "region_cd":  "47250",
+        "name_ko":  "경북 상주시",
+        "name_en":  "Sangju-si",
+        "use_yn":  "Y",
+        "name_zh":  "北州市",
+        "name_ru":  "Санджу"
+    },
+    {
+        "region_cd":  "47170",
+        "name_ko":  "경북 안동시",
+        "name_en":  "Andong-si",
+        "use_yn":  "Y",
+        "name_zh":  "北安市",
+        "name_ru":  "Андонг"
+    },
+    {
+        "region_cd":  "47190",
+        "name_ko":  "경북 구미시",
+        "name_en":  "Gumi-si",
+        "use_yn":  "Y",
+        "name_zh":  "北尾市",
+        "name_ru":  "Гуми"
+    },
+    {
+        "region_cd":  "48890",
+        "name_ko":  "경남 합천군",
+        "name_en":  "Hapcheon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "南川郡",
+        "name_ru":  "Хапчон-гун"
+    },
+    {
+        "region_cd":  "48860",
+        "name_ko":  "경남 산청군",
+        "name_en":  "Sancheong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "南山郡",
+        "name_ru":  "Санчхон-гун"
+    },
+    {
+        "region_cd":  "48840",
+        "name_ko":  "경남 남해군",
+        "name_en":  "Namhae-gun",
+        "use_yn":  "Y",
+        "name_zh":  "南南海郡",
+        "name_ru":  "Намхэ-гун"
+    },
+    {
+        "region_cd":  "48730",
+        "name_ko":  "경남 함안군",
+        "name_en":  "Haman-gun",
+        "use_yn":  "Y",
+        "name_zh":  "南咸安郡",
+        "name_ru":  "Хаман-гун"
+    },
+    {
+        "region_cd":  "48310",
+        "name_ko":  "경남 거제시",
+        "name_en":  "Geoje-si",
+        "use_yn":  "Y",
+        "name_zh":  "南巨市",
+        "name_ru":  "Кодже"
+    },
+    {
+        "region_cd":  "48250",
+        "name_ko":  "경남 김해시",
+        "name_en":  "Gimhae-si",
+        "use_yn":  "Y",
+        "name_zh":  "南金海市",
+        "name_ru":  "Кимхэ"
+    },
+    {
+        "region_cd":  "26260",
+        "name_ko":  "부산 동래구",
+        "name_en":  "Dongnae-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山",
+        "name_ru":  "Доннэ-гу"
+    },
+    {
+        "region_cd":  "26170",
+        "name_ko":  "부산 동구",
+        "name_en":  "Dong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山",
+        "name_ru":  "Донг-гу"
+    },
+    {
+        "region_cd":  "26530",
+        "name_ko":  "부산 사상구",
+        "name_en":  "Sasang-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山沙上",
+        "name_ru":  "Сасанг-гу"
+    },
+    {
+        "region_cd":  "26320",
+        "name_ko":  "부산 북구",
+        "name_en":  "Buk-gu",
+        "use_yn":  "Y",
+        "name_zh":  "釜山北",
+        "name_ru":  "Бук-гу"
+    },
+    {
+        "region_cd":  "27230",
+        "name_ko":  "대구 북구",
+        "name_en":  "Buk-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大邱北",
+        "name_ru":  "Бук-гу"
+    },
+    {
+        "region_cd":  "27140",
+        "name_ko":  "대구 동구",
+        "name_en":  "Dong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大邱",
+        "name_ru":  "Донг-гу"
+    },
+    {
+        "region_cd":  "28110",
+        "name_ko":  "인천 중구",
+        "name_en":  "Jung-gu",
+        "use_yn":  "Y",
+        "name_zh":  "仁川中",
+        "name_ru":  "Чжунг-гу"
+    },
+    {
+        "region_cd":  "29155",
+        "name_ko":  "광주 남구",
+        "name_en":  "Nam-gu",
+        "use_yn":  "Y",
+        "name_zh":  "光州南",
+        "name_ru":  "Нам-гу"
+    },
+    {
+        "region_cd":  "29200",
+        "name_ko":  "광주 광산구",
+        "name_en":  "Gwangsan-gu",
+        "use_yn":  "Y",
+        "name_zh":  "光州光山",
+        "name_ru":  "Квансан-гу"
+    },
+    {
+        "region_cd":  "30140",
+        "name_ko":  "대전 중구",
+        "name_en":  "Jung-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大田中",
+        "name_ru":  "Чжунг-гу"
+    },
+    {
+        "region_cd":  "30200",
+        "name_ko":  "대전 유성구",
+        "name_en":  "Yuseong-gu",
+        "use_yn":  "Y",
+        "name_zh":  "大田儒城",
+        "name_ru":  "Юсон-гу"
+    },
+    {
+        "region_cd":  "31200",
+        "name_ko":  "울산 북구",
+        "name_en":  "Buk-gu",
+        "use_yn":  "Y",
+        "name_zh":  "蔚山北",
+        "name_ru":  "Бук-гу"
+    },
+    {
+        "region_cd":  "31110",
+        "name_ko":  "울산 중구",
+        "name_en":  "Jung-gu",
+        "use_yn":  "Y",
+        "name_zh":  "蔚山中",
+        "name_ru":  "Чжунг-гу"
+    },
+    {
+        "region_cd":  "41830",
+        "name_ko":  "경기 양평군",
+        "name_en":  "Yangpyeong-gun",
+        "use_yn":  "Y",
+        "name_zh":  "京畿平郡",
+        "name_ru":  "Янпхён-гун"
+    },
+    {
+        "region_cd":  "41630",
+        "name_ko":  "경기 양주시",
+        "name_en":  "Yangju-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿州市",
+        "name_ru":  "Янджу"
+    },
+    {
+        "region_cd":  "41570",
+        "name_ko":  "경기 김포시",
+        "name_en":  "Gimpo-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿金浦市",
+        "name_ru":  "Город Кимпхо"
+    },
+    {
+        "region_cd":  "41500",
+        "name_ko":  "경기 이천시",
+        "name_en":  "Icheon-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿利川市",
+        "name_ru":  "Ичхон"
+    },
+    {
+        "region_cd":  "41463",
+        "name_ko":  "경기 용인시 처인구",
+        "name_en":  "Yongin-si Cheoin-gu",
+        "use_yn":  "Y",
+        "name_zh":  "京畿仁市仁",
+        "name_ru":  "Чхоин-гу"
+    },
+    {
+        "region_cd":  "41450",
+        "name_ko":  "경기 하남시",
+        "name_en":  "Hanam-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿河南市",
+        "name_ru":  "Ханам"
+    },
+    {
+        "region_cd":  "41360",
+        "name_ko":  "경기 남양주시",
+        "name_en":  "Namyangju-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿南州市",
+        "name_ru":  "Намьянджу"
+    },
+    {
+        "region_cd":  "41250",
+        "name_ko":  "경기 동두천시",
+        "name_en":  "Dongducheon-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿豆川市",
+        "name_ru":  "Дондучхон"
+    },
+    {
+        "region_cd":  "41150",
+        "name_ko":  "경기 의정부시",
+        "name_en":  "Uijeongbu-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿政府市",
+        "name_ru":  "Ыджонбу"
+    },
+    {
+        "region_cd":  "41800",
+        "name_ko":  "경기 연천군",
+        "name_en":  "Yeoncheon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "京畿川郡",
+        "name_ru":  "Ёнчхон-гун"
+    },
+    {
+        "region_cd":  "41590",
+        "name_ko":  "경기 화성시",
+        "name_en":  "Hwaseong-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿城市",
+        "name_ru":  "Город Хвасон"
+    },
+    {
+        "region_cd":  "41462",
+        "name_ko":  "경기 용인시 수지구",
+        "name_en":  "Yongin-si Suji-gu",
+        "use_yn":  "Y",
+        "name_zh":  "京畿仁市水枝",
+        "name_ru":  "Судж-гу"
+    },
+    {
+        "region_cd":  "41410",
+        "name_ko":  "경기 군포시",
+        "name_en":  "Gunpo-si",
+        "use_yn":  "Y",
+        "name_zh":  "京畿浦市",
+        "name_ru":  "Кунпхо"
+    },
+    {
+        "region_cd":  "42810",
+        "name_ko":  "강원 인제군",
+        "name_en":  "Inje-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原麟蹄郡",
+        "name_ru":  "Индже-гун"
+    },
+    {
+        "region_cd":  "42780",
+        "name_ko":  "강원 철원군",
+        "name_en":  "Cheorwon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原原郡",
+        "name_ru":  "Чорвон-гун"
+    },
+    {
+        "region_cd":  "42760",
+        "name_ko":  "강원 평창군",
+        "name_en":  "Pyeongchang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原平昌郡",
+        "name_ru":  "Пхёнчхан-гун"
+    },
+    {
+        "region_cd":  "42720",
+        "name_ko":  "강원 홍천군",
+        "name_en":  "Hongcheon-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原洪川郡",
+        "name_ru":  "Хончхон-гун"
+    },
+    {
+        "region_cd":  "42190",
+        "name_ko":  "강원 태백시",
+        "name_en":  "Taebaek-si",
+        "use_yn":  "Y",
+        "name_zh":  "江原太白市",
+        "name_ru":  "Тэбэк"
+    },
+    {
+        "region_cd":  "42130",
+        "name_ko":  "강원 원주시",
+        "name_en":  "Wonju-si",
+        "use_yn":  "Y",
+        "name_zh":  "江原原州市",
+        "name_ru":  "Вонджу"
+    },
+    {
+        "region_cd":  "42800",
+        "name_ko":  "강원 양구군",
+        "name_en":  "Yanggu-gun",
+        "use_yn":  "Y",
+        "name_zh":  "江原口郡",
+        "name_ru":  "Янгу-гун"
+    },
+    {
+        "region_cd":  "42150",
+        "name_ko":  "강원 강릉시",
+        "name_en":  "Gangneung-si",
+        "use_yn":  "Y",
+        "name_zh":  "江原江陵市",
+        "name_ru":  "Каннын"
+    },
+    {
+        "region_cd":  "43760",
+        "name_ko":  "충북 괴산군",
+        "name_en":  "Goesan-gun",
+        "use_yn":  "Y",
+        "name_zh":  "忠北槐山郡",
+        "name_ru":  "Коесан-гун"
+    },
+    {
+        "region_cd":  "48170",
+        "name_ko":  "경남 진주시",
+        "name_en":  "Jinju-si",
+        "use_yn":  "Y",
+        "name_zh":  "南晋州市",
+        "name_ru":  "Джинджу"
+    },
+    {
+        "region_cd":  "48880",
+        "name_ko":  "경남 거창군",
+        "name_en":  "Geochang-gun",
+        "use_yn":  "Y",
+        "name_zh":  "南居昌郡",
+        "name_ru":  "Кеочан-гун"
+    },
+    {
+        "region_cd":  "48240",
+        "name_ko":  "경남 사천시",
+        "name_en":  "Sacheon-si",
+        "use_yn":  "Y",
+        "name_zh":  "南泗川市",
+        "name_ru":  "Сачхон"
+    },
+    {
+        "region_cd":  "49130",
+        "name_ko":  "제주 서귀포시",
+        "name_en":  "Seogwipo-si",
+        "use_yn":  "Y",
+        "name_zh":  "州西浦市",
+        "name_ru":  "Согуйпхо"
+    },
+    {
+        "region_cd":  "49710",
+        "name_ko":  "제주 북제주군",
+        "name_en":  "Bukjeju-gun",
+        "use_yn":  "Y",
+        "name_zh":  "州北州郡",
+        "name_ru":  "Букчеджу-гун"
+    }
+]
