@@ -139,9 +139,12 @@ Swagger UI:
 
 로컬 시드 계정:
 
-- `admin.local@kworkerharmony.com` / `password123`
-- `employer.local@kworkerharmony.com` / `password123`
-- `worker.local@kworkerharmony.com` / `password123`
+- `employer.local@kohamo.com` / `password123`
+- `worker1.local@kohamo.com` / `password123`
+- `worker2.local@kohamo.com` / `password123`
+- `worker3.local@kohamo.com` / `password123`
+- `worker4.local@kohamo.com` / `password123`
+- `worker5.local@kohamo.com` / `password123`
 
 ## 주요 환경 변수
 
@@ -190,12 +193,18 @@ Swagger UI:
   "email": "admin@test.com",
   "password": "password123",
   "name": "Admin User",
+  "phoneNumber": "010-1000-0000",
   "userType": "EMPLOYER",
   "countryCode": "KR",
+  "languageCode": "ko",
   "companyName": "Harmony Co",
   "companyBusinessNumber": "123-45-67890",
   "companyIndustry": "Manufacturing",
-  "companyCountry": "KR"
+  "companyAddress": "Seoul",
+  "foreignWorkerQuota": 5,
+  "employmentPermitCertNo": "EPS-001",
+  "companyCountryCode": "KR",
+  "companyLanguageCode": "ko"
 }
 ```
 
