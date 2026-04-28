@@ -151,6 +151,12 @@ Swagger UI:
 - `REDIS_HOST`
 - `REDIS_PORT`
 - `JWT_SECRET`
+- `APP_CORS_ALLOWED_ORIGINS` (기본값: `http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174`)
+- `APP_CORS_ALLOWED_METHODS`
+- `APP_CORS_ALLOWED_HEADERS`
+- `APP_CORS_EXPOSED_HEADERS`
+- `APP_CORS_ALLOW_CREDENTIALS`
+- `APP_CORS_MAX_AGE_SECONDS`
 - `DOCUMENT_STORAGE_ROOT`
 - `DOCUMENT_ANALYSIS_AI_ENABLED`
 - `DOCUMENT_ANALYSIS_AI_BASE_URL`
@@ -175,6 +181,7 @@ DOCUMENT_ANALYSIS_AI_HEALTH_PATH='/health' \
 ```
 
 프론트에서는 `GET /api/ai/health`로 AI 연결 상태를 확인합니다. AI 분석이 비활성화된 로컬 환경에서는 `STUB`, 실제 AI 서버를 붙인 환경에서는 `HTTP` 상태를 반환합니다.
+로컬 프론트 기본 포트인 `5173`, 현재 Vite 대체 포트인 `5174`는 CORS 기본 허용 origin에 포함되어 있습니다.
 
 ## 테스트
 
