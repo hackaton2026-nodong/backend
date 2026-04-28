@@ -139,12 +139,12 @@ Swagger UI:
 
 로컬 시드 계정:
 
-- `employer.local@kohamo.com` / `password123`
-- `worker1.local@kohamo.com` / `password123`
-- `worker2.local@kohamo.com` / `password123`
-- `worker3.local@kohamo.com` / `password123`
-- `worker4.local@kohamo.com` / `password123`
-- `worker5.local@kohamo.com` / `password123`
+- `minsukim@hankukmanufacturing.co.kr` / `password123`
+- `minh.nguyen97@example.com` / `password123`
+- `somchai.phanit95@example.com` / `password123`
+- `maria.santos98@example.com` / `password123`
+- `dewi.lestari96@example.com` / `password123`
+- `ram.thapa94@example.com` / `password123`
 
 ## 주요 환경 변수
 

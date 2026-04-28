@@ -4,80 +4,88 @@ insert into enterprises (
     name, business_number, industry, address, foreign_worker_quota,
     employment_permit_cert_no, country_code, language_code, status, created_at, updated_at
 )
-select 'Kohamo Demo Factory',
-       'LOCAL-BIZ-001',
-       'Manufacturing',
-       'Seoul, Guro-gu Digital-ro 100',
+select '한국제조',
+       '214-86-73951',
+       '제조업 / 금속부품 가공',
+       '경기도 안산시 단원구 산단로 125, 한국제조',
        5,
-       'EPS-DEMO-2026-001',
+       'EPS-2026-KM-0317',
        'KR',
        'ko',
        'ACTIVE',
        current_timestamp,
        current_timestamp
 where not exists (
-    select 1 from enterprises where business_number = 'LOCAL-BIZ-001'
+    select 1 from enterprises where business_number = '214-86-73951'
 );
 
 insert into users (
     email, password_hash, name, birth_date, phone_number, visa_expires_at,
     role, user_type, status, country_code, language_code, enterprise_id, created_at, updated_at
 )
-select 'employer.local@kohamo.com',
+select 'minsukim@hankukmanufacturing.co.kr',
        '$2a$10$jUJLnbeDwaNvtNoILkT7dOIC/CPeUKhsGoMa3/ZARc10xrK/kS5.2',
-       'Kim Employer',
+       '김민수',
        null,
-       '010-1000-0000',
+       '010-4821-7395',
        null,
        'ADMIN',
        'EMPLOYER',
        'ACTIVE',
        'KR',
        'ko',
-       (select id from enterprises where business_number = 'LOCAL-BIZ-001'),
+       (select id from enterprises where business_number = '214-86-73951'),
        current_timestamp,
        current_timestamp
 where not exists (
-    select 1 from users where email = 'employer.local@kohamo.com'
+    select 1 from users where email = 'minsukim@hankukmanufacturing.co.kr'
 );
 
 insert into users (
     email, password_hash, name, birth_date, phone_number, visa_expires_at,
     role, user_type, status, country_code, language_code, enterprise_id, created_at, updated_at
 )
-select concat('worker', n, '.local@kohamo.com'),
+select email,
        '$2a$10$jUJLnbeDwaNvtNoILkT7dOIC/CPeUKhsGoMa3/ZARc10xrK/kS5.2',
-       concat('Demo Worker ', n),
-       date_add(current_date, interval -(25 + n) year),
-       concat('010-2000-000', n),
-       date_add(current_date, interval (6 + n) month),
+       name,
+       birth_date,
+       phone_number,
+       visa_expires_at,
        'WORKER',
        'WORKER',
        'ACTIVE',
        'KR',
        'ko',
-       (select id from enterprises where business_number = 'LOCAL-BIZ-001'),
+       (select id from enterprises where business_number = '214-86-73951'),
        current_timestamp,
        current_timestamp
 from (
-    select 1 as n union all select 2 union all select 3 union all select 4 union all select 5
+    select 1 as n, 'minh.nguyen97@example.com' as email, 'NGUYEN VAN MINH' as name, date '1997-04-12' as birth_date, '010-7314-2568' as phone_number, date '2027-08-14' as visa_expires_at
+    union all select 2, 'somchai.phanit95@example.com', 'SOMCHAI PHANIT', date '1995-11-03', '010-8492-1176', date '2027-10-02'
+    union all select 3, 'maria.santos98@example.com', 'MARIA LUZ SANTOS', date '1998-07-21', '010-6258-9043', date '2028-01-19'
+    union all select 4, 'dewi.lestari96@example.com', 'DEWI LESTARI', date '1996-02-18', '010-3729-6815', date '2027-06-25'
+    union all select 5, 'ram.thapa94@example.com', 'RAM BAHADUR THAPA', date '1994-09-09', '010-9184-5632', date '2028-03-11'
 ) seed_workers
 where not exists (
-    select 1 from users where email = concat('worker', n, '.local@kohamo.com')
+    select 1 from users where email = seed_workers.email
 );
 
 insert into cases (id, employer_id, worker_id, enterprise_id, status, industry, region, created_at, updated_at)
 select concat('11111111-1111-1111-1111-11111111111', n),
-       (select id from users where email = 'employer.local@kohamo.com'),
-       (select id from users where email = concat('worker', n, '.local@kohamo.com')),
-       (select id from enterprises where business_number = 'LOCAL-BIZ-001'),
+       (select id from users where email = 'minsukim@hankukmanufacturing.co.kr'),
+       (select id from users where email = worker_email),
+       (select id from enterprises where business_number = '214-86-73951'),
        'ACTIVE',
-       'Manufacturing',
-       'Seoul',
+       '제조업 / 금속부품 가공',
+       '경기도 안산시',
        current_timestamp,
        current_timestamp
 from (
-    select 1 as n union all select 2 union all select 3 union all select 4 union all select 5
+    select 1 as n, 'minh.nguyen97@example.com' as worker_email
+    union all select 2, 'somchai.phanit95@example.com'
+    union all select 3, 'maria.santos98@example.com'
+    union all select 4, 'dewi.lestari96@example.com'
+    union all select 5, 'ram.thapa94@example.com'
 ) seed_cases
 where not exists (
     select 1 from cases where id = concat('11111111-1111-1111-1111-11111111111', n)
@@ -90,7 +98,7 @@ insert into documents (
 )
 select concat('44444444-4444-4444-4444-44444444444', n),
        concat('11111111-1111-1111-1111-11111111111', n),
-       (select id from users where email = 'employer.local@kohamo.com'),
+       (select id from users where email = 'minsukim@hankukmanufacturing.co.kr'),
        'EMPLOYMENT_CONTRACT',
        concat('employment-contract-worker-', n, '.pdf'),
        concat('local/contracts/worker-', n, '.pdf'),
@@ -137,7 +145,7 @@ insert into company_invite_codes (
     enterprise_id, case_id, code, expires_at, max_uses, used_count,
     active, default_role, created_at, updated_at
 )
-select (select id from enterprises where business_number = 'LOCAL-BIZ-001'),
+select (select id from enterprises where business_number = '214-86-73951'),
        concat('11111111-1111-1111-1111-11111111111', n),
        concat('KOHAMO-WORKER-', n),
        date_add(current_timestamp, interval 1 year),

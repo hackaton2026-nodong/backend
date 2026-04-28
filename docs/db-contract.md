@@ -303,9 +303,9 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 
 `src/main/resources/data-local.sql`과 `docker/mysql/init/02-seed.sql`은 DB align 검증용으로 아래 시나리오를 생성한다.
 
-- 사업장 1개: `Kohamo Demo Factory`
-- 고용주 1명: `employer.local@kohamo.com` / `password123`
-- 근로자 5명: `worker1.local@kohamo.com` ~ `worker5.local@kohamo.com` / `password123`
+- 사업장 1개: `한국제조`
+- 고용주 1명: `minsukim@hankukmanufacturing.co.kr` / `password123`
+- 근로자 5명: `minh.nguyen97@example.com`, `somchai.phanit95@example.com`, `maria.santos98@example.com`, `dewi.lestari96@example.com`, `ram.thapa94@example.com` / `password123`
 - 활성 케이스 5개: 각 근로자별 1개
 - 근로계약서 문서 5개: 각 케이스별 `EMPLOYMENT_CONTRACT`, `ANALYZED` 상태
 - 분석 결과 5개: placeholder summary/risk flags

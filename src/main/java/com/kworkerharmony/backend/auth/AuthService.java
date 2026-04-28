@@ -131,7 +131,7 @@ public class AuthService {
                 Duration.ofSeconds(jwtProperties.refreshTokenExpirationSeconds())
         );
 
-        return new LoginResponse(accessToken, refreshToken);
+        return new LoginResponse(accessToken, refreshToken, user.getRole().name(), user.getUserType().name());
     }
 
     @Transactional(readOnly = true)
