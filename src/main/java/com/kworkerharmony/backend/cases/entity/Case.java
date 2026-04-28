@@ -66,4 +66,9 @@ public class Case extends BaseEntity {
         this.worker = worker;
         this.status = CaseStatus.ACTIVE;
     }
+
+    public void connectWorker(User worker) {
+        this.worker = worker;
+        this.status = CaseStatus.ACTIVE;
+    }
 }
