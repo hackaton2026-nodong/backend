@@ -12,7 +12,7 @@
 - 앵커링은 `DocumentAnchorRelayerPort` 뒤의 Stub adapter가 처리한다. 실제 Sepolia 트랜잭션은 아직 전송하지 않는다.
 - 오프체인 OCR 추출은 Docker Compose의 PaddleOCR worker와 callback API로 실제 동작한다.
 - OCR callback 결과는 필터링/정규화되어 `document_extractions`에 저장된다. 원본 OCR JSON은 저장하지 않고 `source_result_hash`만 남긴다.
-- 오프체인 분석은 `document_analysis_results` 모델과 API로 placeholder 결과를 저장한다. 실제 AI 분석 RPC 또는 AI 레이어 조회 API로 확장할 때의 입력/출력 계약은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
+- 오프체인 분석은 `document_analysis_results` 모델과 API로 placeholder 결과를 저장한다. 설정을 켜면 저장된 sanitized extraction payload를 AI 레이어 endpoint로 `POST`하는 구조로 확장된다. 입력/출력 계약은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
 
 문서 업로드 후 플로우는 의도적으로 두 갈래로 분리한다.
 
@@ -144,7 +144,7 @@
 - `POST /api/documents/{documentId}/analysis`: 오프체인 분석 결과 생성을 시작한다. 현재는 실제 AI 호출 없이 저장된 extraction payload 기준 placeholder 결과를 저장한다.
 - `GET /api/documents/{documentId}/analysis`: 저장된 분석 결과를 조회한다.
 
-실제 AI 분석 구현 시 AI 레이어에는 원문 파일, `storageKey`, 필터링 전 OCR 전문을 전달하지 않는다. AI 레이어는 저장된 extraction payload 또는 그 메타데이터를 조회하는 방식으로 붙이는 방향을 우선 검토한다.
+실제 AI 분석 구현 시 AI 레이어에는 원문 파일, `storageKey`, 필터링 전 OCR 전문을 전달하지 않는다. 백엔드는 저장된 sanitized extraction payload와 메타데이터만 envelope로 구성해 AI 레이어에 `POST`한다.
 
 ## EIP-712 Wallet Flow
 
@@ -256,5 +256,5 @@ http://localhost:8080/document-upload-test.html
 - EIP-712 canonical hash와 Solidity `keccak256` 계산을 맞추고, 서버에서 ECDSA signer recovery를 수행한다.
 - `caseIdHash`, `anchorId`, `typedDataHash`를 실제 컨트랙트 계산식과 동일하게 정렬한다.
 - relayer private key, RPC URL, gas/nonce 정책을 환경변수와 운영 설정으로 분리한다.
-- AI 분석 레이어 조회/연동 API를 추가해 placeholder 분석을 실제 분석 결과로 대체한다.
+- AI 분석 레이어 POST 연동을 활성화해 placeholder 분석을 실제 분석 결과로 대체한다.
 - 프론트 오케스트레이션을 제품 UX로 정리해 업로드, OCR, 서명, 앵커링, 분석 요청이 자연스럽게 이어지게 한다.

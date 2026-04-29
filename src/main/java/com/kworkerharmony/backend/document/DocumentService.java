@@ -21,6 +21,9 @@ import com.kworkerharmony.backend.document.dto.response.DocumentSignatureRespons
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort;
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort.AnchorCommand;
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort.AnchorReceipt;
+import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort;
+import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort.AiAnalysisCommand;
+import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort.AiAnalysisResult;
 import com.kworkerharmony.backend.document.port.DocumentHashPort;
 import com.kworkerharmony.backend.document.port.DocumentOcrPort;
 import com.kworkerharmony.backend.document.port.DocumentOcrPort.OcrCommand;
@@ -66,6 +69,7 @@ public class DocumentService {
     private final DocumentOcrProperties ocrProperties;
     private final DocumentTypedDataFactory typedDataFactory;
     private final DocumentAnchorRelayerPort anchorRelayerPort;
+    private final DocumentAiAnalysisPort documentAiAnalysisPort;
     private final DocumentOcrPort documentOcrPort;
     private final PaddleOcrEmploymentContractExtractor paddleOcrEmploymentContractExtractor;
     private final ObjectMapper objectMapper;
@@ -287,18 +291,20 @@ public class DocumentService {
         DocumentExtraction extraction = documentExtractionRepository.findByDocumentId(document.getId())
                 .orElse(null);
         validateExtractionCanBeAnalyzed(extraction);
-        String aiInputHash = extraction == null
-                ? document.getSha256Hash()
-                : extraction.getAiPayloadHash();
         DocumentAnalysisResult result = documentAnalysisResultRepository.findByDocumentId(document.getId())
                 .orElseGet(() -> documentAnalysisResultRepository.save(new DocumentAnalysisResult(document.getId())));
-        result.markCompleted(
-                aiInputHash,
-                DocumentCrypto.sha256Hex("analysis|" + document.getId() + "|" + aiInputHash),
-                "Placeholder analysis result for document " + document.getId(),
-                "[]"
-        );
-        markAnalyzedWithoutOverwritingOnchainTerminalState(document);
+        try {
+            AiAnalysisResult analysisResult = documentAiAnalysisPort.analyze(aiAnalysisCommand(document, extraction));
+            result.markCompleted(
+                    analysisResult.inputHash(),
+                    analysisResult.analysisResultHash(),
+                    analysisResult.summary(),
+                    analysisResult.riskFlags()
+            );
+            markAnalyzedWithoutOverwritingOnchainTerminalState(document);
+        } catch (RuntimeException ex) {
+            result.markFailed(truncate(ex.getMessage(), 1000));
+        }
         return DocumentAnalysisResponse.from(result);
     }
 
@@ -502,7 +508,7 @@ public class DocumentService {
 
     private void validateExtractionCanBeAnalyzed(DocumentExtraction extraction) {
         if (extraction == null) {
-            return;
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document extraction is required");
         }
         if (extraction.getStatus() == DocumentExtractionStatus.NEEDS_REVIEW
                 || extraction.getStatus() == DocumentExtractionStatus.PENDING
@@ -510,6 +516,36 @@ public class DocumentService {
                 || extraction.getAiPayloadHash() == null
                 || extraction.getAiPayloadHash().isBlank()) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document extraction requires correction");
+        }
+    }
+
+    private AiAnalysisCommand aiAnalysisCommand(Document document, DocumentExtraction extraction) {
+        String payloadJson = extraction.getCorrectedPayload() == null || extraction.getCorrectedPayload().isBlank()
+                ? extraction.getExtractedPayload()
+                : extraction.getCorrectedPayload();
+        JsonNode payload = readJson(payloadJson);
+        String aiPayloadHash = DocumentCrypto.sha256Hex(canonicalJson(payload));
+        return new AiAnalysisCommand(
+                DocumentCrypto.sha256Hex("analysis-request|" + document.getId() + "|" + aiPayloadHash),
+                document.getId(),
+                document.getCaseId(),
+                document.getSha256Hash(),
+                document.getDocumentType(),
+                extraction.getId(),
+                extraction.getStatus().name(),
+                extraction.getSchemaVersion(),
+                extraction.getSourceEngine(),
+                extraction.getSourceResultHash(),
+                aiPayloadHash,
+                payload
+        );
+    }
+
+    private JsonNode readJson(String value) {
+        try {
+            return objectMapper.readTree(value);
+        } catch (JsonProcessingException ex) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Invalid extraction payload JSON");
         }
     }
 

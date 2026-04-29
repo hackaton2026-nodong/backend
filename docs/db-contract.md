@@ -813,7 +813,7 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 
 #### `POST /documents/{documentId}/analysis`
 
-인증 필요. 오프체인 분석 결과를 생성 또는 갱신한다. `document_extractions.corrected_payload`가 있으면 이를 우선 사용하고, 없으면 `extracted_payload`의 hash를 분석 입력 hash로 사용한다. 현재 AI 호출은 placeholder다.
+인증 필요. 오프체인 분석 결과를 생성 또는 갱신한다. `document_extractions.corrected_payload`가 있으면 이를 우선 사용하고, 없으면 `extracted_payload`를 사용해 sanitized AI request를 구성한다. `DOCUMENT_AI_ENABLED=true`이면 `DOCUMENT_AI_ENDPOINT`로 POST하고, 비활성 상태에서는 placeholder 결과를 저장한다.
 
 응답 데이터: `DocumentAnalysisResponse`
 

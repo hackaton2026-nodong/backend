@@ -40,6 +40,9 @@ app:
       endpoint: ${DOCUMENT_OCR_ENDPOINT:}
       callback-token: ${DOCUMENT_OCR_CALLBACK_TOKEN:}
       callback-base-url: ${DOCUMENT_OCR_CALLBACK_BASE_URL:}
+    ai:
+      enabled: ${DOCUMENT_AI_ENABLED:false}
+      endpoint: ${DOCUMENT_AI_ENDPOINT:}
     blockchain:
       chain-id: ${DOCUMENT_CHAIN_ID:11155111}
       contract-address: ${DOCUMENT_CONTRACT_ADDRESS:0x0000000000000000000000000000000000000000}

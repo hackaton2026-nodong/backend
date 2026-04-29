@@ -71,5 +71,6 @@ public class DocumentAnalysisResult extends BaseEntity {
     public void markFailed(String summary) {
         this.status = DocumentAnalysisStatus.FAILED;
         this.summary = summary;
+        this.analyzedAt = LocalDateTime.now();
     }
 }
