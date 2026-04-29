@@ -201,7 +201,7 @@ Enum: `DocumentAnchorStatus = PENDING, ANCHORED, FAILED`
 
 ### `document_analysis_results`
 
-오프체인 분석 결과 placeholder와 향후 OCR/AI 분석 결과 해시를 저장한다. 실제 OCR/parser와 AI 레이어 사이의 payload 규격은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
+오프체인 분석 결과 placeholder와 향후 AI 분석 결과 해시를 저장한다. 실제 OCR 추출 결과는 `document_extractions`에 저장하며, extraction payload와 AI 레이어 사이의 payload 규격은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
 
 | 컬럼 | 타입 | NULL | 키 | 설명 |
 | --- | --- | --- | --- | --- |

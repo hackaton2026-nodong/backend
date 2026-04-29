@@ -4,7 +4,7 @@
 
 ## Scope
 
-현재 구현의 `POST /api/documents/{documentId}/analysis`는 placeholder다. 이 문서는 향후 placeholder를 실제 OCR/parser 및 AI 분석 RPC로 대체할 때 지켜야 할 입력/출력 규격이다.
+현재 구현은 PaddleOCR worker callback을 통해 `document_extractions`에 구조화 계약 필드를 저장한다. `POST /api/documents/{documentId}/analysis`는 아직 placeholder다. 이 문서는 저장된 extraction payload를 AI 레이어와 연결할 때 지켜야 할 입력/출력 규격이다.
 
 업로드 후 공통 기반은 아래와 같다.
 
@@ -22,7 +22,8 @@ document upload
 HASHED document
 -> OCR worker callback with PaddleOCR JSON
 -> sanitize/mask
--> build AI request
+-> persist document_extractions extracted_payload
+-> build or expose AI request metadata
 -> AI analysis
 -> persist analysis result
 ```
@@ -42,8 +43,8 @@ HASHED document
 2. 백엔드는 OCR worker에 `documentId`, `storageKey`, `sha256Hash`, callback URL을 전달한다.
 3. OCR worker는 원본 파일을 OCR/parser에만 전달하고, PaddleOCR JSON을 callback으로 제출한다.
 4. sanitizer가 개인정보, 사업장 식별정보, 상세주소, 문서번호, 계좌번호 등 식별 가능 값을 제거하거나 마스킹한다.
-5. AI request builder가 허용된 근로조건 필드와 근거 참조만 조합한다.
-6. AI analysis port가 request를 전송한다.
+5. 추출기는 허용된 근로조건 필드와 근거 참조만 `document_extractions.extracted_payload`에 저장한다.
+6. AI 레이어는 백엔드가 제공하는 조회 API 또는 내부 계약을 통해 extraction 메타데이터와 payload를 읽는다.
 7. AI response를 검증한 뒤 `document_analysis_results`와 후속 분석 테이블에 저장한다.
 
 ## Field Policy
@@ -105,6 +106,8 @@ AI 설명 품질과 추적성을 위해 제한적으로 전달한다.
 `maskedExcerpt`는 식별자가 제거된 짧은 문구여야 한다. 원문 문단 전체를 전달하지 않는다.
 
 ## AI Request Schema
+
+현재 팀 논의상 백엔드가 AI 레이어에 큰 body를 동기 `POST`하고 응답을 기다리는 방식보다는, AI 레이어가 백엔드의 read-only metadata/payload API를 `GET`으로 조회하는 방향을 우선 검토한다. 아래 schema는 AI 레이어가 조회하거나 내부적으로 구성해야 하는 논리적 입력 구조다.
 
 ```json
 {

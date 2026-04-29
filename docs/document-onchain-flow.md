@@ -10,14 +10,17 @@
 - 프론트는 `document-upload-test.html`에서 MetaMask 호환 지갑 연결과 EIP-712 서명 요청을 수행한다.
 - 백엔드는 서명 요청 payload를 생성하고, 제출된 서명을 저장하며, 서버 기준 payload로 `typedDataHash`를 재계산한다.
 - 앵커링은 `DocumentAnchorRelayerPort` 뒤의 Stub adapter가 처리한다. 실제 Sepolia 트랜잭션은 아직 전송하지 않는다.
-- 오프체인 분석은 `document_analysis_results` 모델과 API로 placeholder 결과를 저장한다. 실제 OCR/parser 및 AI 분석 RPC로 확장할 때의 입력/출력 계약은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
+- 오프체인 OCR 추출은 Docker Compose의 PaddleOCR worker와 callback API로 실제 동작한다.
+- OCR callback 결과는 필터링/정규화되어 `document_extractions`에 저장된다. 원본 OCR JSON은 저장하지 않고 `source_result_hash`만 남긴다.
+- 오프체인 분석은 `document_analysis_results` 모델과 API로 placeholder 결과를 저장한다. 실제 AI 분석 RPC 또는 AI 레이어 조회 API로 확장할 때의 입력/출력 계약은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
 
 문서 업로드 후 플로우는 의도적으로 두 갈래로 분리한다.
 
-- 오프체인 분석 플로우: `HASHED` 문서를 OCR/parser로 처리한 뒤 필터링/마스킹된 allowlist payload만 AI 분석 레이어로 넘겨 `document_analysis_results`에 저장한다. 현재는 placeholder다.
+- 오프체인 추출 플로우: `HASHED` 문서를 PaddleOCR worker로 처리한 뒤 필터링/마스킹된 allowlist payload를 `document_extractions`에 저장한다.
+- 오프체인 분석 플로우: 저장된 extraction payload를 기준으로 AI 분석 레이어가 분석하고 `document_analysis_results`에 저장한다. 현재 AI 분석은 placeholder다.
 - 온체인 증명 플로우: 같은 `documentHash`에 대해 사용자의 EIP-712 서명을 받고, 서버 relayer가 앵커링 결과를 `document_anchors`에 저장한다. 현재는 Stub relayer다.
 
-테스트 페이지는 MVP 검증 편의를 위해 두 갈래를 한 화면에 모아 둔 것이며, 실제 제품 UX에서는 문서 업로드 후 분석은 자동 진행하고 지갑 서명 이후 앵커링은 자동으로 이어지는 형태가 자연스럽다.
+테스트 페이지는 MVP 검증 편의를 위해 업로드, OCR polling, 지갑 서명, 앵커링, 분석 placeholder 저장을 한 화면에 모아 둔 오케스트레이터다. 실제 제품 UX에서는 개발자용 입력/상태 출력을 줄이고 동일한 연쇄 흐름을 사용자 친화적으로 다듬는 작업이 남아 있다.
 
 ## Status Flow
 
@@ -134,10 +137,14 @@
 
 ### Analysis APIs
 
-- `POST /api/documents/{documentId}/analysis`: 오프체인 분석 결과 생성을 시작한다. 현재는 실제 OCR/AI 호출 없이 placeholder 결과를 저장한다.
+- `POST /api/documents/{documentId}/extractions/paddle-ocr`: 인증 사용자가 직접 PaddleOCR JSON을 제출해 extraction을 생성한다. 테스트/수동 검증용이다.
+- `GET /api/documents/{documentId}/extractions`: 저장된 extraction 상태와 payload를 조회한다.
+- `PATCH /api/documents/{documentId}/extractions`: 사용자 보정 payload를 저장한다.
+- `POST /api/internal/documents/{documentId}/ocr-result`: OCR worker callback endpoint다. callback token으로 보호되며 원본 OCR JSON을 받아 구조화 payload만 저장한다.
+- `POST /api/documents/{documentId}/analysis`: 오프체인 분석 결과 생성을 시작한다. 현재는 실제 AI 호출 없이 저장된 extraction payload 기준 placeholder 결과를 저장한다.
 - `GET /api/documents/{documentId}/analysis`: 저장된 분석 결과를 조회한다.
 
-실제 분석 구현 시 AI 레이어에는 원문 파일, `storageKey`, 필터링 전 OCR 전문을 전달하지 않는다. OCR/parser 결과는 메모리에서 필터링/마스킹한 뒤 [offchain-analysis-contract.md](offchain-analysis-contract.md)의 AI request schema로만 전달한다.
+실제 AI 분석 구현 시 AI 레이어에는 원문 파일, `storageKey`, 필터링 전 OCR 전문을 전달하지 않는다. AI 레이어는 저장된 extraction payload 또는 그 메타데이터를 조회하는 방식으로 붙이는 방향을 우선 검토한다.
 
 ## EIP-712 Wallet Flow
 
@@ -203,6 +210,15 @@ event DocumentAnchored(
 - Unique: `(document_id)`
 - `extracted_text_hash`는 필터링 전 OCR 전문의 hash가 아니라, 마스킹/정규화된 AI request 또는 normalized terms의 hash로 사용한다.
 
+### `document_extractions`
+
+PaddleOCR callback 결과에서 근로계약서 분석에 필요한 필드만 추출해 저장한다.
+
+- 주요 필드: `document_id`, `status`, `schema_version`, `source_engine`, `source_result_hash`, `extracted_payload`, `corrected_payload`, `ai_payload_hash`, `review_required_reason`, `extracted_at`, `corrected_at`
+- Unique: `(document_id)`
+- `source_result_hash`는 저장하지 않는 원본 OCR JSON의 canonical hash다.
+- `extracted_payload`와 `corrected_payload`는 개인정보와 원문 OCR 전문을 제외한 구조화 계약 조건만 포함한다.
+
 ## Local Manual Test
 
 1. 로컬 인프라를 실행한다.
@@ -220,21 +236,18 @@ http://localhost:8080/document-upload-test.html
 ```
 
 4. access token, case ID, 파일을 입력해 문서를 업로드한다.
-5. `Create Signature Request`로 EIP-712 payload를 생성한다.
-6. `Connect Wallet`로 MetaMask를 연결한다.
-7. MetaMask 네트워크를 Sepolia로 맞춘다.
-8. `Sign EIP-712`로 지갑 서명을 수행한다.
-9. `Submit Signature`로 서명을 백엔드에 저장한다.
-10. `Anchor Document`로 Stub 앵커링 결과를 확인한다.
-11. `Get Anchor`로 저장된 앵커 결과를 다시 조회한다.
-12. `Create Analysis`로 placeholder 분석 결과 저장을 확인한다.
+5. 화면은 OCR worker callback을 polling하고, 동시에 지갑 서명 플로우를 진행한다.
+6. MetaMask 네트워크를 Sepolia로 맞춘다.
+7. 지갑 서명이 완료되면 서명 제출과 Stub 앵커링을 이어서 확인한다.
+8. extraction이 `EXTRACTED` 또는 `CORRECTED` 상태가 되면 분석 placeholder 저장을 확인한다.
 
 ## Known Limits
 
 - 실제 Sepolia RPC 호출과 `web3j` 기반 relayer 어댑터는 아직 구현하지 않았다.
 - 실제 ECDSA signer recovery 검증은 아직 구현하지 않았다.
 - 현재 `typedDataHash`, `caseIdHash`, `anchorId` 계산은 MVP 내부 검증용 SHA-256 helper를 사용한다. 실제 Solidity 검증과 맞추려면 keccak/EIP-712 canonical hashing 구현으로 교체해야 한다.
-- 오프체인 분석은 placeholder이며 OCR, 구조화, AI 분석 호출은 후속 작업이다. 후속 구현은 원문 비전달, 필터링 전 OCR 비저장, 마스킹 근거 참조 정책을 먼저 만족해야 한다.
+- 오프체인 OCR 추출은 PaddleOCR worker 기반으로 동작한다. 다만 CPU 추론 시간은 2페이지 PDF 기준 약 50~60초 수준이라 운영 환경에서는 worker 리소스와 queue 정책이 필요하다.
+- 오프체인 AI 분석은 placeholder다. 후속 구현은 원문 비전달, 필터링 전 OCR 비저장, 마스킹 근거 참조 정책을 유지해야 한다.
 - DB 변경은 `docker/mysql/init/01-schema.sql`에 반영되어 있으나, 운영 마이그레이션 도구는 아직 없다.
 
 ## Next Development Points
@@ -243,5 +256,5 @@ http://localhost:8080/document-upload-test.html
 - EIP-712 canonical hash와 Solidity `keccak256` 계산을 맞추고, 서버에서 ECDSA signer recovery를 수행한다.
 - `caseIdHash`, `anchorId`, `typedDataHash`를 실제 컨트랙트 계산식과 동일하게 정렬한다.
 - relayer private key, RPC URL, gas/nonce 정책을 환경변수와 운영 설정으로 분리한다.
-- OCR/parser와 AI 분석 레이어 RPC를 추가해 placeholder 분석을 실제 분석 결과로 대체한다.
-- 프론트 오케스트레이션을 추가해 사용자가 서명만 하면 `POST /signatures`, `POST /anchor`, `GET /anchor`가 자동으로 이어지게 한다.
+- AI 분석 레이어 조회/연동 API를 추가해 placeholder 분석을 실제 분석 결과로 대체한다.
+- 프론트 오케스트레이션을 제품 UX로 정리해 업로드, OCR, 서명, 앵커링, 분석 요청이 자연스럽게 이어지게 한다.
