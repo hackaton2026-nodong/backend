@@ -134,14 +134,14 @@ class DocumentControllerIntegrationTest {
     void uploadTestPageIsPubliclyAccessible() throws Exception {
         mockMvc.perform(get("/document-upload-test.html"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Document Upload Test")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("step-upload")));
     }
 
     @Test
     void extractionTestPageIsPubliclyAccessible() throws Exception {
         mockMvc.perform(get("/extraction-test.html"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("OCR Extraction Test")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/document-upload-test.html")));
     }
 
     @Test

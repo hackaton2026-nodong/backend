@@ -31,27 +31,37 @@ services:
       timeout: 3s
       retries: 20
 
-  ocr-mock:
-    image: python:3.12-alpine
-    container_name: backend-ocr-mock
+  ocr-worker:
+    build:
+      context: ./docker/ocr-worker
+    container_name: backend-ocr-worker
     ports:
       - "9000:9000"
     environment:
-      OCR_MOCK_PORT: 9000
+      OCR_WORKER_PORT: 9000
+      OCR_STORAGE_ROOT: /documents
       OCR_CALLBACK_TOKEN: local-ocr-token
       OCR_BACKEND_BASE_URL: http://host.docker.internal:8080
+      OCR_TEXT_DETECTION_MODEL: PP-OCRv5_mobile_det
+      OCR_TEXT_RECOGNITION_MODEL: korean_PP-OCRv5_mobile_rec
+      OCR_TEXT_DET_LIMIT_SIDE_LEN: 1280
+      OCR_TEXT_RECOGNITION_BATCH_SIZE: 8
+      OCR_WARMUP_ON_START: "true"
+      PADDLE_PDX_CPU_NUM_THREADS: 4
+      PADDLE_PDX_ENABLE_MKLDNN_BYDEFAULT: "False"
+      PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK: "True"
     volumes:
-      - ./docker/ocr-mock:/app:ro
-    working_dir: /app
-    command: ["python", "mock_ocr_worker.py"]
+      - ./storage/documents:/documents:ro
+      - paddleocr-models:/root/.paddlex
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/health', timeout=2).read()"]
       interval: 5s
       timeout: 3s
-      retries: 20
+      retries: 240
 
 volumes:
   mysql-data:
   redis-data:
+  paddleocr-models:

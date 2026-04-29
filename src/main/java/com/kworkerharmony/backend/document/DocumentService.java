@@ -40,8 +40,10 @@ import com.kworkerharmony.backend.user.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -405,6 +407,9 @@ public class DocumentService {
     }
 
     private DocumentExtraction applyPaddleOcrExtraction(Document document, JsonNode ocrResult) {
+        if (ocrResult.path("error").isObject()) {
+            return markPaddleOcrFailed(document, ocrResult.path("error"));
+        }
         String sourceResultHash = canonicalHash(ocrResult);
         EmploymentContractExtractionPayload payload = paddleOcrEmploymentContractExtractor.extract(ocrResult);
         validateSanitizedPayload(payload.payloadJson());
@@ -423,6 +428,19 @@ public class DocumentService {
         );
         document.markOcrCompleted();
         document.markStructured();
+        return extraction;
+    }
+
+    private DocumentExtraction markPaddleOcrFailed(Document document, JsonNode error) {
+        String code = error.path("code").asText("OCR_FAILED");
+        String message = error.path("message").asText("OCR processing failed");
+        DocumentExtraction extraction = documentExtractionRepository.findByDocumentId(document.getId())
+                .orElseGet(() -> documentExtractionRepository.save(new DocumentExtraction(
+                        document.getId(),
+                        PaddleOcrEmploymentContractExtractor.SCHEMA_VERSION,
+                        PaddleOcrEmploymentContractExtractor.SOURCE_ENGINE
+                )));
+        extraction.markFailed(truncate(code + ": " + message, 1000));
         return extraction;
     }
 
@@ -530,12 +548,28 @@ public class DocumentService {
                 || lower.contains("주소")) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Raw OCR fields are not allowed");
         }
-        if (payload.matches(".*[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}.*")
-                || payload.matches(".*01[016789]-?\\d{3,4}-?\\d{4}.*")
-                || payload.matches(".*0\\d{1,2}-\\d{3,4}-\\d{4}.*")
-                || payload.matches(".*\\d{3}-\\d{2}-\\d{5}.*")) {
-            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Sensitive identifiers are not allowed");
+        JsonNode root;
+        try {
+            root = objectMapper.readTree(payload);
+        } catch (JsonProcessingException ex) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Invalid extraction payload JSON");
         }
+        Queue<JsonNode> nodes = new ArrayDeque<>();
+        nodes.add(root);
+        while (!nodes.isEmpty()) {
+            JsonNode node = nodes.remove();
+            if (node.isTextual() && containsSensitiveIdentifier(node.asText())) {
+                throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Sensitive identifiers are not allowed");
+            }
+            node.elements().forEachRemaining(nodes::add);
+        }
+    }
+
+    private boolean containsSensitiveIdentifier(String value) {
+        return value.matches(".*[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}.*")
+                || value.matches(".*01[016789]-?\\d{3,4}-?\\d{4}.*")
+                || value.matches(".*0\\d{1,2}-\\d{3,4}-\\d{4}.*")
+                || value.matches(".*\\d{3}-\\d{2}-\\d{5}.*");
     }
 
     private String anchorId(Document document, DocumentSignature signature) {
