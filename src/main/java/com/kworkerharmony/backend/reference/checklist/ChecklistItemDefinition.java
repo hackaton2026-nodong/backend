@@ -7,6 +7,11 @@ public record ChecklistItemDefinition(
         String title,
         String description,
         boolean required,
-        int displayOrder
+        int displayOrder,
+        ChecklistTriggerType triggerType
 ) {
+
+    public ChecklistTriggerType triggerTypeOrDefault() {
+        return triggerType == null ? ChecklistTriggerType.AD_HOC : triggerType;
+    }
 }

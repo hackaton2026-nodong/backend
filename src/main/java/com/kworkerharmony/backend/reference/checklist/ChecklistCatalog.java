@@ -32,7 +32,8 @@ public class ChecklistCatalog {
                                 item.title(),
                                 item.description(),
                                 item.required(),
-                                item.displayOrder()
+                                item.displayOrder(),
+                                item.triggerTypeOrDefault()
                         )))
                 .toList();
         this.itemsByCode = this.items.stream()
