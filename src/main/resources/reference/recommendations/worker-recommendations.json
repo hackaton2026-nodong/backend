@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "category": "EDUCATION",
+      "name": "Foreign Worker Employment Training",
+      "description": "Entry and employment training for foreign workers.",
+      "targetPath": "/recommendations/education/employment-training",
+      "region": "ALL",
+      "languageCode": "ALL",
+      "industry": "ALL",
+      "reasonTags": ["onboarding", "mandatory"]
+    },
+    {
+      "category": "AGENCY",
+      "name": "Employment Center Consultation",
+      "description": "Local employment center guidance for workplace changes and employment status.",
+      "targetPath": "/recommendations/agencies/employment-center",
+      "region": "ALL",
+      "languageCode": "ALL",
+      "industry": "ALL",
+      "reasonTags": ["case", "agency"]
+    },
+    {
+      "category": "EDUCATION",
+      "name": "Manufacturing Safety Basics",
+      "description": "Basic workplace safety education for manufacturing workers.",
+      "targetPath": "/recommendations/education/manufacturing-safety",
+      "region": "ALL",
+      "languageCode": "ALL",
+      "industry": "Manufacturing",
+      "reasonTags": ["industry", "safety"]
+    }
+  ]
+}
