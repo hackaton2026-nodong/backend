@@ -3,6 +3,9 @@ package com.kworkerharmony.backend.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kworkerharmony.backend.auth.dto.request.SignupRequest;
+import com.kworkerharmony.backend.cases.domain.CaseRepository;
+import com.kworkerharmony.backend.cases.domain.CaseStatus;
+import com.kworkerharmony.backend.cases.entity.Case;
 import com.kworkerharmony.backend.enterprise.CompanyInviteCode;
 import com.kworkerharmony.backend.enterprise.CompanyInviteCodeRepository;
 import com.kworkerharmony.backend.enterprise.Enterprise;
@@ -35,6 +38,9 @@ class AuthServiceIntegrationTest {
 
     @Autowired
     private CompanyInviteCodeRepository companyInviteCodeRepository;
+
+    @Autowired
+    private CaseRepository caseRepository;
 
     @MockitoBean
     private RedisTokenRepository redisTokenRepository;
@@ -106,5 +112,59 @@ class AuthServiceIntegrationTest {
         assertThat(savedUser.getRole()).isEqualTo(Role.WORKER);
         assertThat(savedUser.getUserType()).isEqualTo(UserType.WORKER);
         assertThat(inviteCode.getUsedCount()).isEqualTo(1);
+    }
+
+    @Test
+    void signupWithCaseInviteCodeConnectsWorkerToCase() {
+        Enterprise company = enterpriseRepository.save(new Enterprise(
+                "Existing Co",
+                "999-99-99999",
+                "Construction",
+                "KR",
+                "ko",
+                EnterpriseStatus.ACTIVE
+        ));
+        Case caseEntity = caseRepository.save(new Case(
+                company,
+                null,
+                null,
+                CaseStatus.PENDING,
+                "Construction",
+                "Seoul"
+        ));
+        companyInviteCodeRepository.save(new CompanyInviteCode(
+                company,
+                "case-code",
+                LocalDateTime.now().plusDays(1),
+                1,
+                0,
+                true,
+                Role.WORKER,
+                caseEntity.getId()
+        ));
+
+        authService.signup(new SignupRequest(
+                "case-worker@example.com",
+                "password123",
+                "Worker",
+                UserType.WORKER,
+                "KR",
+                "ko",
+                "010-1234-5678",
+                LocalDateTime.now().plusDays(365).toLocalDate(),
+                "case-code",
+                null,
+                null,
+                null,
+                null,
+                null
+        ));
+
+        User savedUser = userRepository.findByEmail("case-worker@example.com").orElseThrow();
+        Case savedCase = caseRepository.findById(caseEntity.getId()).orElseThrow();
+
+        assertThat(savedCase.getWorker().getId()).isEqualTo(savedUser.getId());
+        assertThat(savedUser.getPhoneNumber()).isEqualTo("010-1234-5678");
+        assertThat(savedUser.getVisaExpiresAt()).isNotNull();
     }
 }

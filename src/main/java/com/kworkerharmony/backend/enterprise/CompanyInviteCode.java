@@ -51,6 +51,9 @@ public class CompanyInviteCode extends BaseEntity {
     @Column(nullable = false, length = 20)
     private Role defaultRole;
 
+    @Column(name = "case_id", length = 36)
+    private String caseId;
+
     public CompanyInviteCode(
             Enterprise enterprise,
             String code,
@@ -60,6 +63,19 @@ public class CompanyInviteCode extends BaseEntity {
             boolean active,
             Role defaultRole
     ) {
+        this(enterprise, code, expiresAt, maxUses, usedCount, active, defaultRole, null);
+    }
+
+    public CompanyInviteCode(
+            Enterprise enterprise,
+            String code,
+            LocalDateTime expiresAt,
+            int maxUses,
+            int usedCount,
+            boolean active,
+            Role defaultRole,
+            String caseId
+    ) {
         this.enterprise = enterprise;
         this.code = code;
         this.expiresAt = expiresAt;
@@ -67,6 +83,7 @@ public class CompanyInviteCode extends BaseEntity {
         this.usedCount = usedCount;
         this.active = active;
         this.defaultRole = defaultRole;
+        this.caseId = caseId;
     }
 
     public void use() {

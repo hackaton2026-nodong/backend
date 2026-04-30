@@ -1,5 +1,7 @@
 package com.kworkerharmony.backend.auth;
 
+import com.kworkerharmony.backend.cases.domain.CaseRepository;
+import com.kworkerharmony.backend.cases.entity.Case;
 import com.kworkerharmony.backend.auth.dto.request.LoginRequest;
 import com.kworkerharmony.backend.auth.dto.request.LogoutRequest;
 import com.kworkerharmony.backend.auth.dto.request.ReissueRequest;
@@ -37,6 +39,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final EnterpriseRepository enterpriseRepository;
     private final CompanyInviteCodeRepository companyInviteCodeRepository;
+    private final CaseRepository caseRepository;
     private final CountryCatalog countryCatalog;
     private final LanguageCatalog languageCatalog;
     private final PasswordEncoder passwordEncoder;
@@ -64,10 +67,13 @@ public class AuthService {
                 UserStatus.ACTIVE,
                 countryCatalog.normalize(request.countryCode()),
                 languageCatalog.normalize(request.languageCode()),
+                request.phoneNumber(),
+                signupTarget.userType() == UserType.WORKER ? request.visaExpiresAt() : null,
                 signupTarget.enterprise()
         );
 
         userRepository.save(user);
+        connectInviteCaseIfNeeded(signupTarget.inviteCode(), user);
     }
 
     private SignupTarget resolveSignupTarget(SignupRequest request) {
@@ -82,7 +88,7 @@ public class AuthService {
             Role role = inviteCode.getDefaultRole();
             UserType userType = toUserType(role);
             inviteCode.use();
-            return new SignupTarget(inviteCode.getEnterprise(), role, userType);
+            return new SignupTarget(inviteCode.getEnterprise(), role, userType, inviteCode);
         }
 
         Enterprise enterprise = enterpriseRepository.save(new Enterprise(
@@ -93,7 +99,7 @@ public class AuthService {
                 validatedLanguageCode(request.companyLanguageCode()),
                 EnterpriseStatus.ACTIVE
         ));
-        return new SignupTarget(enterprise, Role.ADMIN, UserType.EMPLOYER);
+        return new SignupTarget(enterprise, Role.ADMIN, UserType.EMPLOYER, null);
     }
 
     private UserType toUserType(Role role) {
@@ -158,8 +164,27 @@ public class AuthService {
     private record SignupTarget(
             Enterprise enterprise,
             Role role,
-            UserType userType
+            UserType userType,
+            CompanyInviteCode inviteCode
     ) {
+    }
+
+    private void connectInviteCaseIfNeeded(CompanyInviteCode inviteCode, User user) {
+        if (inviteCode == null || inviteCode.getCaseId() == null || inviteCode.getCaseId().isBlank()) {
+            return;
+        }
+        if (inviteCode.getDefaultRole() != Role.WORKER || user.getUserType() != UserType.WORKER) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Case invite code can only connect worker users");
+        }
+        Case caseEntity = caseRepository.findById(inviteCode.getCaseId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Case not found"));
+        if (!caseEntity.getEnterprise().getId().equals(inviteCode.getEnterprise().getId())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED, "Invite code belongs to another company");
+        }
+        if (caseEntity.getWorker() != null && !caseEntity.getWorker().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Case already has a worker");
+        }
+        caseEntity.connectWorker(user);
     }
 
     private void validateCountryCode(String countryCode) {

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 
 public record SignupRequest(
         @NotBlank
@@ -27,6 +28,12 @@ public record SignupRequest(
         @NotBlank
         String languageCode,
 
+        @NotBlank
+        @Size(max = 30)
+        String phoneNumber,
+
+        LocalDate visaExpiresAt,
+
         String inviteCode,
 
         String companyName,
@@ -40,6 +47,38 @@ public record SignupRequest(
         String companyLanguageCode
 ) {
 
+    public SignupRequest(
+            String email,
+            String password,
+            String name,
+            UserType userType,
+            String countryCode,
+            String languageCode,
+            String inviteCode,
+            String companyName,
+            String companyBusinessNumber,
+            String companyIndustry,
+            String companyCountryCode,
+            String companyLanguageCode
+    ) {
+        this(
+                email,
+                password,
+                name,
+                userType,
+                countryCode,
+                languageCode,
+                "",
+                null,
+                inviteCode,
+                companyName,
+                companyBusinessNumber,
+                companyIndustry,
+                companyCountryCode,
+                companyLanguageCode
+        );
+    }
+
     @AssertTrue(message = "Provide either inviteCode or all company fields")
     public boolean isSignupFlowValid() {
         boolean hasInviteCode = inviteCode != null && !inviteCode.isBlank();
@@ -50,6 +89,11 @@ public record SignupRequest(
                 && hasText(companyLanguageCode);
 
         return hasInviteCode ^ hasCompanyFields;
+    }
+
+    @AssertTrue(message = "Worker visa expiry date cannot be in the past")
+    public boolean isVisaExpiresAtValid() {
+        return visaExpiresAt == null || !visaExpiresAt.isBefore(LocalDate.now());
     }
 
     private boolean hasText(String value) {

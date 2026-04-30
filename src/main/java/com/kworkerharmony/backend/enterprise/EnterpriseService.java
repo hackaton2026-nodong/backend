@@ -6,6 +6,8 @@ import com.kworkerharmony.backend.enterprise.dto.request.JoinCompanyRequest;
 import com.kworkerharmony.backend.enterprise.dto.response.CompanyInviteCodeResponse;
 import com.kworkerharmony.backend.enterprise.dto.response.CompanyUserResponse;
 import com.kworkerharmony.backend.enterprise.dto.response.EnterpriseResponse;
+import com.kworkerharmony.backend.cases.domain.CaseRepository;
+import com.kworkerharmony.backend.cases.entity.Case;
 import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
 import com.kworkerharmony.backend.global.security.UserPrincipal;
@@ -28,6 +30,7 @@ public class EnterpriseService {
     private final EnterpriseRepository enterpriseRepository;
     private final CompanyInviteCodeRepository companyInviteCodeRepository;
     private final UserRepository userRepository;
+    private final CaseRepository caseRepository;
     private final CountryCatalog countryCatalog;
     private final LanguageCatalog languageCatalog;
 
@@ -73,7 +76,8 @@ public class EnterpriseService {
                 request.maxUses(),
                 0,
                 true,
-                request.defaultRole()
+                request.defaultRole(),
+                request.caseId()
         ));
         return CompanyInviteCodeResponse.from(inviteCode);
     }
@@ -96,6 +100,7 @@ public class EnterpriseService {
         user.changeRole(inviteCode.getDefaultRole());
         user.changeUserType(toUserType(inviteCode.getDefaultRole()));
         user.activate();
+        connectInviteCaseIfNeeded(inviteCode, user);
         inviteCode.use();
 
         return EnterpriseResponse.from(inviteCode.getEnterprise());
@@ -135,6 +140,24 @@ public class EnterpriseService {
             case ADMIN, EMPLOYER -> UserType.EMPLOYER;
             case WORKER -> UserType.WORKER;
         };
+    }
+
+    private void connectInviteCaseIfNeeded(CompanyInviteCode inviteCode, User user) {
+        if (inviteCode.getCaseId() == null || inviteCode.getCaseId().isBlank()) {
+            return;
+        }
+        if (inviteCode.getDefaultRole() != Role.WORKER || user.getUserType() != UserType.WORKER) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Case invite code can only connect worker users");
+        }
+        Case caseEntity = caseRepository.findById(inviteCode.getCaseId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Case not found"));
+        if (!caseEntity.getEnterprise().getId().equals(inviteCode.getEnterprise().getId())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED, "Invite code belongs to another company");
+        }
+        if (caseEntity.getWorker() != null && !caseEntity.getWorker().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Case already has a worker");
+        }
+        caseEntity.connectWorker(user);
     }
 
     private String validatedCountryCode(String countryCode) {

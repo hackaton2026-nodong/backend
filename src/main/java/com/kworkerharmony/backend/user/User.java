@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,6 +55,12 @@ public class User extends BaseEntity {
     @Column(name = "language_code", nullable = false, length = 10)
     private String languageCode;
 
+    @Column(name = "phone_number", nullable = false, length = 30)
+    private String phoneNumber;
+
+    @Column(name = "visa_expires_at")
+    private LocalDate visaExpiresAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enterprise_id")
     private Enterprise enterprise;
@@ -69,6 +76,22 @@ public class User extends BaseEntity {
             String languageCode,
             Enterprise enterprise
     ) {
+        this(email, passwordHash, name, role, userType, status, countryCode, languageCode, "", null, enterprise);
+    }
+
+    public User(
+            String email,
+            String passwordHash,
+            String name,
+            Role role,
+            UserType userType,
+            UserStatus status,
+            String countryCode,
+            String languageCode,
+            String phoneNumber,
+            LocalDate visaExpiresAt,
+            Enterprise enterprise
+    ) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.name = name;
@@ -77,6 +100,8 @@ public class User extends BaseEntity {
         this.status = status;
         this.countryCode = countryCode;
         this.languageCode = languageCode;
+        this.phoneNumber = phoneNumber;
+        this.visaExpiresAt = visaExpiresAt;
         this.enterprise = enterprise;
     }
 
@@ -94,5 +119,13 @@ public class User extends BaseEntity {
 
     public void activate() {
         this.status = UserStatus.ACTIVE;
+    }
+
+    public void updateProfile(String name, String phoneNumber, String countryCode, String languageCode, LocalDate visaExpiresAt) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.countryCode = countryCode;
+        this.languageCode = languageCode;
+        this.visaExpiresAt = visaExpiresAt;
     }
 }

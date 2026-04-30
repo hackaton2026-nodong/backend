@@ -11,7 +11,8 @@ public record CompanyInviteCodeResponse(
         int maxUses,
         int usedCount,
         boolean active,
-        String defaultRole
+        String defaultRole,
+        String caseId
 ) {
 
     public static CompanyInviteCodeResponse from(CompanyInviteCode inviteCode) {
@@ -23,7 +24,8 @@ public record CompanyInviteCodeResponse(
                 inviteCode.getMaxUses(),
                 inviteCode.getUsedCount(),
                 inviteCode.isActive(),
-                inviteCode.getDefaultRole().name()
+                inviteCode.getDefaultRole().name(),
+                inviteCode.getCaseId()
         );
     }
 }
