@@ -15,6 +15,8 @@ import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
 import com.kworkerharmony.backend.global.security.UserPrincipal;
 import com.kworkerharmony.backend.reference.checklist.ChecklistCatalog;
+import com.kworkerharmony.backend.reference.recommendation.RecommendationCatalog;
+import com.kworkerharmony.backend.reference.recommendation.RecommendationItemDefinition;
 import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserRepository;
 import com.kworkerharmony.backend.user.UserType;
@@ -37,6 +39,7 @@ public class DashboardService {
     private final UserRepository userRepository;
     private final DocumentRepository documentRepository;
     private final ChecklistCatalog checklistCatalog;
+    private final RecommendationCatalog recommendationCatalog;
 
     @Transactional(readOnly = true)
     public WorkerDashboardResponse getWorkerDashboard(UserPrincipal userPrincipal) {
@@ -269,11 +272,24 @@ public class DashboardService {
                         "language:" + user.getLanguageCode(),
                         "industry:" + caseEntity.getIndustry()
                 );
+        List<RecommendationItemDefinition> recommendations = recommendationCatalog.find(
+                caseEntity == null ? null : caseEntity.getRegion(),
+                user.getLanguageCode(),
+                caseEntity == null ? null : caseEntity.getIndustry(),
+                3
+        );
         return new WorkerDashboardResponse.RecommendationSlot(
                 "추천 기관 · 교육",
-                "기관/교육 추천 도메인 연결 전까지는 현재 케이스 상태를 기반으로 추천 슬롯만 제공합니다.",
+                "현재 케이스 상태를 기반으로 추천 항목을 제공합니다.",
                 reasonTags,
-                List.of()
+                recommendations.stream()
+                        .map(item -> new WorkerDashboardResponse.RecommendationItem(
+                                item.category(),
+                                item.name(),
+                                item.description(),
+                                item.targetPath()
+                        ))
+                        .toList()
         );
     }
 
