@@ -249,4 +249,3 @@ Swagger UI:
 - [db-contract.md](docs/db-contract.md)
 - [document-onchain-flow.md](docs/document-onchain-flow.md)
 - [offchain-analysis-contract.md](docs/offchain-analysis-contract.md)
-- [spring-ai-integration-handoff.md](docs/spring-ai-integration-handoff.md)
