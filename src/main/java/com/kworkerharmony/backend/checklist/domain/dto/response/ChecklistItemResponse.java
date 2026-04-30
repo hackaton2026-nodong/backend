@@ -1,6 +1,7 @@
 package com.kworkerharmony.backend.checklist.domain.dto.response;
 
 import com.kworkerharmony.backend.reference.checklist.ChecklistItemDefinition;
+import com.kworkerharmony.backend.reference.checklist.ChecklistTriggerType;
 
 public record ChecklistItemResponse(
         String sectionCode,
@@ -9,7 +10,8 @@ public record ChecklistItemResponse(
         String title,
         String description,
         boolean required,
-        int displayOrder
+        int displayOrder,
+        ChecklistTriggerType triggerType
 ) {
 
     public static ChecklistItemResponse from(ChecklistItemDefinition checklistItem) {
@@ -20,7 +22,8 @@ public record ChecklistItemResponse(
                 checklistItem.title(),
                 checklistItem.description(),
                 checklistItem.required(),
-                checklistItem.displayOrder()
+                checklistItem.displayOrder(),
+                checklistItem.triggerTypeOrDefault()
         );
     }
 }

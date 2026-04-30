@@ -3,6 +3,7 @@ package com.kworkerharmony.backend.checklist.domain.dto.response;
 import com.kworkerharmony.backend.checklist.domain.ChecklistStatus;
 import com.kworkerharmony.backend.checklist.entity.CaseChecklistStatus;
 import com.kworkerharmony.backend.reference.checklist.ChecklistItemDefinition;
+import com.kworkerharmony.backend.reference.checklist.ChecklistTriggerType;
 import java.time.LocalDateTime;
 
 public record ChecklistResponse(
@@ -15,6 +16,7 @@ public record ChecklistResponse(
         String title,
         String description,
         boolean required,
+        ChecklistTriggerType triggerType,
         ChecklistStatus status,
         String note,
         LocalDateTime createdAt,
@@ -32,6 +34,7 @@ public record ChecklistResponse(
                 definition.title(),
                 definition.description(),
                 definition.required(),
+                definition.triggerTypeOrDefault(),
                 checklistStatus == null ? ChecklistStatus.NOT_STARTED : checklistStatus.getStatus(),
                 checklistStatus == null ? null : checklistStatus.getNote(),
                 checklistStatus == null ? null : checklistStatus.getCreatedAt(),
