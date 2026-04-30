@@ -94,8 +94,10 @@ src/main/java/com/kworkerharmony/backend
 - 실제 파일 저장과 SHA-256 해시 생성은 동작합니다.
 - 지갑 서명 요청/제출 API와 Stub 앵커링 API는 동작합니다.
 - 실제 Sepolia 트랜잭션 전송은 아직 구현하지 않았습니다.
-- 오프체인 분석 API는 Spring 포트 구조로 분리되어 있으며, `DOCUMENT_ANALYSIS_AI_ENABLED=true`일 때 외부 AI 분석 HTTP API를 호출합니다.
+- `local` 프로필은 Docker Compose의 PaddleOCR worker로 업로드 후 OCR callback과 필드 추출 저장까지 검증할 수 있습니다.
+- 오프체인 분석 API는 placeholder이며 실제 AI 호출은 아직 구현하지 않았습니다.
 - 오프체인 분석에서 원문 파일과 필터링 전 OCR 결과는 AI 레이어로 전달하지 않으며, 세부 입력 규격은 `docs/offchain-analysis-contract.md`를 따릅니다.
+- 실제 PaddleOCR 전환 중 겪은 worker 분리, warm-up, 모델 선택, runtime 오류, 추출기 일반화 이슈는 `docs/ocr-troubleshooting-notes.md`에 작업 노트로 정리했습니다.
 - 정적 테스트 페이지는 MVP 검증용이며, 실제 제품 UX에서는 업로드 후 분석 자동 시작과 서명 후 앵커링 자동 진행으로 분리하는 것이 좋습니다.
 
 ## 로컬 실행
@@ -106,13 +108,15 @@ src/main/java/com/kworkerharmony/backend
 docker compose up -d
 ```
 
+Compose에는 MySQL, Redis, 로컬 검증용 PaddleOCR worker가 포함됩니다. OCR worker는 시작 시 PP-OCRv5 Korean 모델을 미리 로드하고, 준비가 끝난 뒤 health 상태를 `ready`로 전환합니다. 이후 `http://localhost:9000/ocr/jobs`에서 요청을 받고 공유 볼륨의 `storageKey` 파일을 처리한 뒤 백엔드 callback API로 OCR JSON을 전송합니다. 로컬 MVP 기본값은 `PP-OCRv5_mobile_det`, `korean_PP-OCRv5_mobile_rec`, `text_det_limit_side_len=1280`입니다. `PPStructureV3`와 `PaddleOCR-VL 1.5`는 로컬 CPU/메모리 기준으로 MVP 환경에 맞지 않아 제외했고, MKLDNN/oneDNN 경로는 현재 Paddle 런타임 오류가 있어 비활성화했습니다.
+
 백엔드 실행:
 
 ```bash
 ./gradlew bootRun --args='--spring.profiles.active=local'
 ```
 
-`local` 프로필의 기본값은 Docker Compose 기준으로 맞춰져 있어 별도 환경변수 없이 실행 가능합니다.
+`local` 프로필의 기본값은 Docker Compose 기준으로 맞춰져 있어 별도 환경변수 없이 실행 가능합니다. 별도 배포된 PaddleOCR worker를 붙일 때만 `DOCUMENT_OCR_ENDPOINT`, `DOCUMENT_OCR_CALLBACK_TOKEN`, `DOCUMENT_OCR_CALLBACK_BASE_URL`을 재정의하면 됩니다.
 로컬 MySQL 또는 다른 접속 정보를 사용할 경우 아래 환경 변수를 본인 환경에 맞게 지정하면 됩니다.
 
 ```bash
@@ -132,16 +136,20 @@ Swagger UI:
 
 - `http://localhost:8080/swagger-ui.html`
 
-문서 업로드 테스트 페이지:
+문서 처리 오케스트레이터:
 
 - `http://localhost:8080/document-upload-test.html`
+- `http://localhost:8080/extraction-test.html`은 위 화면으로 이동합니다.
 - `http://localhost:8080/dashboard-api-preview.html`
 
 로컬 시드 계정:
 
-- `admin.local@kworkerharmony.com` / `password123`
-- `employer.local@kworkerharmony.com` / `password123`
-- `worker.local@kworkerharmony.com` / `password123`
+- `minsukim@hankukmanufacturing.co.kr` / `password123`
+- `minh.nguyen97@example.com` / `password123`
+- `somchai.phanit95@example.com` / `password123`
+- `maria.santos98@example.com` / `password123`
+- `dewi.lestari96@example.com` / `password123`
+- `ram.thapa94@example.com` / `password123`
 
 ## 주요 환경 변수
 
@@ -158,11 +166,14 @@ Swagger UI:
 - `APP_CORS_ALLOW_CREDENTIALS`
 - `APP_CORS_MAX_AGE_SECONDS`
 - `DOCUMENT_STORAGE_ROOT`
-- `DOCUMENT_ANALYSIS_AI_ENABLED`
-- `DOCUMENT_ANALYSIS_AI_BASE_URL`
-- `DOCUMENT_ANALYSIS_AI_ENDPOINT_PATH`
-- `DOCUMENT_ANALYSIS_AI_HEALTH_PATH`
-- `DOCUMENT_ANALYSIS_AI_HEALTH_TIMEOUT_MILLIS`
+- `DOCUMENT_OCR_ENABLED`
+- `DOCUMENT_OCR_ENDPOINT`
+- `DOCUMENT_OCR_CALLBACK_TOKEN`
+- `DOCUMENT_OCR_CALLBACK_BASE_URL`
+- `DOCUMENT_AI_ENABLED`
+- `DOCUMENT_AI_ENDPOINT`
+- `DOCUMENT_AI_HEALTH_ENDPOINT`
+- `DOCUMENT_AI_HEALTH_TIMEOUT_MILLIS`
 - `DOCUMENT_CHAIN_ID`
 - `DOCUMENT_CONTRACT_ADDRESS`
 - `DOCUMENT_DOMAIN_NAME`
@@ -170,18 +181,7 @@ Swagger UI:
 - `DOCUMENT_SIGNATURE_TTL_SECONDS`
 
 기본 문서 저장 경로는 프로젝트 루트 기준 `./storage/documents`입니다.
-AI 분석 서비스는 기본적으로 비활성화되어 로컬 Stub 응답을 반환합니다. 실제 AI 서버를 붙일 때는 예를 들어 아래처럼 실행합니다.
-
-```bash
-DOCUMENT_ANALYSIS_AI_ENABLED=true \
-DOCUMENT_ANALYSIS_AI_BASE_URL='http://localhost:8000' \
-DOCUMENT_ANALYSIS_AI_ENDPOINT_PATH='/document-analysis' \
-DOCUMENT_ANALYSIS_AI_HEALTH_PATH='/health' \
-./gradlew bootRun --args='--spring.profiles.active=local'
-```
-
-프론트에서는 `GET /api/ai/health`로 AI 연결 상태를 확인합니다. AI 분석이 비활성화된 로컬 환경에서는 `STUB`, 실제 AI 서버를 붙인 환경에서는 `HTTP` 상태를 반환합니다.
-로컬 프론트 기본 포트인 `5173`, 현재 Vite 대체 포트인 `5174`는 CORS 기본 허용 origin에 포함되어 있습니다.
+프론트에서는 `GET /api/ai/health`로 AI 연결 상태를 확인합니다. 로컬 프론트 기본 포트인 `5173`, 현재 Vite 대체 포트인 `5174`는 CORS 기본 허용 origin에 포함되어 있습니다.
 
 ## 테스트
 
@@ -199,13 +199,13 @@ DOCUMENT_ANALYSIS_AI_HEALTH_PATH='/health' \
 - 문서 업로드 후 `documents` 테이블에 데이터가 쌓이는지
 - 업로드 파일이 `storage/documents` 아래 저장되는지
 - 업로드 응답에서 `stored=true`, `status=HASHED`가 반환되는지
-- `document-upload-test.html`에서 `Create Signature Request`, `Connect Wallet`, `Sign EIP-712`, `Submit Signature`, `Anchor Document`, `Get Anchor` 순서로 Stub 앵커링 결과가 반환되는지
-- `Create Analysis`로 AI 분석 결과 또는 로컬 Stub 분석 결과가 저장되는지
+- `document-upload-test.html`에서 문서 업로드 후 OCR 대기, 지갑 서명, Stub 앵커링이 연쇄 실행되는지
+- `분석 요청`으로 OCR 추출 payload hash 기반 placeholder 분석 결과가 저장되는지
 
 ## 예시 시나리오
 
 1. `docker compose up -d`
-2. `./gradlew bootRun`
+2. `./gradlew bootRun --args='--spring.profiles.active=local'`
 3. Swagger에서 `POST /api/auth/signup` 호출
 
 ```json
@@ -213,12 +213,18 @@ DOCUMENT_ANALYSIS_AI_HEALTH_PATH='/health' \
   "email": "admin@test.com",
   "password": "password123",
   "name": "Admin User",
+  "phoneNumber": "010-1000-0000",
   "userType": "EMPLOYER",
   "countryCode": "KR",
+  "languageCode": "ko",
   "companyName": "Harmony Co",
   "companyBusinessNumber": "123-45-67890",
   "companyIndustry": "Manufacturing",
-  "companyCountry": "KR"
+  "companyAddress": "Seoul",
+  "foreignWorkerQuota": 5,
+  "employmentPermitCertNo": "EPS-001",
+  "companyCountryCode": "KR",
+  "companyLanguageCode": "ko"
 }
 ```
 
@@ -240,10 +246,11 @@ DOCUMENT_ANALYSIS_AI_HEALTH_PATH='/health' \
 }
 ```
 
-6. `http://localhost:8080/document-upload-test.html` 접속 후 로그인 응답의 `accessToken`, 케이스 생성 응답의 `data.id`를 넣고 파일 1건 업로드
-7. `storage/documents` 아래 실제 파일 생성 여부 확인
-8. MetaMask를 Sepolia로 맞춘 뒤 `Create Signature Request` -> `Connect Wallet` -> `Sign EIP-712` -> `Submit Signature` -> `Anchor Document` -> `Get Anchor` 순서로 Stub 앵커링을 확인
-9. `Create Analysis`로 placeholder 분석 저장 확인
+6. MetaMask를 Sepolia로 맞춘 뒤 `http://localhost:8080/document-upload-test.html` 접속
+7. 근로계약서 PDF를 선택하고 `업로드 및 서명 시작`을 누른 뒤 지갑 연결/서명 팝업 승인
+8. 화면에서 업로드, OCR, 서명, Stub 앵커링 단계가 완료되는지 확인
+9. `분석 요청`으로 OCR 추출 payload hash 기반 placeholder 분석 저장 확인
+10. `storage/documents` 아래 실제 파일 생성 여부 확인
 
 ## 참고 문서
 
@@ -251,4 +258,3 @@ DOCUMENT_ANALYSIS_AI_HEALTH_PATH='/health' \
 - [db-contract.md](docs/db-contract.md)
 - [document-onchain-flow.md](docs/document-onchain-flow.md)
 - [offchain-analysis-contract.md](docs/offchain-analysis-contract.md)
-- [COMMIT_CONVENTION.md](docs/COMMIT_CONVENTION.md)

@@ -42,13 +42,16 @@ app:
     max-age-seconds: ${APP_CORS_MAX_AGE_SECONDS:3600}
   document:
     storage-root: ${DOCUMENT_STORAGE_ROOT:./storage/documents}
-    analysis:
-      ai:
-        enabled: ${DOCUMENT_ANALYSIS_AI_ENABLED:false}
-        base-url: ${DOCUMENT_ANALYSIS_AI_BASE_URL:http://localhost:8000}
-        endpoint-path: ${DOCUMENT_ANALYSIS_AI_ENDPOINT_PATH:/document-analysis}
-        health-path: ${DOCUMENT_ANALYSIS_AI_HEALTH_PATH:/health}
-        health-timeout-millis: ${DOCUMENT_ANALYSIS_AI_HEALTH_TIMEOUT_MILLIS:2000}
+    ocr:
+      enabled: ${DOCUMENT_OCR_ENABLED:false}
+      endpoint: ${DOCUMENT_OCR_ENDPOINT:}
+      callback-token: ${DOCUMENT_OCR_CALLBACK_TOKEN:}
+      callback-base-url: ${DOCUMENT_OCR_CALLBACK_BASE_URL:}
+    ai:
+      enabled: ${DOCUMENT_AI_ENABLED:false}
+      endpoint: ${DOCUMENT_AI_ENDPOINT:}
+      health-endpoint: ${DOCUMENT_AI_HEALTH_ENDPOINT:http://localhost:8000/health}
+      health-timeout-millis: ${DOCUMENT_AI_HEALTH_TIMEOUT_MILLIS:2000}
     blockchain:
       chain-id: ${DOCUMENT_CHAIN_ID:11155111}
       contract-address: ${DOCUMENT_CONTRACT_ADDRESS:0x0000000000000000000000000000000000000000}

@@ -4,7 +4,7 @@
 
 ## Scope
 
-현재 구현의 `POST /api/documents/{documentId}/analysis`는 placeholder다. 이 문서는 향후 placeholder를 실제 OCR/parser 및 AI 분석 RPC로 대체할 때 지켜야 할 입력/출력 규격이다.
+현재 구현은 PaddleOCR worker callback을 통해 `document_extractions`에 구조화 계약 필드를 저장한다. `POST /api/documents/{documentId}/analysis`는 아직 placeholder다. 이 문서는 저장된 extraction payload를 AI 레이어와 연결할 때 지켜야 할 입력/출력 규격이다.
 
 업로드 후 공통 기반은 아래와 같다.
 
@@ -12,16 +12,19 @@
 document upload
 -> local/original document storage
 -> sha256 hash
+-> create pending extraction
+-> request OCR worker
 ```
 
 그 이후 오프체인 분석은 온체인 증명과 독립적으로 진행한다.
 
 ```text
 HASHED document
--> OCR/parser
+-> OCR worker callback with PaddleOCR JSON
 -> sanitize/mask
--> build AI request
--> AI analysis
+-> persist document_extractions extracted_payload
+-> build sanitized AI request
+-> POST AI analysis endpoint
 -> persist analysis result
 ```
 
@@ -37,11 +40,11 @@ HASHED document
 ## Data Flow
 
 1. `Document`가 `HASHED` 상태인지 확인한다.
-2. 원본 파일은 storage adapter를 통해 OCR/parser에만 전달한다.
-3. OCR/parser는 필터링 전 텍스트를 메모리에서만 생성한다.
+2. 백엔드는 OCR worker에 `documentId`, `storageKey`, `sha256Hash`, callback URL을 전달한다.
+3. OCR worker는 원본 파일을 OCR/parser에만 전달하고, PaddleOCR JSON을 callback으로 제출한다.
 4. sanitizer가 개인정보, 사업장 식별정보, 상세주소, 문서번호, 계좌번호 등 식별 가능 값을 제거하거나 마스킹한다.
-5. AI request builder가 허용된 근로조건 필드와 근거 참조만 조합한다.
-6. AI analysis port가 request를 전송한다.
+5. 추출기는 허용된 근로조건 필드와 근거 참조만 `document_extractions.extracted_payload`에 저장한다.
+6. 백엔드는 저장된 extraction payload에 envelope를 씌워 AI 레이어 endpoint로 `POST`한다.
 7. AI response를 검증한 뒤 `document_analysis_results`와 후속 분석 테이블에 저장한다.
 
 ## Field Policy
@@ -102,7 +105,15 @@ AI 설명 품질과 추적성을 위해 제한적으로 전달한다.
 
 `maskedExcerpt`는 식별자가 제거된 짧은 문구여야 한다. 원문 문단 전체를 전달하지 않는다.
 
+## AI Endpoint Handoff
+
+- 백엔드는 `DOCUMENT_AI_ENABLED=true`일 때 `DOCUMENT_AI_ENDPOINT`로 sanitized 분석 요청을 `POST`한다.
+- 프론트는 백엔드의 `GET /api/ai/health`만 호출한다. 백엔드는 내부적으로 `DOCUMENT_AI_HEALTH_ENDPOINT`에 `GET` 요청을 보내 2xx 응답이면 사용 가능 상태로 본다.
+- AI 레이어는 준비 완료 상태에서 health endpoint가 2xx를 반환하도록 맞춘다. 기본 로컬 기대값은 `http://localhost:8000/health`다.
+
 ## AI Request Schema
+
+현재 팀 합의상 백엔드가 DB에 저장한 sanitized extraction payload를 AI 레이어 endpoint로 `POST`한다. 아래 schema는 AI 레이어로 전달하는 논리적 입력 구조다.
 
 ```json
 {
@@ -234,11 +245,32 @@ MVP의 기존 `document_analysis_results`는 요약 결과 저장소로 유지�
 
 후속 구현에서 별도 테이블을 추가한다면 저장 대상은 필터링 후 산출물만 허용한다.
 
+- `document_extractions`: OCR 결과에서 필요한 계약 필드만 추출한 JSON, 보정 JSON, AI payload hash
 - `document_sanitized_inputs`: 마스킹된 AI request와 hash
 - `document_analysis_findings`: field findings, risk flags, checklist suggestions
 - `document_evidence_refs`: page, boundingBox, confidence, maskedExcerpt
 
 필터링 전 raw OCR text 저장 테이블은 만들지 않는다.
+
+## Extraction Payload Policy
+
+PaddleOCR 등 OCR/parser가 반환한 원본 JSON은 worker callback의 일회성 입력으로만 사용한다. 백엔드는 원본 JSON을 DB에 저장하지 않고 `source_result_hash`만 남긴다.
+
+`document_extractions.extracted_payload`와 `corrected_payload`에는 아래 구조화 필드만 저장한다.
+
+- 계약 기간, 수습기간
+- 임금, 기본급, 수당, 상여금, 지급일, 지급방법
+- 근로시간, 시간외근로, 교대제
+- 휴게시간, 휴일, 유급 여부
+- 업종/직무/근무지역 category
+- 기숙사 제공 여부, 숙박비 공제액
+- 식사 제공 여부, 식비 공제액
+- 표준계약서 여부, 서명일, 서명 존재 여부
+- 필드별 `status`, `confidence`, `evidenceRefs`
+
+저장 금지 대상은 원본 OCR 전문, PaddleOCR `layoutParsingResults`, raw markdown, raw table HTML, 이름, 전화번호, 이메일, 사업자등록번호, 상세주소, 본국 주소, `storageKey`다.
+
+사용자 보정이 완료되면 AI request는 `corrected_payload`를 우선 사용한다. 보정값이 없으면 `extracted_payload`를 사용하되, 필수 필드가 누락된 경우 `NEEDS_REVIEW` 상태로 AI 호출을 보류할 수 있다.
 
 ## Validation Scenarios
 

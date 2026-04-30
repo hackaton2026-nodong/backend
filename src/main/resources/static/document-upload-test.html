@@ -1,372 +1,450 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document Upload Test</title>
+  <title>문서 처리 오케스트레이터</title>
   <style>
     :root {
-      --bg: #f4efe7;
-      --panel: #fffaf2;
-      --line: #d8c7ac;
-      --text: #1f1a14;
-      --muted: #6a5d4f;
-      --accent: #0f766e;
-      --accent-strong: #115e59;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --line: #d7dde6;
+      --text: #17202b;
+      --muted: #647386;
+      --accent: #14736a;
+      --accent-dark: #0d5d56;
+      --warn: #9a5b00;
       --danger: #b42318;
+      --ok: #176b3a;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 28%),
-        linear-gradient(135deg, #f7f1e8, #efe5d5);
-      color: var(--text);
       min-height: 100vh;
+      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
 
-    .wrap {
-      max-width: 920px;
+    main {
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 40px 20px 60px;
+      padding: 28px 20px 48px;
     }
 
-    .hero {
-      margin-bottom: 24px;
+    header {
+      margin-bottom: 18px;
     }
 
     h1 {
-      margin: 0 0 10px;
-      font-size: clamp(2rem, 3vw, 3rem);
-      line-height: 1.05;
-      letter-spacing: -0.04em;
+      margin: 0 0 6px;
+      font-size: 1.75rem;
+      letter-spacing: 0;
     }
 
-    .hero p {
+    p {
       margin: 0;
       color: var(--muted);
-      max-width: 700px;
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
-    .panel {
-      background: rgba(255, 250, 242, 0.92);
+    section {
+      margin-top: 16px;
+      padding: 18px;
+      background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 24px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 14px 40px rgba(45, 33, 18, 0.08);
+      border-radius: 8px;
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
+      gap: 14px;
     }
 
     .field {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
     }
 
-    .field.full {
-      grid-column: 1 / -1;
-    }
+    .full { grid-column: 1 / -1; }
 
     label {
-      font-size: 0.95rem;
-      font-weight: 600;
+      font-size: 0.9rem;
+      font-weight: 700;
     }
 
     input,
-    select,
     textarea,
     button {
       font: inherit;
     }
 
     input,
-    select,
     textarea {
       width: 100%;
-      border: 1px solid #cbb99b;
-      background: #fffdf8;
-      border-radius: 14px;
-      padding: 12px 14px;
+      border: 1px solid #c9d0da;
+      border-radius: 6px;
+      padding: 10px 11px;
+      background: #fff;
       color: var(--text);
     }
 
     textarea {
-      min-height: 118px;
+      min-height: 80px;
       resize: vertical;
+      font-family: "Cascadia Code", "Consolas", monospace;
+      font-size: 0.86rem;
+    }
+
+    details {
+      grid-column: 1 / -1;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #f9fafb;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--muted);
     }
 
     .actions {
       display: flex;
-      gap: 12px;
-      margin-top: 20px;
       flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
     }
 
     button {
       border: 0;
-      border-radius: 999px;
-      padding: 12px 18px;
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: #fff;
       background: var(--accent);
-      color: #f6fffd;
       font-weight: 700;
       cursor: pointer;
     }
 
-    button.secondary {
-      background: #dfd1bd;
-      color: #352a1f;
-    }
+    button:hover { background: var(--accent-dark); }
+    button.secondary { background: #536273; }
+    button.secondary:hover { background: #435160; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
 
     .status {
-      margin-top: 20px;
-      padding: 14px 16px;
-      border-radius: 14px;
-      background: #fcf7ef;
-      border: 1px dashed var(--line);
+      margin-top: 14px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f9fafb;
       color: var(--muted);
       line-height: 1.5;
     }
 
     .status.error {
+      border-color: rgba(180, 35, 24, 0.35);
+      background: rgba(180, 35, 24, 0.06);
       color: var(--danger);
-      border-color: rgba(180, 35, 24, 0.3);
+    }
+
+    .status.warn {
+      border-color: rgba(154, 91, 0, 0.35);
+      background: rgba(154, 91, 0, 0.07);
+      color: var(--warn);
+    }
+
+    .status.ok {
+      border-color: rgba(23, 107, 58, 0.35);
+      background: rgba(23, 107, 58, 0.06);
+      color: var(--ok);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .step {
+      min-height: 86px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.82rem;
+    }
+
+    .step span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .step.active {
+      border-color: rgba(20, 115, 106, 0.55);
+      background: rgba(20, 115, 106, 0.06);
+    }
+
+    .step.done {
+      border-color: rgba(23, 107, 58, 0.45);
+      background: rgba(23, 107, 58, 0.05);
+    }
+
+    .step.error {
+      border-color: rgba(180, 35, 24, 0.4);
       background: rgba(180, 35, 24, 0.05);
     }
 
-    .result {
-      margin-top: 24px;
+    .cards {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .flow {
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid var(--line);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
     }
 
     .card {
+      min-height: 84px;
+      padding: 13px;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 16px;
-      background: #fffdf8;
+      border-radius: 8px;
+      background: #fff;
     }
 
     .card strong {
       display: block;
-      margin-bottom: 8px;
-      font-size: 0.86rem;
+      margin-bottom: 7px;
       color: var(--muted);
+      font-size: 0.78rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.04em;
     }
 
-    code {
+    .card span {
+      display: block;
       white-space: pre-wrap;
       word-break: break-word;
-      font-family: "Cascadia Code", "Consolas", monospace;
-      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.4;
     }
 
-    @media (max-width: 760px) {
+    .raw {
+      margin-top: 14px;
+      padding: 12px;
+      max-height: 360px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #101820;
+      color: #dce7f3;
+      font-family: "Cascadia Code", "Consolas", monospace;
+      font-size: 0.82rem;
+      white-space: pre-wrap;
+    }
+
+    @media (max-width: 980px) {
+      .steps,
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
       .grid,
-      .result {
+      .steps,
+      .cards {
         grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
-<main class="wrap">
-  <section class="hero">
-    <h1>Document Upload Test</h1>
-    <p>JWT access token, case ID, and a file are enough to verify that the upload API works and that the document is saved on the server's local storage.</p>
-  </section>
+<main>
+  <header>
+    <h1>문서 처리 오케스트레이터</h1>
+    <p>문서 업로드 후 OCR 대기, 지갑 서명, 온체인 앵커링, 분석 저장까지 한 화면에서 이어서 실행합니다.</p>
+  </header>
 
-  <section class="panel">
+  <section>
     <div class="grid">
       <div class="field full">
-        <label for="token">Access Token</label>
-        <textarea id="token" placeholder="Paste Bearer token value without the Bearer prefix"></textarea>
+        <label for="file">근로계약서 파일</label>
+        <input id="file" type="file" accept="application/pdf,image/*">
       </div>
 
       <div class="field">
-        <label for="caseId">Case ID</label>
-        <input id="caseId" type="text" placeholder="UUID case id">
-      </div>
-
-      <div class="field">
-        <label for="documentType">Document Type</label>
-        <select id="documentType">
-          <option value="EMPLOYMENT_CONTRACT">EMPLOYMENT_CONTRACT</option>
-          <option value="PAYSLIP">PAYSLIP</option>
-          <option value="VISA">VISA</option>
-          <option value="RESIDENCE_PROOF">RESIDENCE_PROOF</option>
-          <option value="OTHER">OTHER</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="issuedAt">Issued At</label>
+        <label for="issuedAt">발급일</label>
         <input id="issuedAt" type="date">
       </div>
 
       <div class="field">
-        <label for="expiresAt">Expires At</label>
+        <label for="expiresAt">만료일</label>
         <input id="expiresAt" type="date">
       </div>
 
-      <div class="field full">
-        <label for="file">File</label>
-        <input id="file" type="file">
-      </div>
+      <details>
+        <summary>고급 설정</summary>
+        <div class="grid" style="margin-top: 12px;">
+          <div class="field full">
+            <label for="token">Access Token</label>
+            <textarea id="token" placeholder="비워두면 로컬 시드 계정으로 자동 로그인합니다."></textarea>
+          </div>
+          <div class="field">
+            <label for="caseId">Case ID</label>
+            <input id="caseId" placeholder="기본 로컬 케이스를 사용합니다.">
+          </div>
+          <div class="field">
+            <label for="documentId">Document ID</label>
+            <input id="documentId" placeholder="업로드 후 자동 입력됩니다.">
+          </div>
+        </div>
+      </details>
     </div>
 
     <div class="actions">
-      <button id="uploadButton" type="button">Upload Document</button>
-      <button id="resetButton" class="secondary" type="button">Reset</button>
+      <button id="startButton" type="button">업로드 및 서명 시작</button>
+      <button id="analysisButton" class="secondary" type="button" disabled>분석 요청</button>
+      <button id="resetButton" class="secondary" type="button">초기화</button>
     </div>
 
-    <div id="status" class="status">Ready. Provide token, case ID, dates, and a file to start.</div>
+    <div id="status" class="status">파일을 선택한 뒤 시작하세요. 지갑 서명은 브라우저 지갑 팝업에서 승인해야 합니다.</div>
+  </section>
 
-    <div class="result">
-      <div class="card">
-        <strong>Upload Summary</strong>
-        <code id="summary">No upload yet.</code>
-      </div>
-      <div class="card">
-        <strong>Raw Response</strong>
-        <code id="response">No response yet.</code>
-      </div>
+  <section>
+    <div class="steps">
+      <div id="step-upload" class="step"><strong>1. 업로드</strong><span>대기 중</span></div>
+      <div id="step-ocr" class="step"><strong>2. OCR</strong><span>대기 중</span></div>
+      <div id="step-signature" class="step"><strong>3. 서명</strong><span>대기 중</span></div>
+      <div id="step-anchor" class="step"><strong>4. 온체인</strong><span>대기 중</span></div>
+      <div id="step-analysis" class="step"><strong>5. 분석 저장</strong><span>대기 중</span></div>
     </div>
+  </section>
 
-    <div class="flow">
-      <div class="grid">
-        <div class="field">
-          <label for="documentId">Document ID</label>
-          <input id="documentId" type="text" placeholder="Filled after upload or paste an existing document id">
-        </div>
-        <div class="field">
-          <label for="walletAddress">Wallet Address</label>
-          <input id="walletAddress" type="text" placeholder="Connect MetaMask">
-        </div>
-      </div>
-
-      <div class="actions">
-        <button id="signatureRequestButton" type="button">Create Signature Request</button>
-        <button id="connectWalletButton" class="secondary" type="button">Connect Wallet</button>
-        <button id="signButton" class="secondary" type="button">Sign EIP-712</button>
-        <button id="submitSignatureButton" class="secondary" type="button">Submit Signature</button>
-        <button id="anchorButton" class="secondary" type="button">Anchor Document</button>
-        <button id="getAnchorButton" class="secondary" type="button">Get Anchor</button>
-        <button id="analysisButton" class="secondary" type="button">Create Analysis</button>
-      </div>
-
-      <div class="result">
-        <div class="card">
-          <strong>Signature / Anchor Summary</strong>
-          <code id="chainSummary">No signature flow yet.</code>
-        </div>
-        <div class="card">
-          <strong>Signature / Anchor Raw Response</strong>
-          <code id="chainResponse">No response yet.</code>
-        </div>
-      </div>
+  <section>
+    <p id="summary">처리 결과가 아직 없습니다.</p>
+    <div class="cards">
+      <div class="card"><strong>Document</strong><span id="documentSummary">-</span></div>
+      <div class="card"><strong>Signature</strong><span id="signatureSummary">-</span></div>
+      <div class="card"><strong>Anchor</strong><span id="anchorSummary">-</span></div>
+      <div class="card"><strong>Analysis</strong><span id="analysisSummary">-</span></div>
+      <div class="card"><strong>Extraction</strong><span id="extractionStatus">-</span></div>
+      <div class="card"><strong>Contract Period</strong><span id="contractPeriod">-</span></div>
+      <div class="card"><strong>Wage</strong><span id="wage">-</span></div>
+      <div class="card"><strong>Working Hours</strong><span id="workingHours">-</span></div>
     </div>
+    <pre id="raw" class="raw">No response yet.</pre>
   </section>
 </main>
 
 <script>
   const tokenInput = document.getElementById("token");
   const caseIdInput = document.getElementById("caseId");
-  const documentTypeInput = document.getElementById("documentType");
+  const documentIdInput = document.getElementById("documentId");
   const issuedAtInput = document.getElementById("issuedAt");
   const expiresAtInput = document.getElementById("expiresAt");
   const fileInput = document.getElementById("file");
-  const uploadButton = document.getElementById("uploadButton");
-  const resetButton = document.getElementById("resetButton");
-  const documentIdInput = document.getElementById("documentId");
-  const walletAddressInput = document.getElementById("walletAddress");
-  const signatureRequestButton = document.getElementById("signatureRequestButton");
-  const connectWalletButton = document.getElementById("connectWalletButton");
-  const signButton = document.getElementById("signButton");
-  const submitSignatureButton = document.getElementById("submitSignatureButton");
-  const anchorButton = document.getElementById("anchorButton");
-  const getAnchorButton = document.getElementById("getAnchorButton");
+  const startButton = document.getElementById("startButton");
   const analysisButton = document.getElementById("analysisButton");
+  const resetButton = document.getElementById("resetButton");
   const statusBox = document.getElementById("status");
   const summaryBox = document.getElementById("summary");
-  const responseBox = document.getElementById("response");
-  const chainSummaryBox = document.getElementById("chainSummary");
-  const chainResponseBox = document.getElementById("chainResponse");
+  const rawBox = document.getElementById("raw");
 
-  let signatureRequest = null;
-  let walletAddress = "";
-  let walletChainId = null;
-  let signature = "";
-  let signatureId = "";
+  const state = {
+    accessToken: "",
+    document: null,
+    extraction: null,
+    signatureRequest: null,
+    walletAddress: "",
+    signature: "",
+    signatureId: "",
+    anchor: null,
+    analysis: null,
+    pollingTimer: null,
+    ocrPolling: false
+  };
 
+  const defaultLogin = {
+    email: "minsukim@hankukmanufacturing.co.kr",
+    password: "password123"
+  };
+  const defaultCaseId = "11111111-1111-1111-1111-111111111113";
   const today = new Date().toISOString().slice(0, 10);
+
   issuedAtInput.value = today;
   expiresAtInput.value = today;
+  caseIdInput.value = defaultCaseId;
 
-  function setStatus(message, isError = false) {
+  function setStatus(message, mode = "") {
     statusBox.textContent = message;
-    statusBox.className = isError ? "status error" : "status";
+    statusBox.className = mode ? `status ${mode}` : "status";
   }
 
-  function resetForm() {
-    caseIdInput.value = "";
-    documentIdInput.value = "";
-    walletAddressInput.value = "";
-    documentTypeInput.value = "EMPLOYMENT_CONTRACT";
-    fileInput.value = "";
-    summaryBox.textContent = "No upload yet.";
-    responseBox.textContent = "No response yet.";
-    chainSummaryBox.textContent = "No signature flow yet.";
-    chainResponseBox.textContent = "No response yet.";
-    signatureRequest = null;
-    walletAddress = "";
-    walletChainId = null;
-    signature = "";
-    signatureId = "";
-    setStatus("Ready. Provide token, case ID, dates, and a file to start.");
+  function writeRaw(label, payload) {
+    rawBox.textContent = `${label}\n${JSON.stringify(payload, null, 2)}`;
+  }
+
+  function setStep(id, status, detail) {
+    const step = document.getElementById(`step-${id}`);
+    step.className = `step ${status}`;
+    step.querySelector("span").textContent = detail;
   }
 
   function token() {
-    return tokenInput.value.trim();
+    return tokenInput.value.trim() || state.accessToken;
   }
 
   function documentId() {
-    return documentIdInput.value.trim();
+    return documentIdInput.value.trim() || state.document?.id || "";
   }
 
-  async function parseJsonResponse(response) {
+  function text(value) {
+    return value === null || value === undefined || value === "" ? "-" : String(value);
+  }
+
+  function amount(value) {
+    return value === null || value === undefined || value === "" ? "-" : `${Number(value).toLocaleString("ko-KR")} KRW`;
+  }
+
+  async function readPayload(response, label) {
     const payload = await response.json();
-    chainResponseBox.textContent = JSON.stringify(payload, null, 2);
+    writeRaw(label, payload);
     if (!response.ok || !payload.success) {
       throw new Error(payload?.error?.message || `Request failed with status ${response.status}`);
     }
     return payload.data;
   }
 
-  function requireTokenAndDocument() {
-    if (!token() || !documentId()) {
-      throw new Error("Access token and document ID are required.");
+  async function ensureToken({ force = false } = {}) {
+    if (token() && !force) {
+      state.accessToken = token();
+      return state.accessToken;
     }
+    setStatus(`로컬 계정으로 로그인 중입니다. ${defaultLogin.email}`);
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(defaultLogin)
+    });
+    const payload = await response.json();
+    writeRaw("login", payload);
+    if (!response.ok || !payload.success) {
+      throw new Error(payload?.error?.message || `Login failed with status ${response.status}`);
+    }
+    state.accessToken = payload.data.accessToken;
+    tokenInput.value = state.accessToken;
+    return state.accessToken;
   }
 
   function ethereumProvider() {
@@ -386,262 +464,297 @@
     return Number(chainId);
   }
 
-  async function upload() {
-    const token = tokenInput.value.trim();
+  async function uploadDocument(accessToken) {
     const caseId = caseIdInput.value.trim();
     const file = fileInput.files[0];
-
-    if (!token || !caseId || !file || !issuedAtInput.value || !expiresAtInput.value) {
-      setStatus("Token, case ID, issuedAt, expiresAt, and file are required.", true);
-      return;
+    if (!caseId || !issuedAtInput.value || !expiresAtInput.value) {
+      throw new Error("Case ID와 날짜가 필요합니다.");
     }
+    if (!file) {
+      throw new Error("업로드할 문서 파일이 필요합니다.");
+    }
+
+    setStep("upload", "active", "업로드 중");
+    setStatus("문서를 업로드하고 OCR 작업을 요청합니다.");
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("documentType", documentTypeInput.value);
+    formData.append("documentType", "EMPLOYMENT_CONTRACT");
     formData.append("issuedAt", issuedAtInput.value);
     formData.append("expiresAt", expiresAtInput.value);
 
-    uploadButton.disabled = true;
-    setStatus("Uploading document...");
+    const response = await fetch(`/api/cases/${encodeURIComponent(caseId)}/documents`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: formData
+    });
+    const data = await readPayload(response, "upload document");
+    state.document = data;
+    documentIdInput.value = data.id;
+    document.getElementById("documentSummary").textContent = [
+      `id: ${data.id}`,
+      `status: ${data.status}`,
+      `hash: ${data.sha256Hash}`
+    ].join("\n");
+    setStep("upload", "done", `완료: ${data.status}`);
+    return data;
+  }
+
+  async function waitForExtraction(accessToken) {
+    setStep("ocr", "active", "OCR callback 대기 중");
+    setStatus("OCR 결과를 기다리는 중입니다.");
+    state.ocrPolling = true;
 
     try {
-      const response = await fetch(`/api/cases/${encodeURIComponent(caseId)}/documents`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: formData
+    for (let attempt = 1; attempt <= 600; attempt += 1) {
+      const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/extraction`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
       });
-
-      const payload = await response.json();
-      responseBox.textContent = JSON.stringify(payload, null, 2);
-
-      if (!response.ok || !payload.success) {
-        const message = payload?.error?.message || `Upload failed with status ${response.status}`;
-        summaryBox.textContent = "Upload failed.";
-        setStatus(message, true);
-        return;
+      const data = await readPayload(response, `refresh extraction ${attempt}`);
+      state.extraction = data;
+      showExtraction(data);
+      if (data.status === "EXTRACTED" || data.status === "CORRECTED") {
+        setStep("ocr", "done", `완료: ${data.status}`);
+        analysisButton.disabled = false;
+        setStatus("OCR 추출이 완료되어 분석 요청이 가능합니다.", "ok");
+        return data;
       }
+      if (data.status === "NEEDS_REVIEW") {
+        setStep("ocr", "done", `검토 필요: ${data.reviewRequiredReason || "-"}`);
+        throw new Error("OCR 추출 결과에 검토가 필요합니다. 보정 후 분석을 진행해야 합니다.");
+      }
+      if (data.status === "FAILED") {
+        setStep("ocr", "error", data.reviewRequiredReason || "OCR 실패");
+        throw new Error(data.reviewRequiredReason || "OCR 처리에 실패했습니다.");
+      }
+      if (attempt <= 180) {
+        setStep("ocr", "active", `OCR 처리 중 (${attempt}/180)`);
+      } else {
+        setStep("ocr", "active", `백그라운드 처리 중 (${attempt}/600)`);
+      }
+      await delay(3000);
+    }
 
-      const data = payload.data;
-      documentIdInput.value = data.id;
-      summaryBox.textContent = [
-        `documentId: ${data.id}`,
-        `status: ${data.status}`,
-        `stored: ${data.stored}`,
-        `storageKey: ${data.storageKey}`,
-        `sha256Hash: ${data.sha256Hash}`,
-        `fileSize: ${data.fileSize}`,
-        `mimeType: ${data.mimeType}`
-      ].join("\n");
-      setStatus("Upload completed. Check stored=true and the storageKey field.");
-    } catch (error) {
-      summaryBox.textContent = "Upload failed.";
-      setStatus(`Request failed: ${error.message}`, true);
+    setStep("ocr", "error", "장시간 미완료");
+    throw new Error("OCR 결과가 장시간 도착하지 않았습니다. 워커 로그를 확인하세요.");
     } finally {
-      uploadButton.disabled = false;
+      state.ocrPolling = false;
     }
   }
 
-  async function createSignatureRequest() {
-    try {
-      requireTokenAndDocument();
-      const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/signature-request`, {
-        headers: {
-          Authorization: `Bearer ${token()}`
-        }
-      });
-      signatureRequest = await parseJsonResponse(response);
-      chainSummaryBox.textContent = [
-        `documentId: ${signatureRequest.documentId}`,
-        `expectedChainId: ${signatureRequest.expectedChainId}`,
-        `nonce: ${signatureRequest.message.nonce}`,
-        `deadline: ${signatureRequest.message.deadline}`,
-        `typedDataHash: ${signatureRequest.typedDataHash}`
-      ].join("\n");
-      setStatus("Signature request created.");
-    } catch (error) {
-      setStatus(error.message, true);
-    }
-  }
+  async function runSignatureAndAnchor(accessToken) {
+    setStep("signature", "active", "서명 요청 생성 중");
+    setStatus("서명 요청을 만들고 지갑 연결을 요청합니다.");
 
-  async function connectWallet() {
-    try {
-      setStatus("Requesting wallet connection. Check the MetaMask extension popup.");
-      chainSummaryBox.textContent = "Waiting for MetaMask account approval...";
-      const provider = ethereumProvider();
-      if (!provider) {
-        throw new Error("MetaMask compatible wallet was not detected.");
-      }
-      const accounts = await provider.request({ method: "eth_requestAccounts" });
-      if (!accounts || accounts.length === 0) {
-        throw new Error("No wallet account was returned.");
-      }
-      walletAddress = accounts[0];
-      walletChainId = parseChainId(await provider.request({ method: "eth_chainId" }));
-      walletAddressInput.value = walletAddress;
-      chainSummaryBox.textContent = [
-        `walletAddress: ${walletAddress}`,
-        `chainId: ${walletChainId}`
-      ].join("\n");
-      setStatus("Wallet connected.");
-    } catch (error) {
-      setStatus(error.message, true);
-    }
-  }
+    const requestResponse = await fetch(`/api/documents/${encodeURIComponent(documentId())}/signature-request`, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    state.signatureRequest = await readPayload(requestResponse, "create signature request");
 
-  async function signTypedData() {
-    try {
-      if (!signatureRequest) {
-        throw new Error("Create a signature request first.");
-      }
-      const provider = ethereumProvider();
-      if (!provider || !walletAddress) {
-        throw new Error("Connect wallet first.");
-      }
-      setStatus("Requesting EIP-712 signature. Check the MetaMask popup.");
-      const chainId = parseChainId(await provider.request({ method: "eth_chainId" }));
-      if (chainId !== Number(signatureRequest.expectedChainId)) {
-        throw new Error(`Switch wallet network to chainId ${signatureRequest.expectedChainId}. Current chainId is ${chainId}.`);
-      }
-      const typedData = {
-        domain: signatureRequest.domain,
-        types: signatureRequest.types,
-        primaryType: "DocumentConsent",
-        message: signatureRequest.message
-      };
-      signature = await provider.request({
-        method: "eth_signTypedData_v4",
-        params: [walletAddress, JSON.stringify(typedData)]
-      });
-      chainSummaryBox.textContent = [
-        `walletAddress: ${walletAddress}`,
-        `signature: ${signature}`,
-        `nonce: ${signatureRequest.message.nonce}`
-      ].join("\n");
-      setStatus("EIP-712 signature created.");
-    } catch (error) {
-      setStatus(error.message, true);
+    const provider = ethereumProvider();
+    if (!provider) {
+      throw new Error("MetaMask 호환 지갑을 찾을 수 없습니다.");
     }
-  }
 
-  async function submitSignature() {
-    try {
-      requireTokenAndDocument();
-      if (!signatureRequest || !signature || !walletAddress) {
-        throw new Error("Signature request, wallet address, and signature are required.");
-      }
-      const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/signatures`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token()}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          walletAddress,
-          chainId: signatureRequest.expectedChainId,
-          signature,
-          typedDataHash: signatureRequest.typedDataHash,
-          nonce: signatureRequest.message.nonce
-        })
-      });
-      const data = await parseJsonResponse(response);
-      signatureId = data.signatureId;
-      chainSummaryBox.textContent = [
-        `signatureId: ${data.signatureId}`,
-        `documentId: ${data.documentId}`,
-        `walletAddress: ${data.walletAddress}`,
-        `status: ${data.status}`,
-        `signedAt: ${data.signedAt}`
-      ].join("\n");
-      setStatus("Signature submitted.");
-    } catch (error) {
-      setStatus(error.message, true);
+    const accounts = await provider.request({ method: "eth_requestAccounts" });
+    if (!accounts || accounts.length === 0) {
+      throw new Error("지갑 계정을 가져오지 못했습니다.");
     }
-  }
+    state.walletAddress = accounts[0];
 
-  async function anchorDocument() {
-    try {
-      requireTokenAndDocument();
-      if (!signatureId) {
-        throw new Error("Submit signature first.");
-      }
-      const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/anchor`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token()}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ signatureId })
-      });
-      const data = await parseJsonResponse(response);
-      chainSummaryBox.textContent = [
-        `anchorId: ${data.anchorId}`,
-        `status: ${data.status}`,
-        `txHash: ${data.txHash}`,
-        `blockNumber: ${data.blockNumber}`,
-        `anchoredAt: ${data.anchoredAt}`
-      ].join("\n");
-      setStatus("Anchor request completed.");
-    } catch (error) {
-      setStatus(error.message, true);
+    const chainId = parseChainId(await provider.request({ method: "eth_chainId" }));
+    if (chainId !== Number(state.signatureRequest.expectedChainId)) {
+      throw new Error(`지갑 네트워크를 chainId ${state.signatureRequest.expectedChainId}로 전환해야 합니다. 현재 chainId는 ${chainId}입니다.`);
     }
-  }
 
-  async function getAnchor() {
-    try {
-      requireTokenAndDocument();
-      const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/anchor`, {
-        headers: {
-          Authorization: `Bearer ${token()}`
-        }
-      });
-      const data = await parseJsonResponse(response);
-      chainSummaryBox.textContent = [
-        `anchorId: ${data.anchorId}`,
-        `status: ${data.status}`,
-        `txHash: ${data.txHash}`,
-        `blockNumber: ${data.blockNumber}`,
-        `anchoredAt: ${data.anchoredAt}`
-      ].join("\n");
-      setStatus("Anchor loaded.");
-    } catch (error) {
-      setStatus(error.message, true);
-    }
+    setStatus("지갑 서명 팝업을 승인하세요.");
+    const typedData = {
+      domain: state.signatureRequest.domain,
+      types: state.signatureRequest.types,
+      primaryType: "DocumentConsent",
+      message: state.signatureRequest.message
+    };
+    state.signature = await provider.request({
+      method: "eth_signTypedData_v4",
+      params: [state.walletAddress, JSON.stringify(typedData)]
+    });
+
+    const submitResponse = await fetch(`/api/documents/${encodeURIComponent(documentId())}/signatures`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        walletAddress: state.walletAddress,
+        chainId: state.signatureRequest.expectedChainId,
+        signature: state.signature,
+        typedDataHash: state.signatureRequest.typedDataHash,
+        nonce: state.signatureRequest.message.nonce
+      })
+    });
+    const signatureData = await readPayload(submitResponse, "submit signature");
+    state.signatureId = signatureData.signatureId;
+    document.getElementById("signatureSummary").textContent = [
+      `id: ${signatureData.signatureId}`,
+      `wallet: ${signatureData.walletAddress}`,
+      `status: ${signatureData.status}`
+    ].join("\n");
+    setStep("signature", "done", "서명 제출 완료");
+
+    setStep("anchor", "active", "앵커링 중");
+    const anchorResponse = await fetch(`/api/documents/${encodeURIComponent(documentId())}/anchor`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ signatureId: state.signatureId })
+    });
+    state.anchor = await readPayload(anchorResponse, "anchor document");
+    document.getElementById("anchorSummary").textContent = [
+      `anchorId: ${state.anchor.anchorId}`,
+      `status: ${state.anchor.status}`,
+      `txHash: ${state.anchor.txHash || "-"}`
+    ].join("\n");
+    setStep("anchor", "done", `완료: ${state.anchor.status}`);
   }
 
   async function createAnalysis() {
     try {
-      requireTokenAndDocument();
+      analysisButton.disabled = true;
+      const accessToken = await ensureToken();
+      if (!documentId()) {
+        throw new Error("분석할 documentId가 없습니다.");
+      }
+      setStep("analysis", "active", "저장 요청 중");
+      setStatus("분석 결과 저장 API를 호출합니다.");
       const response = await fetch(`/api/documents/${encodeURIComponent(documentId())}/analysis`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token()}`
-        }
+        headers: { Authorization: `Bearer ${accessToken}` }
       });
-      const data = await parseJsonResponse(response);
-      chainSummaryBox.textContent = [
-        `analysisId: ${data.id}`,
-        `status: ${data.status}`,
-        `extractedTextHash: ${data.extractedTextHash}`,
-        `analysisResultHash: ${data.analysisResultHash}`
+      state.analysis = await readPayload(response, "create analysis");
+      document.getElementById("analysisSummary").textContent = [
+        `id: ${state.analysis.id}`,
+        `status: ${state.analysis.status}`,
+        `inputHash: ${state.analysis.extractedTextHash}`,
+        `resultHash: ${state.analysis.analysisResultHash}`
       ].join("\n");
-      setStatus("Analysis created.");
+      setStep("analysis", "done", `저장 완료: ${state.analysis.status}`);
+      setStatus("분석 결과가 DB에 저장되었습니다.", "ok");
     } catch (error) {
-      setStatus(error.message, true);
+      setStep("analysis", "error", error.message);
+      setStatus(error.message, "error");
+      analysisButton.disabled = false;
     }
   }
 
-  uploadButton.addEventListener("click", upload);
-  resetButton.addEventListener("click", resetForm);
-  signatureRequestButton.addEventListener("click", createSignatureRequest);
-  connectWalletButton.addEventListener("click", connectWallet);
-  signButton.addEventListener("click", signTypedData);
-  submitSignatureButton.addEventListener("click", submitSignature);
-  anchorButton.addEventListener("click", anchorDocument);
-  getAnchorButton.addEventListener("click", getAnchor);
+  async function startFlow() {
+    let ocrPromise = null;
+    try {
+      startButton.disabled = true;
+      analysisButton.disabled = true;
+      resetRuntimeState();
+      const accessToken = await ensureToken({ force: !tokenInput.value.trim() });
+      await uploadDocument(accessToken);
+      ocrPromise = waitForExtraction(accessToken)
+        .then(() => {
+          summaryBox.textContent = "업로드, OCR, 서명, 앵커링이 완료되었습니다. 분석 요청을 누르면 결과가 DB에 저장됩니다.";
+        })
+        .catch((error) => {
+          if (state.anchor) {
+            setStatus(`${error.message} 서명과 앵커링은 완료되었고 OCR은 백그라운드 상태로 확인할 수 있습니다.`, "error");
+            return null;
+          }
+          throw error;
+        });
+      await runSignatureAndAnchor(accessToken);
+      summaryBox.textContent = "업로드, 서명, 앵커링이 완료되었습니다. OCR 완료 후 분석 요청이 활성화됩니다.";
+      setStatus("OCR이 완료되면 분석 요청이 가능합니다.", "ok");
+      ocrPromise.catch(() => {});
+    } catch (error) {
+      if (ocrPromise) {
+        ocrPromise.catch(() => {});
+      }
+      setStatus(error.message, "error");
+      markActiveStepError(error.message);
+    } finally {
+      startButton.disabled = false;
+    }
+  }
+
+  function showExtraction(data) {
+    const payload = data.correctedPayload && data.correctedPayload !== null ? data.correctedPayload : data.extractedPayload;
+    const terms = payload?.contractTerms || {};
+    const period = terms.contractPeriod || {};
+    const wage = terms.wage || {};
+    const hours = terms.workingHours || {};
+
+    document.getElementById("extractionStatus").textContent = [
+      data.status,
+      data.reviewRequiredReason || "",
+      data.aiPayloadHash ? `hash: ${data.aiPayloadHash}` : ""
+    ].filter(Boolean).join("\n");
+
+    document.getElementById("contractPeriod").textContent = [
+      `${text(period.contractStartDate)} ~ ${text(period.contractEndDate)}`,
+      `status: ${text(period.status)}`
+    ].join("\n");
+
+    document.getElementById("wage").textContent = [
+      `monthly: ${amount(wage.amount)}`,
+      `base: ${amount(wage.basePay)}`,
+      `payment day: ${text(wage.paymentDay)}`
+    ].join("\n");
+
+    document.getElementById("workingHours").textContent = [
+      `${text(hours.startTime)} ~ ${text(hours.endTime)}`,
+      `overtime/day: ${text(hours.overtimeHoursPerDay)}`
+    ].join("\n");
+  }
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function markActiveStepError(message) {
+    document.querySelectorAll(".step.active").forEach((step) => {
+      step.className = "step error";
+      step.querySelector("span").textContent = message;
+    });
+  }
+
+  function resetRuntimeState() {
+    state.document = null;
+    state.extraction = null;
+    state.signatureRequest = null;
+    state.walletAddress = "";
+    state.signature = "";
+    state.signatureId = "";
+    state.anchor = null;
+    state.analysis = null;
+    state.ocrPolling = false;
+    ["upload", "ocr", "signature", "anchor", "analysis"].forEach((id) => setStep(id, "", "대기 중"));
+  }
+
+  function reset() {
+    resetRuntimeState();
+    documentIdInput.value = "";
+    fileInput.value = "";
+    caseIdInput.value = defaultCaseId;
+    issuedAtInput.value = today;
+    expiresAtInput.value = today;
+    analysisButton.disabled = true;
+    summaryBox.textContent = "처리 결과가 아직 없습니다.";
+    rawBox.textContent = "No response yet.";
+    ["documentSummary", "signatureSummary", "anchorSummary", "analysisSummary", "extractionStatus", "contractPeriod", "wage", "workingHours"]
+      .forEach((id) => document.getElementById(id).textContent = "-");
+    setStatus("파일을 선택한 뒤 시작하세요. 지갑 서명은 브라우저 지갑 팝업에서 승인해야 합니다.");
+  }
+
+  startButton.addEventListener("click", startFlow);
   analysisButton.addEventListener("click", createAnalysis);
+  resetButton.addEventListener("click", reset);
 </script>
 </body>
 </html>

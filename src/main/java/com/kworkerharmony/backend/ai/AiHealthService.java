@@ -1,7 +1,7 @@
 package com.kworkerharmony.backend.ai;
 
 import com.kworkerharmony.backend.ai.dto.response.AiHealthResponse;
-import com.kworkerharmony.backend.document.config.DocumentAnalysisAiProperties;
+import com.kworkerharmony.backend.document.config.DocumentAiProperties;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AiHealthService {
 
-    private final DocumentAnalysisAiProperties properties;
+    private final DocumentAiProperties properties;
 
     public AiHealthResponse getHealth() {
         if (!properties.enabled()) {
@@ -24,15 +24,15 @@ public class AiHealthService {
                     "STUB",
                     "AVAILABLE",
                     true,
-                    properties.healthPath(),
+                    properties.healthEndpoint(),
                     null,
-                    "AI analysis uses the local stub adapter.",
+                    "AI analysis uses the local placeholder result.",
                     LocalDateTime.now()
             );
         }
 
         try {
-            URI healthUri = properties.healthUri();
+            URI healthUri = URI.create(properties.healthEndpoint());
             HttpClient client = HttpClient.newBuilder()
                     .connectTimeout(Duration.ofMillis(properties.healthTimeoutMillis()))
                     .build();
@@ -46,7 +46,7 @@ public class AiHealthService {
                     "HTTP",
                     available ? "AVAILABLE" : "UNAVAILABLE",
                     available,
-                    properties.healthPath(),
+                    properties.healthEndpoint(),
                     response.statusCode(),
                     available ? "AI server health check succeeded." : "AI server returned a non-2xx health status.",
                     LocalDateTime.now()
@@ -66,7 +66,7 @@ public class AiHealthService {
                 "HTTP",
                 "UNAVAILABLE",
                 false,
-                properties.healthPath(),
+                properties.healthEndpoint(),
                 null,
                 message,
                 LocalDateTime.now()

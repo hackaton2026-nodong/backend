@@ -32,6 +32,9 @@ public class CompanyInviteCode extends BaseEntity {
     @JoinColumn(name = "enterprise_id", nullable = false)
     private Enterprise enterprise;
 
+    @Column(name = "case_id", length = 36)
+    private String caseId;
+
     @Column(nullable = false, unique = true, length = 64)
     private String code;
 
@@ -60,7 +63,21 @@ public class CompanyInviteCode extends BaseEntity {
             boolean active,
             Role defaultRole
     ) {
+        this(enterprise, null, code, expiresAt, maxUses, usedCount, active, defaultRole);
+    }
+
+    public CompanyInviteCode(
+            Enterprise enterprise,
+            String caseId,
+            String code,
+            LocalDateTime expiresAt,
+            int maxUses,
+            int usedCount,
+            boolean active,
+            Role defaultRole
+    ) {
         this.enterprise = enterprise;
+        this.caseId = caseId;
         this.code = code;
         this.expiresAt = expiresAt;
         this.maxUses = maxUses;

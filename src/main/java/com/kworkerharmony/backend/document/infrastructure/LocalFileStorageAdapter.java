@@ -4,6 +4,7 @@ import com.kworkerharmony.backend.document.port.FileStoragePort;
 import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
 import java.io.IOException;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -32,7 +33,7 @@ public class LocalFileStorageAdapter implements FileStoragePort {
 
             return new StoredFile(
                     originalFileName,
-                    rootDirectory.relativize(targetFile).toString(),
+                    rootDirectory.relativize(targetFile).toString().replace(File.separatorChar, '/'),
                     file.getContentType() != null ? file.getContentType() : "application/octet-stream",
                     file.getSize(),
                     targetFile.toString()
@@ -47,6 +48,6 @@ public class LocalFileStorageAdapter implements FileStoragePort {
         if (storageKey == null || storageKey.isBlank()) {
             return false;
         }
-        return Files.exists(rootDirectory.resolve(storageKey).normalize());
+        return Files.exists(rootDirectory.resolve(storageKey.replace('\\', File.separatorChar)).normalize());
     }
 }

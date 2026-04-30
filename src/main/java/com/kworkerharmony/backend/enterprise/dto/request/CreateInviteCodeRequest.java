@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 
 public record CreateInviteCodeRequest(
+        String caseId,
+
         @NotNull(message = "Expiry date is required")
         @Future(message = "Expiry date must be in the future")
         LocalDateTime expiresAt,

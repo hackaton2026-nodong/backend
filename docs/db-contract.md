@@ -1,6 +1,6 @@
 # DB 명세 및 API 계약
 
-최종 검토일: 2026-04-25
+최종 검토일: 2026-04-28
 
 이 문서는 현재 프로젝트의 JPA 엔티티, DTO record, 컨트롤러, `docker/mysql/init/01-schema.sql`을 기준으로 작성했다.
 
@@ -37,6 +37,9 @@
 | `name` | `VARCHAR(100)` | NO |  | 회사명 |
 | `business_number` | `VARCHAR(100)` | NO |  | 사업자 등록번호 |
 | `industry` | `VARCHAR(255)` | NO |  | 업종 |
+| `address` | `VARCHAR(255)` | YES |  | 사업장 주소 |
+| `foreign_worker_quota` | `INT` | YES |  | 외국인 고용 허가 인원 |
+| `employment_permit_cert_no` | `VARCHAR(100)` | YES |  | 고용허가제 인증번호 |
 | `country_code` | `VARCHAR(10)` | NO |  | 국가 코드 |
 | `language_code` | `VARCHAR(10)` | NO |  | 언어 코드 |
 | `status` | `VARCHAR(20)` | NO |  | `EnterpriseStatus` |
@@ -55,6 +58,9 @@ Enum: `EnterpriseStatus = ACTIVE, INACTIVE`
 | `email` | `VARCHAR(255)` | NO | UNIQUE | 로그인 이메일 |
 | `password_hash` | `VARCHAR(255)` | NO |  | BCrypt 해시 |
 | `name` | `VARCHAR(100)` | NO |  | 사용자 이름 |
+| `birth_date` | `DATE` | YES |  | 근로자 생년월일 |
+| `phone_number` | `VARCHAR(30)` | YES |  | 사용자 연락처 |
+| `visa_expires_at` | `DATE` | YES |  | 근로자 체류 만료일 |
 | `role` | `VARCHAR(20)` | NO |  | `Role` |
 | `user_type` | `VARCHAR(20)` | NO |  | `UserType` |
 | `status` | `VARCHAR(20)` | NO |  | `UserStatus` |
@@ -77,6 +83,7 @@ Enums:
 | --- | --- | --- | --- | --- |
 | `id` | `BIGINT AUTO_INCREMENT` | NO | PK | 초대코드 ID |
 | `enterprise_id` | `BIGINT` | NO | FK | `enterprises.id` |
+| `case_id` | `VARCHAR(36)` | YES |  | 근로자 온보딩 시 연결할 케이스 ID |
 | `code` | `VARCHAR(64)` | NO | UNIQUE | 초대코드 |
 | `expires_at` | `DATETIME(6)` | NO |  | 만료 시각 |
 | `max_uses` | `INT` | NO |  | 최대 사용 횟수 |
@@ -87,6 +94,8 @@ Enums:
 | `updated_at` | `DATETIME(6)` | NO |  | 수정 시각 |
 
 사용 가능 조건: `active = true`, `used_count < max_uses`, `expires_at >= now`
+
+`case_id`가 있는 초대코드로 근로자가 가입하거나 `/api/companies/join`을 호출하면 해당 케이스의 `worker_id`를 가입/합류 사용자로 채우고 케이스 상태를 `ACTIVE`로 전환한다. 현재 `case_id`는 JPA/서비스에서 스칼라 값으로 관리하며 DB FK는 없다.
 
 ### `cases`
 
@@ -192,7 +201,7 @@ Enum: `DocumentAnchorStatus = PENDING, ANCHORED, FAILED`
 
 ### `document_analysis_results`
 
-오프체인 분석 결과 placeholder와 향후 OCR/AI 분석 결과 해시를 저장한다. 실제 OCR/parser와 AI 레이어 사이의 payload 규격은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
+오프체인 분석 결과 placeholder와 향후 AI 분석 결과 해시를 저장한다. 실제 OCR 추출 결과는 `document_extractions`에 저장하며, extraction payload와 AI 레이어 사이의 payload 규격은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
 
 | 컬럼 | 타입 | NULL | 키 | 설명 |
 | --- | --- | --- | --- | --- |
@@ -210,6 +219,31 @@ Enum: `DocumentAnchorStatus = PENDING, ANCHORED, FAILED`
 Enum: `DocumentAnalysisStatus = PENDING, COMPLETED, FAILED`
 
 필터링 전 raw OCR text 저장 테이블은 만들지 않는다. 원문 파일, `storageKey`, 필터링 전 OCR 전문은 AI request와 로그에 포함하지 않는다.
+
+### `document_extractions`
+
+OCR 결과에서 근로계약서 분석에 필요한 필드만 추출해 저장하는 테이블이다. PaddleOCR 원본 JSON, raw markdown, raw table HTML, raw OCR 전문은 저장하지 않는다.
+
+| 컬럼 | 타입 | NULL | 키 | 설명 |
+| --- | --- | --- | --- | --- |
+| `id` | `VARCHAR(36)` | NO | PK | UUID 문자열 |
+| `document_id` | `VARCHAR(36)` | NO | UNIQUE, FK | `documents.id` |
+| `status` | `VARCHAR(50)` | NO |  | `DocumentExtractionStatus` |
+| `schema_version` | `VARCHAR(100)` | NO |  | 추출 payload 스키마 버전 |
+| `source_engine` | `VARCHAR(100)` | NO |  | OCR/parser 엔진명. 예: `PADDLE_OCR` |
+| `source_result_hash` | `VARCHAR(64)` | YES |  | 저장하지 않는 원본 OCR JSON의 canonical hash |
+| `extracted_payload` | `TEXT` | YES |  | 민감정보 제거 후 구조화한 계약 필드 JSON |
+| `corrected_payload` | `TEXT` | YES |  | 사용자 보정 후 최종 계약 필드 JSON |
+| `ai_payload_hash` | `VARCHAR(64)` | YES |  | AI 전달 기준 payload hash |
+| `review_required_reason` | `VARCHAR(1000)` | YES |  | 보정 필요 사유 |
+| `extracted_at` | `DATETIME(6)` | YES |  | 추출 완료 시각 |
+| `corrected_at` | `DATETIME(6)` | YES |  | 보정 완료 시각 |
+| `created_at` | `DATETIME(6)` | NO |  | 생성 시각 |
+| `updated_at` | `DATETIME(6)` | NO |  | 수정 시각 |
+
+Enum: `DocumentExtractionStatus = PENDING, EXTRACTED, NEEDS_REVIEW, CORRECTED, FAILED`
+
+AI 요청은 `corrected_payload`가 있으면 이를 우선 사용하고, 없으면 `extracted_payload`를 사용한다. 두 payload 모두 이름, 전화번호, 이메일, 사업자등록번호, 상세주소, 본국 주소, 원문 OCR 전문, `storageKey`를 포함하면 안 된다.
 
 ### `alerts`
 
@@ -288,7 +322,21 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 - `case_checklist_statuses.case_id -> cases.id`
 - `consultations.uid -> users.id`
 
-현재 설계상 `documents.uploader_user_id`는 엔티티에서 스칼라 값으로만 관리하며, `01-schema.sql`에도 DB FK가 없다.
+현재 설계상 `company_invite_codes.case_id`와 `documents.uploader_user_id`는 엔티티에서 스칼라 값으로만 관리하며, `01-schema.sql`에도 DB FK가 없다.
+
+## 로컬 시드 시나리오
+
+`src/main/resources/data-local.sql`과 `docker/mysql/init/02-seed.sql`은 DB align 검증용으로 아래 시나리오를 생성한다.
+
+- 사업장 1개: `한국제조`
+- 고용주 1명: `minsukim@hankukmanufacturing.co.kr` / `password123`
+- 근로자 5명: `minh.nguyen97@example.com`, `somchai.phanit95@example.com`, `maria.santos98@example.com`, `dewi.lestari96@example.com`, `ram.thapa94@example.com` / `password123`
+- 활성 케이스 5개: 각 근로자별 1개
+- 근로계약서 문서 5개: 각 케이스별 `EMPLOYMENT_CONTRACT`, `ANALYZED` 상태
+- 분석 결과 5개: placeholder summary/risk flags
+- 케이스 연결 초대코드 5개: `KOHAMO-WORKER-1` ~ `KOHAMO-WORKER-5`
+
+이 시드는 실제 온체인 호출, 실제 전자서명, 실제 AI 분석을 수행하지 않는다. 화면/DB 플로우 검증을 위해 문서와 분석 상태만 미리 채운다.
 
 ## API 공통 응답
 
@@ -357,6 +405,9 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
   "email": "user@example.com",
   "password": "password123",
   "name": "User Name",
+  "birthDate": null,
+  "phoneNumber": "010-1000-0000",
+  "visaExpiresAt": null,
   "userType": "EMPLOYER",
   "countryCode": "KR",
   "languageCode": "ko",
@@ -364,6 +415,9 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
   "companyName": "Harmony Co",
   "companyBusinessNumber": "123-45-67890",
   "companyIndustry": "Manufacturing",
+  "companyAddress": "Seoul",
+  "foreignWorkerQuota": 5,
+  "employmentPermitCertNo": "EPS-001",
   "companyCountryCode": "KR",
   "companyLanguageCode": "ko"
 }
@@ -375,6 +429,9 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 - `name`: 필수, 최대 100자
 - `countryCode`, `languageCode`: 필수
 - `inviteCode` 또는 전체 회사 필드 묶음 중 정확히 하나만 제공해야 함
+- 고용주 가입은 회사 필드 묶음으로 `Enterprise`를 생성하고 사용자와 연결함
+- 근로자 가입은 `inviteCode`로 기존 회사에 연결하며, 초대코드에 `caseId`가 있으면 해당 케이스도 연결함
+- `birthDate`, `phoneNumber`, `visaExpiresAt`, 사업장 추가 필드는 nullable이지만 온보딩 UI 입력값 저장용으로 사용함
 
 응답 데이터: 없음
 
@@ -443,6 +500,9 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
     "name": "Harmony Co",
     "businessNumber": "123-45-67890",
     "industry": "Manufacturing",
+    "address": "Seoul",
+    "foreignWorkerQuota": 5,
+    "employmentPermitCertNo": "EPS-001",
     "countryCode": "KR",
     "languageCode": "ko",
     "status": "ACTIVE"
@@ -463,6 +523,9 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
   "name": "Harmony Co",
   "businessNumber": "123-45-67890",
   "industry": "Manufacturing",
+  "address": "Seoul",
+  "foreignWorkerQuota": 5,
+  "employmentPermitCertNo": "EPS-001",
   "countryCode": "KR",
   "languageCode": "ko"
 }
@@ -478,6 +541,7 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 
 ```json
 {
+  "caseId": "case-uuid",
   "expiresAt": "2026-12-31T23:59:59",
   "maxUses": 10,
   "defaultRole": "WORKER"
@@ -490,6 +554,7 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 {
   "id": 1,
   "companyId": 1,
+  "caseId": "case-uuid",
   "code": "INVITE-CODE",
   "expiresAt": "2026-12-31T23:59:59",
   "maxUses": 10,
@@ -525,6 +590,7 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
     "id": 1,
     "email": "worker@example.com",
     "name": "Worker",
+    "phoneNumber": "010-2000-0001",
     "role": "WORKER",
     "status": "ACTIVE"
   }
@@ -747,7 +813,7 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 
 #### `POST /documents/{documentId}/analysis`
 
-인증 필요. 현재는 placeholder 오프체인 분석 결과를 생성 또는 갱신한다.
+인증 필요. 오프체인 분석 결과를 생성 또는 갱신한다. `document_extractions.corrected_payload`가 있으면 이를 우선 사용하고, 없으면 `extracted_payload`를 사용해 sanitized AI request를 구성한다. `DOCUMENT_AI_ENABLED=true`이면 `DOCUMENT_AI_ENDPOINT`로 POST하고, 비활성 상태에서는 placeholder 결과를 저장한다.
 
 응답 데이터: `DocumentAnalysisResponse`
 
@@ -769,6 +835,61 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 인증 필요. 저장된 분석 결과를 조회한다.
 
 응답 데이터: `DocumentAnalysisResponse`
+
+#### `POST /documents/{documentId}/extraction/paddle-ocr`
+
+인증 필요. 개발/수동 검증용 API다. PaddleOCR 원본 JSON을 받아 근로계약서 분석에 필요한 필드만 추출한다. 제품 플로우에서는 업로드 후 OCR worker가 내부 callback API로 결과를 제출한다.
+
+요청:
+
+```json
+{
+  "ocrResult": {
+    "layoutParsingResults": []
+  }
+}
+```
+
+응답 데이터: `DocumentExtractionResponse`
+
+#### `POST /internal/documents/{documentId}/ocr-result`
+
+OCR worker callback API다. JWT 인증 대신 `X-OCR-Callback-Token` 헤더를 `DOCUMENT_OCR_CALLBACK_TOKEN`과 비교한다. 토큰 설정값이 비어 있으면 로컬 개발 편의를 위해 토큰 검증을 생략한다.
+
+요청:
+
+```json
+{
+  "ocrResult": {
+    "layoutParsingResults": []
+  }
+}
+```
+
+응답 데이터: `DocumentExtractionResponse`
+
+#### `GET /documents/{documentId}/extraction`
+
+인증 필요. 저장된 추출/보정 payload를 조회한다. 응답에는 정제된 JSON만 포함되며 raw OCR 결과는 포함되지 않는다.
+
+응답 데이터: `DocumentExtractionResponse`
+
+#### `PUT /documents/{documentId}/extraction/correction`
+
+인증 필요. 사용자가 보정한 최종 계약 필드 JSON을 저장한다. raw OCR 필드명, 이메일, 전화번호, 사업자등록번호 등 민감 식별자가 포함되면 거부한다.
+
+요청:
+
+```json
+{
+  "correctedPayload": {
+    "schemaVersion": "employment-contract-v1",
+    "contractTerms": {}
+  }
+}
+```
+
+응답 데이터: `DocumentExtractionResponse`
 
 ### Checklists
 
@@ -998,6 +1119,7 @@ Hello, K-Worker Harmony!
 ## 현재 계약상 주의 사항
 
 - `documents.case_id`에는 DB FK가 있지만, `Document` 엔티티는 JPA 관계가 아니라 `String` 스칼라 값으로 매핑한다.
+- `company_invite_codes.case_id`는 DB FK 없이 `String` 스칼라 값으로 매핑한다.
 - `documents.uploader_user_id`는 `01-schema.sql`에 DB FK가 없다.
 - `dashboards` 테이블은 존재하지만 현재 `/api/dashboard/*` 엔드포인트는 계산형 응답을 반환하며 이 테이블을 사용하지 않는다.
 - `consultations`는 감사 시각을 저장하지만 `ConsultationResponse`는 이를 노출하지 않는다.

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 public record CompanyInviteCodeResponse(
         Long id,
         Long companyId,
+        String caseId,
         String code,
         LocalDateTime expiresAt,
         int maxUses,
@@ -18,6 +19,7 @@ public record CompanyInviteCodeResponse(
         return new CompanyInviteCodeResponse(
                 inviteCode.getId(),
                 inviteCode.getEnterprise().getId(),
+                inviteCode.getCaseId(),
                 inviteCode.getCode(),
                 inviteCode.getExpiresAt(),
                 inviteCode.getMaxUses(),

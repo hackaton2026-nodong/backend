@@ -1,31 +1,38 @@
 package com.kworkerharmony.backend.document;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kworkerharmony.backend.cases.domain.CaseRepository;
 import com.kworkerharmony.backend.cases.entity.Case;
 import com.kworkerharmony.backend.document.config.DocumentBlockchainProperties;
+import com.kworkerharmony.backend.document.config.DocumentOcrProperties;
 import com.kworkerharmony.backend.document.dto.request.AnchorDocumentRequest;
+import com.kworkerharmony.backend.document.dto.request.CorrectDocumentExtractionRequest;
+import com.kworkerharmony.backend.document.dto.request.CreatePaddleOcrExtractionRequest;
+import com.kworkerharmony.backend.document.dto.request.ReceivePaddleOcrResultRequest;
 import com.kworkerharmony.backend.document.dto.request.SubmitDocumentSignatureRequest;
 import com.kworkerharmony.backend.document.dto.response.DocumentAnalysisResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentAnchorResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentExtractionResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentSignatureRequestResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentSignatureResponse;
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort;
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort.AnchorCommand;
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort.AnchorReceipt;
-import com.kworkerharmony.backend.document.port.DocumentAnalysisPort;
-import com.kworkerharmony.backend.document.port.DocumentAnalysisPort.AnalysisCommand;
-import com.kworkerharmony.backend.document.port.DocumentAnalysisPort.CaseContextPayload;
-import com.kworkerharmony.backend.document.port.DocumentAnalysisPort.ChecklistContextPayload;
-import com.kworkerharmony.backend.document.port.DocumentAnalysisPort.DocumentPayload;
-import com.kworkerharmony.backend.document.port.DocumentAnalysisPort.OutputRequestPayload;
+import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort;
+import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort.AiAnalysisCommand;
+import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort.AiAnalysisResult;
 import com.kworkerharmony.backend.document.port.DocumentHashPort;
+import com.kworkerharmony.backend.document.port.DocumentOcrPort;
+import com.kworkerharmony.backend.document.port.DocumentOcrPort.OcrCommand;
 import com.kworkerharmony.backend.document.port.FileStoragePort;
 import com.kworkerharmony.backend.document.port.FileStoragePort.StoredFile;
 import com.kworkerharmony.backend.document.support.DocumentCrypto;
 import com.kworkerharmony.backend.document.support.DocumentTypedDataFactory;
+import com.kworkerharmony.backend.document.support.EmploymentContractExtractionPayload;
+import com.kworkerharmony.backend.document.support.PaddleOcrEmploymentContractExtractor;
 import com.kworkerharmony.backend.enterprise.Enterprise;
 import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
@@ -36,9 +43,10 @@ import com.kworkerharmony.backend.user.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
+import java.util.Queue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,10 +64,14 @@ public class DocumentService {
     private final DocumentSignatureRepository documentSignatureRepository;
     private final DocumentAnchorRepository documentAnchorRepository;
     private final DocumentAnalysisResultRepository documentAnalysisResultRepository;
+    private final DocumentExtractionRepository documentExtractionRepository;
     private final DocumentBlockchainProperties blockchainProperties;
+    private final DocumentOcrProperties ocrProperties;
     private final DocumentTypedDataFactory typedDataFactory;
     private final DocumentAnchorRelayerPort anchorRelayerPort;
-    private final DocumentAnalysisPort documentAnalysisPort;
+    private final DocumentAiAnalysisPort documentAiAnalysisPort;
+    private final DocumentOcrPort documentOcrPort;
+    private final PaddleOcrEmploymentContractExtractor paddleOcrEmploymentContractExtractor;
     private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
@@ -114,6 +126,8 @@ public class DocumentService {
                     storedFile.fileSize()
             );
             document.markHashed(documentHashPort.hash(storedFile.absolutePath()));
+            createPendingExtraction(document);
+            requestOcr(document);
             return toResponse(document);
         } catch (RuntimeException ex) {
             document.markFailed();
@@ -273,29 +287,21 @@ public class DocumentService {
     @Transactional
     public DocumentAnalysisResponse analyzeDocument(String documentId, UserPrincipal userPrincipal) {
         Document document = getAccessibleDocument(documentId, userPrincipal);
-        validateDocumentCanBeAnalyzed(document);
-        Case caseEntity = caseRepository.findById(document.getCaseId())
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Case not found"));
-        User user = getUser(userPrincipal.getId());
+        validateDocumentReadyForExtraction(document);
+        DocumentExtraction extraction = documentExtractionRepository.findByDocumentId(document.getId())
+                .orElse(null);
+        validateExtractionCanBeAnalyzed(extraction);
         DocumentAnalysisResult result = documentAnalysisResultRepository.findByDocumentId(document.getId())
                 .orElseGet(() -> documentAnalysisResultRepository.save(new DocumentAnalysisResult(document.getId())));
-
-        AnalysisCommand command = buildAnalysisCommand(document, caseEntity, user);
-        String requestHash = DocumentCrypto.sha256Hex(toJson(command));
         try {
-            DocumentAnalysisPort.AnalysisResult analysis = documentAnalysisPort.analyze(command);
-            String resultHash = DocumentCrypto.sha256Hex(analysis.responseBodyJson());
-            if (analysis.status() == DocumentAnalysisStatus.COMPLETED) {
-                result.markCompleted(
-                        requestHash,
-                        resultHash,
-                        analysis.summary(),
-                        analysis.riskFlagsJson()
-                );
-                document.markAnalyzed();
-            } else {
-                result.markFailed(analysis.summary());
-            }
+            AiAnalysisResult analysisResult = documentAiAnalysisPort.analyze(aiAnalysisCommand(document, extraction));
+            result.markCompleted(
+                    analysisResult.inputHash(),
+                    analysisResult.analysisResultHash(),
+                    analysisResult.summary(),
+                    analysisResult.riskFlags()
+            );
+            markAnalyzedWithoutOverwritingOnchainTerminalState(document);
         } catch (RuntimeException ex) {
             result.markFailed(truncate(ex.getMessage(), 1000));
         }
@@ -310,8 +316,138 @@ public class DocumentService {
         return DocumentAnalysisResponse.from(result);
     }
 
+    @Transactional
+    public DocumentExtractionResponse createPaddleOcrExtraction(
+            String documentId,
+            CreatePaddleOcrExtractionRequest request,
+            UserPrincipal userPrincipal
+    ) {
+        Document document = getAccessibleDocument(documentId, userPrincipal);
+        validateDocumentReadyForExtraction(document);
+        if (!DocumentType.EMPLOYMENT_CONTRACT.name().equals(document.getDocumentType())) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Only employment contracts are supported");
+        }
+
+        DocumentExtraction extraction = applyPaddleOcrExtraction(document, request.ocrResult());
+        return DocumentExtractionResponse.from(extraction, objectMapper);
+    }
+
+    @Transactional
+    public DocumentExtractionResponse receivePaddleOcrResult(
+            String documentId,
+            ReceivePaddleOcrResultRequest request,
+            String callbackToken
+    ) {
+        validateCallbackToken(callbackToken);
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document not found"));
+        validateDocumentReadyForExtraction(document);
+        if (!DocumentType.EMPLOYMENT_CONTRACT.name().equals(document.getDocumentType())) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Only employment contracts are supported");
+        }
+        DocumentExtraction extraction = applyPaddleOcrExtraction(document, request.ocrResult());
+        return DocumentExtractionResponse.from(extraction, objectMapper);
+    }
+
+    @Transactional(readOnly = true)
+    public DocumentExtractionResponse getExtraction(String documentId, UserPrincipal userPrincipal) {
+        Document document = getAccessibleDocument(documentId, userPrincipal);
+        DocumentExtraction extraction = documentExtractionRepository.findByDocumentId(document.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document extraction not found"));
+        return DocumentExtractionResponse.from(extraction, objectMapper);
+    }
+
+    @Transactional
+    public DocumentExtractionResponse correctExtraction(
+            String documentId,
+            CorrectDocumentExtractionRequest request,
+            UserPrincipal userPrincipal
+    ) {
+        Document document = getAccessibleDocument(documentId, userPrincipal);
+        DocumentExtraction extraction = documentExtractionRepository.findByDocumentId(document.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document extraction not found"));
+        String correctedPayload = canonicalJson(request.correctedPayload());
+        validateSanitizedPayload(correctedPayload);
+        extraction.markCorrected(correctedPayload, DocumentCrypto.sha256Hex(correctedPayload));
+        return DocumentExtractionResponse.from(extraction, objectMapper);
+    }
+
     private DocumentResponse toResponse(Document document) {
         return DocumentResponse.from(document, fileStoragePort.exists(document.getStorageKey()));
+    }
+
+    private void createPendingExtraction(Document document) {
+        if (!DocumentType.EMPLOYMENT_CONTRACT.name().equals(document.getDocumentType())) {
+            return;
+        }
+        documentExtractionRepository.findByDocumentId(document.getId())
+                .orElseGet(() -> documentExtractionRepository.save(new DocumentExtraction(
+                        document.getId(),
+                        PaddleOcrEmploymentContractExtractor.SCHEMA_VERSION,
+                        PaddleOcrEmploymentContractExtractor.SOURCE_ENGINE
+                )));
+    }
+
+    private void requestOcr(Document document) {
+        try {
+            documentOcrPort.requestOcr(new OcrCommand(
+                    document.getId(),
+                    document.getCaseId(),
+                    document.getDocumentType(),
+                    document.getStorageKey(),
+                    document.getSha256Hash(),
+                    callbackUrl(document.getId())
+            ));
+        } catch (RuntimeException ex) {
+            documentExtractionRepository.findByDocumentId(document.getId())
+                    .ifPresent(extraction -> extraction.markFailed(truncate(ex.getMessage(), 1000)));
+        }
+    }
+
+    private String callbackUrl(String documentId) {
+        if (ocrProperties.callbackBaseUrl().isBlank()) {
+            return "/api/internal/documents/" + documentId + "/ocr-result";
+        }
+        return ocrProperties.callbackBaseUrl().replaceAll("/+$", "")
+                + "/api/internal/documents/" + documentId + "/ocr-result";
+    }
+
+    private DocumentExtraction applyPaddleOcrExtraction(Document document, JsonNode ocrResult) {
+        if (ocrResult.path("error").isObject()) {
+            return markPaddleOcrFailed(document, ocrResult.path("error"));
+        }
+        String sourceResultHash = canonicalHash(ocrResult);
+        EmploymentContractExtractionPayload payload = paddleOcrEmploymentContractExtractor.extract(ocrResult);
+        validateSanitizedPayload(payload.payloadJson());
+
+        DocumentExtraction extraction = documentExtractionRepository.findByDocumentId(document.getId())
+                .orElseGet(() -> documentExtractionRepository.save(new DocumentExtraction(
+                        document.getId(),
+                        PaddleOcrEmploymentContractExtractor.SCHEMA_VERSION,
+                        PaddleOcrEmploymentContractExtractor.SOURCE_ENGINE
+                )));
+        extraction.markExtracted(
+                sourceResultHash,
+                payload.payloadJson(),
+                payload.aiPayloadHash(),
+                payload.reviewRequiredReason()
+        );
+        document.markOcrCompleted();
+        document.markStructured();
+        return extraction;
+    }
+
+    private DocumentExtraction markPaddleOcrFailed(Document document, JsonNode error) {
+        String code = error.path("code").asText("OCR_FAILED");
+        String message = error.path("message").asText("OCR processing failed");
+        DocumentExtraction extraction = documentExtractionRepository.findByDocumentId(document.getId())
+                .orElseGet(() -> documentExtractionRepository.save(new DocumentExtraction(
+                        document.getId(),
+                        PaddleOcrEmploymentContractExtractor.SCHEMA_VERSION,
+                        PaddleOcrEmploymentContractExtractor.SOURCE_ENGINE
+                )));
+        extraction.markFailed(truncate(code + ": " + message, 1000));
+        return extraction;
     }
 
     private Document getAccessibleDocument(String documentId, UserPrincipal userPrincipal) {
@@ -341,56 +477,135 @@ public class DocumentService {
         if (document.getSha256Hash() == null || document.getSha256Hash().isBlank()) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document hash is required");
         }
-        if (!List.of(DocumentStatus.HASHED, DocumentStatus.SIGNATURE_REQUESTED, DocumentStatus.SIGNED, DocumentStatus.ANALYZED)
+        if (!List.of(
+                        DocumentStatus.HASHED,
+                        DocumentStatus.SIGNATURE_REQUESTED,
+                        DocumentStatus.SIGNED,
+                        DocumentStatus.OCR_COMPLETED,
+                        DocumentStatus.STRUCTURED,
+                        DocumentStatus.ANALYZED
+                )
                 .contains(document.getStatus())) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document is not ready for signature");
         }
     }
 
-    private void validateDocumentCanBeAnalyzed(Document document) {
+    private void validateDocumentReadyForExtraction(Document document) {
         if (document.getSha256Hash() == null || document.getSha256Hash().isBlank()) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document hash is required");
         }
+        if (document.getStorageKey() == null || document.getStorageKey().isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Stored document is required");
+        }
     }
 
-    private AnalysisCommand buildAnalysisCommand(Document document, Case caseEntity, User user) {
-        String languageCode = user.getLanguageCode() == null || user.getLanguageCode().isBlank()
-                ? "ko"
-                : user.getLanguageCode();
-        return new AnalysisCommand(
-                UUID.randomUUID().toString(),
-                new DocumentPayload(
-                        document.getId(),
-                        document.getCaseId(),
-                        document.getSha256Hash(),
-                        document.getDocumentType(),
-                        document.getIssuedAt(),
-                        document.getExpiresAt()
-                ),
-                new CaseContextPayload(
-                        caseEntity.getIndustry(),
-                        caseEntity.getRegion(),
-                        languageCode,
-                        "FOREIGN_WORKER"
-                ),
-                new ChecklistContextPayload(
-                        "MOEL_FOREIGN_WORKER_EMPLOYMENT_MANAGEMENT",
-                        List.of()
-                ),
-                new OutputRequestPayload(
-                        languageCode,
-                        true,
-                        true
-                )
+    private void markAnalyzedWithoutOverwritingOnchainTerminalState(Document document) {
+        if (document.getStatus() == DocumentStatus.ANCHORED_ON_CHAIN || document.getStatus() == DocumentStatus.ANCHOR_FAILED) {
+            return;
+        }
+        document.markAnalyzed();
+    }
+
+    private void validateExtractionCanBeAnalyzed(DocumentExtraction extraction) {
+        if (extraction == null) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document extraction is required");
+        }
+        if (extraction.getStatus() == DocumentExtractionStatus.NEEDS_REVIEW
+                || extraction.getStatus() == DocumentExtractionStatus.PENDING
+                || extraction.getStatus() == DocumentExtractionStatus.FAILED
+                || extraction.getAiPayloadHash() == null
+                || extraction.getAiPayloadHash().isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document extraction requires correction");
+        }
+    }
+
+    private AiAnalysisCommand aiAnalysisCommand(Document document, DocumentExtraction extraction) {
+        String payloadJson = extraction.getCorrectedPayload() == null || extraction.getCorrectedPayload().isBlank()
+                ? extraction.getExtractedPayload()
+                : extraction.getCorrectedPayload();
+        JsonNode payload = readJson(payloadJson);
+        String aiPayloadHash = DocumentCrypto.sha256Hex(canonicalJson(payload));
+        return new AiAnalysisCommand(
+                DocumentCrypto.sha256Hex("analysis-request|" + document.getId() + "|" + aiPayloadHash),
+                document.getId(),
+                document.getCaseId(),
+                document.getSha256Hash(),
+                document.getDocumentType(),
+                extraction.getId(),
+                extraction.getStatus().name(),
+                extraction.getSchemaVersion(),
+                extraction.getSourceEngine(),
+                extraction.getSourceResultHash(),
+                aiPayloadHash,
+                payload
         );
     }
 
-    private String toJson(Object value) {
+    private JsonNode readJson(String value) {
+        try {
+            return objectMapper.readTree(value);
+        } catch (JsonProcessingException ex) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Invalid extraction payload JSON");
+        }
+    }
+
+    private void validateCallbackToken(String callbackToken) {
+        if (ocrProperties.callbackToken().isBlank()) {
+            return;
+        }
+        if (callbackToken == null || !ocrProperties.callbackToken().equals(callbackToken)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED, "Invalid OCR callback token");
+        }
+    }
+
+    private String canonicalHash(JsonNode value) {
+        return DocumentCrypto.sha256Hex(canonicalJson(value));
+    }
+
+    private String canonicalJson(JsonNode value) {
         try {
             return objectMapper.writeValueAsString(value);
         } catch (JsonProcessingException ex) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to serialize analysis payload");
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Invalid JSON payload");
         }
+    }
+
+    private void validateSanitizedPayload(String payload) {
+        if (payload == null || payload.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Extraction payload is required");
+        }
+        String lower = payload.toLowerCase(Locale.ROOT);
+        if (lower.contains("storagekey")
+                || lower.contains("layoutparsingresults")
+                || lower.contains("parsing_res_list")
+                || lower.contains("block_content")
+                || lower.contains("markdown")
+                || lower.contains("address")
+                || lower.contains("주소")) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Raw OCR fields are not allowed");
+        }
+        JsonNode root;
+        try {
+            root = objectMapper.readTree(payload);
+        } catch (JsonProcessingException ex) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Invalid extraction payload JSON");
+        }
+        Queue<JsonNode> nodes = new ArrayDeque<>();
+        nodes.add(root);
+        while (!nodes.isEmpty()) {
+            JsonNode node = nodes.remove();
+            if (node.isTextual() && containsSensitiveIdentifier(node.asText())) {
+                throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Sensitive identifiers are not allowed");
+            }
+            node.elements().forEachRemaining(nodes::add);
+        }
+    }
+
+    private boolean containsSensitiveIdentifier(String value) {
+        return value.matches(".*[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}.*")
+                || value.matches(".*01[016789]-?\\d{3,4}-?\\d{4}.*")
+                || value.matches(".*0\\d{1,2}-\\d{3,4}-\\d{4}.*")
+                || value.matches(".*\\d{3}-\\d{2}-\\d{5}.*");
     }
 
     private String anchorId(Document document, DocumentSignature signature) {

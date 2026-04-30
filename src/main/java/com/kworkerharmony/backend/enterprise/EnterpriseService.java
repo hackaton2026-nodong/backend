@@ -1,5 +1,7 @@
 package com.kworkerharmony.backend.enterprise;
 
+import com.kworkerharmony.backend.cases.domain.CaseRepository;
+import com.kworkerharmony.backend.cases.entity.Case;
 import com.kworkerharmony.backend.enterprise.dto.request.CreateEnterpriseRequest;
 import com.kworkerharmony.backend.enterprise.dto.request.CreateInviteCodeRequest;
 import com.kworkerharmony.backend.enterprise.dto.request.JoinCompanyRequest;
@@ -28,6 +30,7 @@ public class EnterpriseService {
     private final EnterpriseRepository enterpriseRepository;
     private final CompanyInviteCodeRepository companyInviteCodeRepository;
     private final UserRepository userRepository;
+    private final CaseRepository caseRepository;
     private final CountryCatalog countryCatalog;
     private final LanguageCatalog languageCatalog;
 
@@ -52,6 +55,9 @@ public class EnterpriseService {
                         request.name(),
                         request.businessNumber(),
                         request.industry(),
+                        request.address(),
+                        request.foreignWorkerQuota(),
+                        request.employmentPermitCertNo(),
                         validatedCountryCode(request.countryCode()),
                         validatedLanguageCode(request.languageCode()),
                         EnterpriseStatus.ACTIVE
@@ -65,9 +71,11 @@ public class EnterpriseService {
         User user = getUser(userPrincipal);
         validateAdmin(user);
         Enterprise enterprise = requireEnterprise(user);
+        String caseId = validatedInviteCaseId(request.caseId(), enterprise);
 
         CompanyInviteCode inviteCode = companyInviteCodeRepository.save(new CompanyInviteCode(
                 enterprise,
+                caseId,
                 UUID.randomUUID().toString().replace("-", ""),
                 request.expiresAt(),
                 request.maxUses(),
@@ -97,6 +105,7 @@ public class EnterpriseService {
         user.changeUserType(toUserType(inviteCode.getDefaultRole()));
         user.activate();
         inviteCode.use();
+        connectCaseIfRequired(inviteCode, user);
 
         return EnterpriseResponse.from(inviteCode.getEnterprise());
     }
@@ -128,6 +137,32 @@ public class EnterpriseService {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "User is not assigned to a company");
         }
         return user.getEnterprise();
+    }
+
+    private String validatedInviteCaseId(String caseId, Enterprise enterprise) {
+        if (caseId == null || caseId.isBlank()) {
+            return null;
+        }
+
+        Case caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Case not found"));
+        if (!caseEntity.getEnterprise().getId().equals(enterprise.getId())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED, "Case belongs to another company");
+        }
+        return caseEntity.getId();
+    }
+
+    private void connectCaseIfRequired(CompanyInviteCode inviteCode, User user) {
+        if (inviteCode.getCaseId() == null || inviteCode.getCaseId().isBlank()) {
+            return;
+        }
+
+        Case caseEntity = caseRepository.findById(inviteCode.getCaseId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Case not found"));
+        if (!caseEntity.getEnterprise().getId().equals(inviteCode.getEnterprise().getId())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED, "Invite code case belongs to another company");
+        }
+        caseEntity.connectWorker(user);
     }
 
     private UserType toUserType(Role role) {

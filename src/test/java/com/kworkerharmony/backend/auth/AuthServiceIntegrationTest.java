@@ -3,6 +3,9 @@ package com.kworkerharmony.backend.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kworkerharmony.backend.auth.dto.request.SignupRequest;
+import com.kworkerharmony.backend.cases.domain.CaseRepository;
+import com.kworkerharmony.backend.cases.domain.CaseStatus;
+import com.kworkerharmony.backend.cases.entity.Case;
 import com.kworkerharmony.backend.enterprise.CompanyInviteCode;
 import com.kworkerharmony.backend.enterprise.CompanyInviteCodeRepository;
 import com.kworkerharmony.backend.enterprise.Enterprise;
@@ -36,6 +39,9 @@ class AuthServiceIntegrationTest {
     @Autowired
     private CompanyInviteCodeRepository companyInviteCodeRepository;
 
+    @Autowired
+    private CaseRepository caseRepository;
+
     @MockitoBean
     private RedisTokenRepository redisTokenRepository;
 
@@ -46,12 +52,18 @@ class AuthServiceIntegrationTest {
                 "password123",
                 "Admin",
                 null,
+                "010-1000-0000",
+                null,
+                null,
                 "KR",
                 "ko",
                 null,
                 "Harmony Co",
                 "123-45-67890",
                 "Manufacturing",
+                "Seoul",
+                5,
+                "EPS-001",
                 "KR",
                 "ko"
         ));
@@ -87,10 +99,16 @@ class AuthServiceIntegrationTest {
                 "worker@example.com",
                 "password123",
                 "Worker",
+                java.time.LocalDate.of(1995, 1, 1),
+                "010-2000-0000",
+                java.time.LocalDate.now().plusYears(1),
                 UserType.WORKER,
                 "KR",
                 "ko",
                 "join-code",
+                null,
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -106,5 +124,79 @@ class AuthServiceIntegrationTest {
         assertThat(savedUser.getRole()).isEqualTo(Role.WORKER);
         assertThat(savedUser.getUserType()).isEqualTo(UserType.WORKER);
         assertThat(inviteCode.getUsedCount()).isEqualTo(1);
+    }
+
+    @Test
+    void signupWithCaseInviteCodeConnectsWorkerToPendingCase() {
+        Enterprise company = enterpriseRepository.save(new Enterprise(
+                "Existing Co",
+                "999-99-99999",
+                "Construction",
+                "Seoul",
+                5,
+                "EPS-TEST-001",
+                "KR",
+                "ko",
+                EnterpriseStatus.ACTIVE
+        ));
+        User employer = userRepository.save(new User(
+                "employer@example.com",
+                "encoded",
+                "Employer",
+                null,
+                "010-1000-0000",
+                null,
+                Role.ADMIN,
+                UserType.EMPLOYER,
+                com.kworkerharmony.backend.user.UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        Case pendingCase = caseRepository.save(new Case(
+                company,
+                employer,
+                null,
+                CaseStatus.PENDING,
+                "Construction",
+                "Seoul"
+        ));
+        companyInviteCodeRepository.save(new CompanyInviteCode(
+                company,
+                pendingCase.getId(),
+                "case-join-code",
+                LocalDateTime.now().plusDays(1),
+                1,
+                0,
+                true,
+                Role.WORKER
+        ));
+
+        authService.signup(new SignupRequest(
+                "case.worker@example.com",
+                "password123",
+                "Case Worker",
+                java.time.LocalDate.of(1998, 1, 1),
+                "010-3000-0000",
+                java.time.LocalDate.now().plusYears(1),
+                UserType.WORKER,
+                "KR",
+                "ko",
+                "case-join-code",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        ));
+
+        Case connectedCase = caseRepository.findById(pendingCase.getId()).orElseThrow();
+        User savedUser = userRepository.findByEmail("case.worker@example.com").orElseThrow();
+
+        assertThat(connectedCase.getStatus()).isEqualTo(CaseStatus.ACTIVE);
+        assertThat(connectedCase.getWorker().getId()).isEqualTo(savedUser.getId());
     }
 }

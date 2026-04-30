@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS enterprises (
     name VARCHAR(100) NOT NULL,
     business_number VARCHAR(100) NOT NULL,
     industry VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NULL,
+    foreign_worker_quota INT NULL,
+    employment_permit_cert_no VARCHAR(100) NULL,
     country_code VARCHAR(10) NOT NULL,
     language_code VARCHAR(10) NOT NULL,
     status VARCHAR(20) NOT NULL,
@@ -22,6 +25,9 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(100) NOT NULL,
+    birth_date DATE NULL,
+    phone_number VARCHAR(30) NULL,
+    visa_expires_at DATE NULL,
     role VARCHAR(20) NOT NULL,
     user_type VARCHAR(20) NOT NULL,
     status VARCHAR(20) NOT NULL,
@@ -39,6 +45,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS company_invite_codes (
     id BIGINT NOT NULL AUTO_INCREMENT,
     enterprise_id BIGINT NOT NULL,
+    case_id VARCHAR(36) NULL,
     code VARCHAR(64) NOT NULL,
     expires_at DATETIME(6) NOT NULL,
     max_uses INT NOT NULL,
@@ -163,6 +170,27 @@ CREATE TABLE IF NOT EXISTS document_analysis_results (
     PRIMARY KEY (id),
     UNIQUE KEY uk_document_analysis_results_document (document_id),
     CONSTRAINT fk_document_analysis_results_document
+        FOREIGN KEY (document_id) REFERENCES documents (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS document_extractions (
+    id VARCHAR(36) NOT NULL,
+    document_id VARCHAR(36) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    schema_version VARCHAR(100) NOT NULL,
+    source_engine VARCHAR(100) NOT NULL,
+    source_result_hash VARCHAR(64) NULL,
+    extracted_payload TEXT NULL,
+    corrected_payload TEXT NULL,
+    ai_payload_hash VARCHAR(64) NULL,
+    review_required_reason VARCHAR(1000) NULL,
+    extracted_at DATETIME(6) NULL,
+    corrected_at DATETIME(6) NULL,
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_document_extractions_document (document_id),
+    CONSTRAINT fk_document_extractions_document
         FOREIGN KEY (document_id) REFERENCES documents (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

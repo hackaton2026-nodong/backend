@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,15 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, length = 100)
     private String name;
+
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+
+    @Column(name = "phone_number", length = 30)
+    private String phoneNumber;
+
+    @Column(name = "visa_expires_at")
+    private LocalDate visaExpiresAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -69,9 +79,42 @@ public class User extends BaseEntity {
             String languageCode,
             Enterprise enterprise
     ) {
+        this(
+                email,
+                passwordHash,
+                name,
+                null,
+                null,
+                null,
+                role,
+                userType,
+                status,
+                countryCode,
+                languageCode,
+                enterprise
+        );
+    }
+
+    public User(
+            String email,
+            String passwordHash,
+            String name,
+            LocalDate birthDate,
+            String phoneNumber,
+            LocalDate visaExpiresAt,
+            Role role,
+            UserType userType,
+            UserStatus status,
+            String countryCode,
+            String languageCode,
+            Enterprise enterprise
+    ) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.name = name;
+        this.birthDate = birthDate;
+        this.phoneNumber = phoneNumber;
+        this.visaExpiresAt = visaExpiresAt;
         this.role = role;
         this.userType = userType;
         this.status = status;

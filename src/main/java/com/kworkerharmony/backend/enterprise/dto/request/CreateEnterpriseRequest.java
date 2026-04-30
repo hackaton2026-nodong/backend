@@ -12,6 +12,12 @@ public record CreateEnterpriseRequest(
         @NotBlank(message = "Industry is required")
         String industry,
 
+        String address,
+
+        Integer foreignWorkerQuota,
+
+        String employmentPermitCertNo,
+
         @NotBlank(message = "Country code is required")
         String countryCode,
 
