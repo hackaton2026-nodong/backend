@@ -17,6 +17,8 @@ public record CreateInviteCodeRequest(
         int maxUses,
 
         @NotNull(message = "Default role is required")
-        Role defaultRole
+        Role defaultRole,
+
+        String caseId
 ) {
 }

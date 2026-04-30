@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS users (
     status VARCHAR(20) NOT NULL,
     country_code VARCHAR(10) NOT NULL,
     language_code VARCHAR(10) NOT NULL,
+    phone_number VARCHAR(30) NOT NULL,
+    visa_expires_at DATE NULL,
     enterprise_id BIGINT NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
@@ -52,6 +54,7 @@ CREATE TABLE IF NOT EXISTS company_invite_codes (
     used_count INT NOT NULL,
     active BIT(1) NOT NULL,
     default_role VARCHAR(20) NOT NULL,
+    case_id VARCHAR(36) NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
@@ -243,4 +246,30 @@ CREATE TABLE IF NOT EXISTS consultations (
     PRIMARY KEY (id),
     CONSTRAINT fk_consultations_user
         FOREIGN KEY (uid) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS consultation_sessions (
+    id VARCHAR(36) NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    case_id VARCHAR(36) NULL,
+    user_id BIGINT NOT NULL,
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_consultation_sessions_user
+        FOREIGN KEY (user_id) REFERENCES users (id),
+    CONSTRAINT fk_consultation_sessions_case
+        FOREIGN KEY (case_id) REFERENCES cases (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS consultation_messages (
+    id VARCHAR(36) NOT NULL,
+    session_id VARCHAR(36) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    content VARCHAR(4000) NOT NULL,
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_consultation_messages_session
+        FOREIGN KEY (session_id) REFERENCES consultation_sessions (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

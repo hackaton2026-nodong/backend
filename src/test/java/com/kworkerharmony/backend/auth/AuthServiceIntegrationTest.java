@@ -15,7 +15,9 @@ import com.kworkerharmony.backend.global.security.RedisTokenRepository;
 import com.kworkerharmony.backend.user.Role;
 import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserRepository;
+import com.kworkerharmony.backend.user.UserStatus;
 import com.kworkerharmony.backend.user.UserType;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,9 +101,9 @@ class AuthServiceIntegrationTest {
                 "worker@example.com",
                 "password123",
                 "Worker",
-                java.time.LocalDate.of(1995, 1, 1),
+                LocalDate.of(1995, 1, 1),
                 "010-2000-0000",
-                java.time.LocalDate.now().plusYears(1),
+                LocalDate.now().plusYears(1),
                 UserType.WORKER,
                 "KR",
                 "ko",
@@ -123,6 +125,8 @@ class AuthServiceIntegrationTest {
         assertThat(savedUser.getEnterprise().getId()).isEqualTo(company.getId());
         assertThat(savedUser.getRole()).isEqualTo(Role.WORKER);
         assertThat(savedUser.getUserType()).isEqualTo(UserType.WORKER);
+        assertThat(savedUser.getPhoneNumber()).isEqualTo("010-2000-0000");
+        assertThat(savedUser.getVisaExpiresAt()).isNotNull();
         assertThat(inviteCode.getUsedCount()).isEqualTo(1);
     }
 
@@ -148,7 +152,7 @@ class AuthServiceIntegrationTest {
                 null,
                 Role.ADMIN,
                 UserType.EMPLOYER,
-                com.kworkerharmony.backend.user.UserStatus.ACTIVE,
+                UserStatus.ACTIVE,
                 "KR",
                 "ko",
                 company
@@ -176,9 +180,9 @@ class AuthServiceIntegrationTest {
                 "case.worker@example.com",
                 "password123",
                 "Case Worker",
-                java.time.LocalDate.of(1998, 1, 1),
+                LocalDate.of(1998, 1, 1),
                 "010-3000-0000",
-                java.time.LocalDate.now().plusYears(1),
+                LocalDate.now().plusYears(1),
                 UserType.WORKER,
                 "KR",
                 "ko",
@@ -198,5 +202,7 @@ class AuthServiceIntegrationTest {
 
         assertThat(connectedCase.getStatus()).isEqualTo(CaseStatus.ACTIVE);
         assertThat(connectedCase.getWorker().getId()).isEqualTo(savedUser.getId());
+        assertThat(savedUser.getPhoneNumber()).isEqualTo("010-3000-0000");
+        assertThat(savedUser.getVisaExpiresAt()).isNotNull();
     }
 }

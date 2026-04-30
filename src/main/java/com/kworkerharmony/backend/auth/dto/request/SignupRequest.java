@@ -22,6 +22,8 @@ public record SignupRequest(
 
         LocalDate birthDate,
 
+        @NotBlank
+        @Size(max = 30)
         String phoneNumber,
 
         LocalDate visaExpiresAt,
@@ -53,6 +55,42 @@ public record SignupRequest(
         String companyLanguageCode
 ) {
 
+    public SignupRequest(
+            String email,
+            String password,
+            String name,
+            UserType userType,
+            String countryCode,
+            String languageCode,
+            String inviteCode,
+            String companyName,
+            String companyBusinessNumber,
+            String companyIndustry,
+            String companyCountryCode,
+            String companyLanguageCode
+    ) {
+        this(
+                email,
+                password,
+                name,
+                null,
+                "",
+                null,
+                userType,
+                countryCode,
+                languageCode,
+                inviteCode,
+                companyName,
+                companyBusinessNumber,
+                companyIndustry,
+                null,
+                null,
+                null,
+                companyCountryCode,
+                companyLanguageCode
+        );
+    }
+
     @AssertTrue(message = "Provide either inviteCode or all company fields")
     public boolean isSignupFlowValid() {
         boolean hasInviteCode = inviteCode != null && !inviteCode.isBlank();
@@ -63,6 +101,11 @@ public record SignupRequest(
                 && hasText(companyLanguageCode);
 
         return hasInviteCode ^ hasCompanyFields;
+    }
+
+    @AssertTrue(message = "Worker visa expiry date cannot be in the past")
+    public boolean isVisaExpiresAtValid() {
+        return visaExpiresAt == null || !visaExpiresAt.isBefore(LocalDate.now());
     }
 
     private boolean hasText(String value) {

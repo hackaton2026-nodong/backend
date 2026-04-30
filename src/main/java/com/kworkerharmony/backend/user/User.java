@@ -138,4 +138,12 @@ public class User extends BaseEntity {
     public void activate() {
         this.status = UserStatus.ACTIVE;
     }
+
+    public void updateProfile(String name, String phoneNumber, String countryCode, String languageCode, LocalDate visaExpiresAt) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.countryCode = countryCode;
+        this.languageCode = languageCode;
+        this.visaExpiresAt = visaExpiresAt;
+    }
 }

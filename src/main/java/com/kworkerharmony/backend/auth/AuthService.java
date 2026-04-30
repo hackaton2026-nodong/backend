@@ -64,7 +64,7 @@ public class AuthService {
                 request.name(),
                 request.birthDate(),
                 request.phoneNumber(),
-                request.visaExpiresAt(),
+                signupTarget.userType() == UserType.WORKER ? request.visaExpiresAt() : null,
                 signupTarget.role(),
                 signupTarget.userType(),
                 UserStatus.ACTIVE,
@@ -74,7 +74,7 @@ public class AuthService {
         );
 
         userRepository.save(user);
-        connectCaseIfRequired(signupTarget.inviteCode(), user);
+        connectInviteCaseIfNeeded(signupTarget.inviteCode(), user);
     }
 
     private SignupTarget resolveSignupTarget(SignupRequest request) {
@@ -173,15 +173,20 @@ public class AuthService {
     ) {
     }
 
-    private void connectCaseIfRequired(CompanyInviteCode inviteCode, User user) {
+    private void connectInviteCaseIfNeeded(CompanyInviteCode inviteCode, User user) {
         if (inviteCode == null || inviteCode.getCaseId() == null || inviteCode.getCaseId().isBlank()) {
             return;
         }
-
+        if (inviteCode.getDefaultRole() != Role.WORKER || user.getUserType() != UserType.WORKER) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Case invite code can only connect worker users");
+        }
         Case caseEntity = caseRepository.findById(inviteCode.getCaseId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Case not found"));
         if (!caseEntity.getEnterprise().getId().equals(inviteCode.getEnterprise().getId())) {
-            throw new CustomException(ErrorCode.ACCESS_DENIED, "Invite code case belongs to another company");
+            throw new CustomException(ErrorCode.ACCESS_DENIED, "Invite code belongs to another company");
+        }
+        if (caseEntity.getWorker() != null && !caseEntity.getWorker().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Case already has a worker");
         }
         caseEntity.connectWorker(user);
     }
