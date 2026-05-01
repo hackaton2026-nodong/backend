@@ -15,8 +15,8 @@ import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
 import com.kworkerharmony.backend.global.security.UserPrincipal;
 import com.kworkerharmony.backend.reference.checklist.ChecklistCatalog;
-import com.kworkerharmony.backend.reference.recommendation.RecommendationCatalog;
-import com.kworkerharmony.backend.reference.recommendation.RecommendationItemDefinition;
+import com.kworkerharmony.backend.reference.educationvenue.EducationVenueCatalog;
+import com.kworkerharmony.backend.reference.organization.OrganizationCatalog;
 import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserRepository;
 import com.kworkerharmony.backend.user.UserType;
@@ -39,7 +39,8 @@ public class DashboardService {
     private final UserRepository userRepository;
     private final DocumentRepository documentRepository;
     private final ChecklistCatalog checklistCatalog;
-    private final RecommendationCatalog recommendationCatalog;
+    private final EducationVenueCatalog educationVenueCatalog;
+    private final OrganizationCatalog organizationCatalog;
 
     @Transactional(readOnly = true)
     public WorkerDashboardResponse getWorkerDashboard(UserPrincipal userPrincipal) {
@@ -265,31 +266,33 @@ public class DashboardService {
     }
 
     private WorkerDashboardResponse.RecommendationSlot buildRecommendationSlot(Case caseEntity, User user) {
+        String region = caseEntity == null ? null : caseEntity.getRegion();
         List<String> reasonTags = caseEntity == null
                 ? List.of("language:" + user.getLanguageCode())
                 : List.of(
-                        "region:" + caseEntity.getRegion(),
+                        "region:" + region,
                         "language:" + user.getLanguageCode(),
                         "industry:" + caseEntity.getIndustry()
                 );
-        List<RecommendationItemDefinition> recommendations = recommendationCatalog.find(
-                caseEntity == null ? null : caseEntity.getRegion(),
-                user.getLanguageCode(),
-                caseEntity == null ? null : caseEntity.getIndustry(),
-                3
-        );
+        List<WorkerDashboardResponse.RecommendationItem> items = educationVenueCatalog.findByRegion(region, 3)
+                .stream()
+                .map(venue -> {
+                    String orgName = organizationCatalog.findByOrgCd(venue.orgCd())
+                            .map(org -> org.nameKo())
+                            .orElse("");
+                    return new WorkerDashboardResponse.RecommendationItem(
+                            "EDUCATION",
+                            venue.name(),
+                            orgName + " | " + venue.address(),
+                            "/education/venues/" + venue.eduOrgCd()
+                    );
+                })
+                .toList();
         return new WorkerDashboardResponse.RecommendationSlot(
-                "추천 기관 · 교육",
-                "현재 케이스 상태를 기반으로 추천 항목을 제공합니다.",
+                "추천 교육장",
+                "근무 지역 기준으로 가까운 교육장을 안내합니다.",
                 reasonTags,
-                recommendations.stream()
-                        .map(item -> new WorkerDashboardResponse.RecommendationItem(
-                                item.category(),
-                                item.name(),
-                                item.description(),
-                                item.targetPath()
-                        ))
-                        .toList()
+                items
         );
     }
 
