@@ -2,6 +2,7 @@ package com.kworkerharmony.backend.document.dto.response;
 
 import com.kworkerharmony.backend.document.Document;
 import com.kworkerharmony.backend.document.DocumentStatus;
+import com.kworkerharmony.backend.enterprise.dto.response.CompanyInviteCodeResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -21,10 +22,15 @@ public record DocumentResponse(
         LocalDate issuedAt,
         LocalDate expiresAt,
         LocalDateTime ocrCompletedAt,
-        LocalDateTime analyzedAt
+        LocalDateTime analyzedAt,
+        CompanyInviteCodeResponse inviteCode
 ) {
 
     public static DocumentResponse from(Document document, boolean stored) {
+        return from(document, stored, null);
+    }
+
+    public static DocumentResponse from(Document document, boolean stored, CompanyInviteCodeResponse inviteCode) {
         return new DocumentResponse(
                 document.getId(),
                 document.getCaseId(),
@@ -41,7 +47,8 @@ public record DocumentResponse(
                 document.getIssuedAt(),
                 document.getExpiresAt(),
                 document.getOcrCompletedAt(),
-                document.getAnalyzedAt()
+                document.getAnalyzedAt(),
+                inviteCode
         );
     }
 }
