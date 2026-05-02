@@ -201,7 +201,7 @@ Enum: `DocumentAnchorStatus = PENDING, ANCHORED, FAILED`
 
 ### `document_analysis_results`
 
-오프체인 분석 결과 placeholder와 향후 AI 분석 결과 해시를 저장한다. 실제 OCR 추출 결과는 `document_extractions`에 저장하며, extraction payload와 AI 레이어 사이의 payload 규격은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
+오프체인 분석 결과와 AI 분석 결과 해시를 저장한다. 실제 OCR 추출 결과는 `document_extractions`에 저장하며, extraction payload와 AI 레이어 사이의 payload 규격은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
 
 | 컬럼 | 타입 | NULL | 키 | 설명 |
 | --- | --- | --- | --- | --- |
@@ -343,7 +343,7 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 - 근로자 5명: `minh.nguyen97@example.com`, `somchai.phanit95@example.com`, `maria.santos98@example.com`, `dewi.lestari96@example.com`, `ram.thapa94@example.com` / `password123`
 - 활성 케이스 5개: 각 근로자별 1개
 - 근로계약서 문서 5개: 각 케이스별 `EMPLOYMENT_CONTRACT`, `ANALYZED` 상태
-- 분석 결과 5개: placeholder summary/risk flags
+- 분석 결과 5개: seed summary/risk flags
 - 케이스 연결 초대코드 5개: `KOHAMO-WORKER-1` ~ `KOHAMO-WORKER-5`
 
 이 시드는 실제 온체인 호출, 실제 전자서명, 실제 AI 분석을 수행하지 않는다. 화면/DB 플로우 검증을 위해 문서와 분석 상태만 미리 채운다.

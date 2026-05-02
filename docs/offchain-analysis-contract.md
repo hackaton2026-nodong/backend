@@ -4,7 +4,7 @@
 
 ## Scope
 
-현재 구현은 PaddleOCR worker callback을 통해 `document_extractions`에 구조화 계약 필드를 저장한다. `POST /api/documents/{documentId}/analysis`는 아직 placeholder다. 이 문서는 저장된 extraction payload를 AI 레이어와 연결할 때 지켜야 할 입력/출력 규격이다.
+현재 구현은 PaddleOCR worker callback을 통해 `document_extractions`에 구조화 계약 필드를 저장한다. `POST /api/documents/{documentId}/analysis`는 저장된 extraction payload를 기준으로 FastAPI AI 레이어에 분석을 요청하고 결과를 `document_analysis_results`에 저장한다. `DOCUMENT_AI_ENABLED=false`인 로컬/테스트 상황에서는 placeholder 결과를 저장한다. 이 문서는 저장된 extraction payload를 AI 레이어와 연결할 때 지켜야 할 입력/출력 규격이다.
 
 업로드 후 공통 기반은 아래와 같다.
 
