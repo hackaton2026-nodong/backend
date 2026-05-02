@@ -1,0 +1,50 @@
+{
+  "requestId": "analysis-request-break-time-ocr",
+  "documentId": "document-break-time-uuid",
+  "caseId": "case-break-time-uuid",
+  "documentHash": "sha256-hex",
+  "documentType": "EMPLOYMENT_CONTRACT",
+  "extractionId": "extraction-break-time-uuid",
+  "extractionStatus": "EXTRACTED",
+  "schemaVersion": "employment-contract-v1",
+  "sourceEngine": "PADDLE_OCR",
+  "sourceResultHash": "sha256-hex",
+  "aiPayloadHash": "sha256-hex",
+  "payload": {
+    "schemaVersion": "employment-contract-v1",
+    "contractTerms": {
+      "workingHours": {
+        "status": "FOUND",
+        "hoursPerDay": 8,
+        "hoursPerWeek": 40,
+        "startTime": "09:00",
+        "endTime": "18:00"
+      },
+      "breakTime": {
+        "status": "FOUND",
+        "minutesPerDay": 20
+      },
+      "wage": {
+        "status": "FOUND",
+        "amount": 2600000,
+        "currency": "KRW",
+        "period": "MONTHLY",
+        "paymentDay": 25,
+        "paymentMethod": "BANK_TRANSFER"
+      }
+    },
+    "evidenceRefs": [
+      {
+        "evidenceId": "ev-break-time-short",
+        "fieldName": "breakTime.minutesPerDay",
+        "page": 1,
+        "confidence": 0.91,
+        "maskedExcerpt": "휴게시간 [MINUTES]분으로 부족"
+      }
+    ],
+    "candidateChecklistItemCodes": [
+      "LRA_REST_BREAKS",
+      "LRA_STATUTORY_WORKING_HOURS"
+    ]
+  }
+}

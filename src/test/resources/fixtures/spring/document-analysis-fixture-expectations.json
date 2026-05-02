@@ -1,0 +1,92 @@
+[
+  {
+    "name": "employment_contract_mixed",
+    "fixture": "fixtures/spring/document-analysis-request-employment-contract.json",
+    "expectedIssuePrefix": [
+      "MINIMUM_WAGE",
+      "OVERTIME_PAY"
+    ],
+    "expectedIssueContains": [
+      "MINIMUM_WAGE",
+      "OVERTIME_PAY",
+      "BREAK_TIME",
+      "DORMITORY_DEDUCTION"
+    ]
+  },
+  {
+    "name": "unfair_dismissal",
+    "fixture": "fixtures/spring/document-analysis-request-unfair-dismissal-ocr.json",
+    "expectedIssuePrefix": [
+      "UNFAIR_DISMISSAL",
+      "DISMISSAL_NOTICE"
+    ],
+    "expectedIssueContains": [
+      "UNFAIR_DISMISSAL",
+      "DISMISSAL_NOTICE"
+    ],
+    "expectedInstitutionContains": [
+      "institution:labor-relations-commission"
+    ]
+  },
+  {
+    "name": "minimum_wage",
+    "fixture": "fixtures/spring/document-analysis-request-minimum-wage-ocr.json",
+    "expectedIssuePrefix": [
+      "MINIMUM_WAGE"
+    ],
+    "expectedIssueContains": [
+      "MINIMUM_WAGE"
+    ]
+  },
+  {
+    "name": "break_time",
+    "fixture": "fixtures/spring/document-analysis-request-break-time-ocr.json",
+    "expectedIssuePrefix": [
+      "BREAK_TIME"
+    ],
+    "expectedIssueContains": [
+      "BREAK_TIME"
+    ]
+  },
+  {
+    "name": "dormitory_deduction",
+    "fixture": "fixtures/spring/document-analysis-request-dormitory-deduction-ocr.json",
+    "expectedIssuePrefix": [
+      "DORMITORY_DEDUCTION",
+      "MINIMUM_WAGE"
+    ],
+    "expectedIssueContains": [
+      "DORMITORY_DEDUCTION",
+      "MINIMUM_WAGE"
+    ]
+  },
+  {
+    "name": "dismissal_notice_pay",
+    "fixture": "fixtures/spring/document-analysis-request-dismissal-notice-pay-ocr.json",
+    "expectedIssuePrefix": [
+      "DISMISSAL_NOTICE",
+      "UNPAID_WAGES"
+    ],
+    "expectedIssueContains": [
+      "DISMISSAL_NOTICE",
+      "UNPAID_WAGES"
+    ]
+  },
+  {
+    "name": "wage_statement",
+    "fixture": "fixtures/spring/document-analysis-request-wage-statement-ocr.json",
+    "expectedIssuePrefix": [
+      "WAGE_STATEMENT",
+      "OVERTIME_PAY",
+      "UNPAID_WAGES"
+    ],
+    "expectedIssueContains": [
+      "WAGE_STATEMENT",
+      "OVERTIME_PAY",
+      "NIGHT_WORK_PAY",
+      "UNPAID_WAGES",
+      "DORMITORY_DEDUCTION",
+      "MINIMUM_WAGE"
+    ]
+  }
+]

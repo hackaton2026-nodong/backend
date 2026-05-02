@@ -108,8 +108,11 @@ AI 설명 품질과 추적성을 위해 제한적으로 전달한다.
 ## AI Endpoint Handoff
 
 - 백엔드는 `DOCUMENT_AI_ENABLED=true`일 때 `DOCUMENT_AI_ENDPOINT`로 sanitized 분석 요청을 `POST`한다.
+- `DOCUMENT_AI_INTERNAL_TOKEN`이 설정되어 있으면 FastAPI 호출에 `X-AI-Internal-Token` 헤더를 붙인다. 이 값은 브라우저에 노출하지 않는다.
+- 연결/응답 제한시간은 `DOCUMENT_AI_CONNECT_TIMEOUT_MILLIS`, `DOCUMENT_AI_READ_TIMEOUT_MILLIS`로 제어하고, 5xx 또는 연결 실패는 `DOCUMENT_AI_MAX_RETRIES` 범위에서 재시도한다.
 - 프론트는 백엔드의 `GET /api/ai/health`만 호출한다. 백엔드는 내부적으로 `DOCUMENT_AI_HEALTH_ENDPOINT`에 `GET` 요청을 보내 2xx 응답이면 사용 가능 상태로 본다.
 - AI 레이어는 준비 완료 상태에서 health endpoint가 2xx를 반환하도록 맞춘다. 기본 로컬 기대값은 `http://localhost:8000/health`다.
+- 채팅 streaming은 후속 작업에서 Spring `POST /api/ai/chat/stream` proxy로 제공하고, FastAPI `DOCUMENT_AI_CHAT_STREAM_ENDPOINT`로만 서버 간 호출한다.
 
 ## AI Request Schema
 

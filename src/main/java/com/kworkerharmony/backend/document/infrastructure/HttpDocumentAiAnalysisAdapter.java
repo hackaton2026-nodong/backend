@@ -7,12 +7,38 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kworkerharmony.backend.document.config.DocumentAiProperties;
 import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort;
 import com.kworkerharmony.backend.document.support.DocumentCrypto;
+import java.time.Duration;
+import java.util.Locale;
+import java.util.Set;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 @Component
 public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
+
+    private static final String INTERNAL_TOKEN_HEADER = "X-AI-Internal-Token";
+    private static final Set<String> FORBIDDEN_PAYLOAD_KEYS = Set.of(
+            "rawtext",
+            "rawocrtext",
+            "ocrtext",
+            "plaintext",
+            "documenttext",
+            "file",
+            "filebytes",
+            "image",
+            "imagebytes",
+            "base64",
+            "passportnumber",
+            "alienregistrationnumber",
+            "residentregistrationnumber",
+            "phonenumber",
+            "email"
+    );
 
     private final DocumentAiProperties properties;
     private final RestClient restClient;
@@ -24,7 +50,9 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
             ObjectMapper objectMapper
     ) {
         this.properties = properties;
-        this.restClient = restClientBuilder.build();
+        this.restClient = restClientBuilder
+                .requestFactory(requestFactory(properties))
+                .build();
         this.objectMapper = objectMapper;
     }
 
@@ -35,14 +63,51 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
             return placeholderResult(command, requestJson);
         }
 
-        String responseJson = restClient.post()
-                .uri(properties.endpoint())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(requestJson)
-                .retrieve()
-                .body(String.class);
-
+        String responseJson = postWithRetry(requestJson);
         return parseResponse(command, requestJson, responseJson);
+    }
+
+    private SimpleClientHttpRequestFactory requestFactory(DocumentAiProperties properties) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofMillis(properties.connectTimeoutMillis()));
+        factory.setReadTimeout(Duration.ofMillis(properties.readTimeoutMillis()));
+        return factory;
+    }
+
+    private String postWithRetry(String requestJson) {
+        RuntimeException lastFailure = null;
+        int attempts = properties.maxRetries() + 1;
+        for (int attempt = 1; attempt <= attempts; attempt += 1) {
+            try {
+                return restClient.post()
+                        .uri(properties.endpoint())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .headers(headers -> {
+                            if (!properties.internalToken().isBlank()) {
+                                headers.set(INTERNAL_TOKEN_HEADER, properties.internalToken());
+                            }
+                        })
+                        .body(requestJson)
+                        .retrieve()
+                        .body(String.class);
+            } catch (RestClientResponseException ex) {
+                if (!shouldRetry(ex.getStatusCode(), attempt, attempts)) {
+                    throw new IllegalStateException("AI analysis request failed with HTTP " + ex.getStatusCode().value(), ex);
+                }
+                lastFailure = ex;
+            } catch (ResourceAccessException ex) {
+                if (attempt >= attempts) {
+                    throw new IllegalStateException("AI analysis request failed because the AI server was unavailable", ex);
+                }
+                lastFailure = ex;
+            }
+        }
+        throw new IllegalStateException("AI analysis request failed", lastFailure);
+    }
+
+    private boolean shouldRetry(HttpStatusCode statusCode, int attempt, int attempts) {
+        return attempt < attempts && statusCode.is5xxServerError();
     }
 
     private AiAnalysisResult placeholderResult(AiAnalysisCommand command, String requestJson) {
@@ -91,6 +156,7 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
     }
 
     private String jsonBody(AiAnalysisCommand command) {
+        validateNoForbiddenKeys(command.payload());
         ObjectNode root = objectMapper.createObjectNode();
         root.put("requestId", command.requestId());
         root.put("documentId", command.documentId());
@@ -104,10 +170,32 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
         root.put("sourceResultHash", command.sourceResultHash());
         root.put("aiPayloadHash", command.aiPayloadHash());
         root.set("payload", command.payload());
+        ObjectNode outputRequest = root.putObject("outputRequest");
+        outputRequest.put("languageCode", "ko");
+        outputRequest.put("includeGeneratedAnalysis", false);
         try {
             return objectMapper.writeValueAsString(root);
         } catch (JsonProcessingException ex) {
             throw new IllegalStateException("Failed to serialize AI analysis request", ex);
+        }
+    }
+
+    private void validateNoForbiddenKeys(JsonNode node) {
+        if (node == null) {
+            return;
+        }
+        if (node.isObject()) {
+            node.fields().forEachRemaining(entry -> {
+                String normalizedKey = entry.getKey().toLowerCase(Locale.ROOT);
+                if (FORBIDDEN_PAYLOAD_KEYS.contains(normalizedKey)) {
+                    throw new IllegalArgumentException("AI analysis payload contains forbidden field: " + entry.getKey());
+                }
+                validateNoForbiddenKeys(entry.getValue());
+            });
+            return;
+        }
+        if (node.isArray()) {
+            node.elements().forEachRemaining(this::validateNoForbiddenKeys);
         }
     }
 }

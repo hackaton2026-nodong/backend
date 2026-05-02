@@ -1,0 +1,48 @@
+{
+  "requestId": "analysis-request-minimum-wage-ocr",
+  "documentId": "document-minimum-wage-uuid",
+  "caseId": "case-minimum-wage-uuid",
+  "documentHash": "sha256-hex",
+  "documentType": "EMPLOYMENT_CONTRACT",
+  "extractionId": "extraction-minimum-wage-uuid",
+  "extractionStatus": "EXTRACTED",
+  "schemaVersion": "employment-contract-v1",
+  "sourceEngine": "PADDLE_OCR",
+  "sourceResultHash": "sha256-hex",
+  "aiPayloadHash": "sha256-hex",
+  "payload": {
+    "schemaVersion": "employment-contract-v1",
+    "contractTerms": {
+      "workingHours": {
+        "status": "FOUND",
+        "hoursPerDay": 8,
+        "hoursPerWeek": 40
+      },
+      "breakTime": {
+        "status": "FOUND",
+        "minutesPerDay": 60
+      },
+      "wage": {
+        "status": "FOUND",
+        "amount": 1900000,
+        "currency": "KRW",
+        "period": "MONTHLY",
+        "paymentDay": 10,
+        "paymentMethod": "BANK_TRANSFER"
+      }
+    },
+    "evidenceRefs": [
+      {
+        "evidenceId": "ev-minimum-wage-amount",
+        "fieldName": "wage.amount",
+        "page": 1,
+        "confidence": 0.86,
+        "maskedExcerpt": "월급 [AMOUNT]원, 최저임금 미달 의심"
+      }
+    ],
+    "candidateChecklistItemCodes": [
+      "MWA_MINIMUM_WAGE",
+      "LRA_REGULAR_PAYDAY"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "requestId": "analysis-request-privacy-block",
+  "documentId": "document-uuid",
+  "documentHash": "sha256-hex",
+  "documentType": "EMPLOYMENT_CONTRACT",
+  "payload": {
+    "rawOcrText": "원문 OCR 전문은 FastAPI로 전달하면 안 된다.",
+    "contractTerms": {}
+  }
+}

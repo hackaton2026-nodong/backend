@@ -1,0 +1,54 @@
+{
+  "requestId": "analysis-request-dormitory-deduction-ocr",
+  "documentId": "document-dormitory-deduction-uuid",
+  "caseId": "case-dormitory-deduction-uuid",
+  "documentHash": "sha256-hex",
+  "documentType": "EMPLOYMENT_CONTRACT",
+  "extractionId": "extraction-dormitory-deduction-uuid",
+  "extractionStatus": "EXTRACTED",
+  "schemaVersion": "employment-contract-v1",
+  "sourceEngine": "PADDLE_OCR",
+  "sourceResultHash": "sha256-hex",
+  "aiPayloadHash": "sha256-hex",
+  "payload": {
+    "schemaVersion": "employment-contract-v1",
+    "contractTerms": {
+      "workingHours": {
+        "status": "FOUND",
+        "hoursPerDay": 8,
+        "hoursPerWeek": 40
+      },
+      "breakTime": {
+        "status": "FOUND",
+        "minutesPerDay": 60
+      },
+      "wage": {
+        "status": "FOUND",
+        "amount": 2300000,
+        "currency": "KRW",
+        "period": "MONTHLY",
+        "paymentDay": 10,
+        "paymentMethod": "BANK_TRANSFER"
+      },
+      "dormitory": {
+        "status": "FOUND",
+        "provided": true,
+        "typeCategory": "DORMITORY",
+        "deductionAmount": 300000
+      }
+    },
+    "evidenceRefs": [
+      {
+        "evidenceId": "ev-dormitory-deduction",
+        "fieldName": "dormitory.deductionAmount",
+        "page": 1,
+        "confidence": 0.84,
+        "maskedExcerpt": "기숙사비 [AMOUNT]원 공제"
+      }
+    ],
+    "candidateChecklistItemCodes": [
+      "FEA_DORMITORY_INFO_DISCLOSURE",
+      "FEA_DORMITORY_STANDARD"
+    ]
+  }
+}

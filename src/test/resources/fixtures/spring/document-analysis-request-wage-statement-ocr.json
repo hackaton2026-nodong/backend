@@ -1,0 +1,116 @@
+{
+  "requestId": "analysis-request-wage-statement-ocr",
+  "documentId": "document-wage-statement-uuid",
+  "caseId": "case-wage-statement-uuid",
+  "documentHash": "sha256-hex",
+  "documentType": "WAGE_STATEMENT",
+  "extractionId": "extraction-wage-statement-uuid",
+  "extractionStatus": "EXTRACTED",
+  "schemaVersion": "wage-statement-ocr-v1",
+  "sourceEngine": "PADDLE_OCR",
+  "sourceResultHash": "sha256-hex",
+  "aiPayloadHash": "sha256-hex",
+  "payload": {
+    "schemaVersion": "wage-statement-ocr-v1",
+    "wageStatement": {
+      "payPeriod": {
+        "startDate": "2026-04-01",
+        "endDate": "2026-04-30",
+        "paymentDate": "2026-05-10"
+      },
+      "wage": {
+        "currency": "KRW",
+        "grossPaymentAmount": 2300000,
+        "netPaymentAmount": 1980000
+      },
+      "workTime": {
+        "totalWorkingDays": 22,
+        "totalWorkingHours": 209,
+        "overtimeHours": 24,
+        "nightHours": 8,
+        "holidayHours": 0
+      },
+      "earnings": [
+        {
+          "itemName": "기본급",
+          "category": "BASE_PAY",
+          "amount": 1900000,
+          "calculationMethodPresent": true
+        },
+        {
+          "itemName": "연장근로수당",
+          "category": "OVERTIME_PAY",
+          "amount": 0,
+          "calculationMethodPresent": false
+        },
+        {
+          "itemName": "야간근로수당",
+          "category": "NIGHT_WORK_PAY",
+          "amount": 0,
+          "calculationMethodPresent": false
+        }
+      ],
+      "deductions": [
+        {
+          "itemName": "고용보험",
+          "category": "EMPLOYMENT_INSURANCE",
+          "amount": 18000,
+          "statutory": true,
+          "consentEvidencePresent": true
+        },
+        {
+          "itemName": "기숙사비",
+          "category": "DORMITORY",
+          "amount": 250000,
+          "statutory": false,
+          "consentEvidencePresent": false
+        }
+      ],
+      "requiredItems": {
+        "wageItemsPresent": true,
+        "calculationMethodPresent": false,
+        "deductionItemsPresent": true,
+        "paymentDatePresent": true
+      }
+    },
+    "evidenceRefs": [
+      {
+        "evidenceId": "ev-wage-statement-required-items",
+        "fieldName": "wageStatement.requiredItems.calculationMethodPresent",
+        "page": 1,
+        "confidence": 0.82,
+        "maskedExcerpt": "계산방법 누락"
+      },
+      {
+        "evidenceId": "ev-overtime-pay-missing",
+        "fieldName": "wageStatement.earnings[OVERTIME_PAY].amount",
+        "page": 1,
+        "confidence": 0.86,
+        "maskedExcerpt": "연장근로수당 [AMOUNT]원"
+      },
+      {
+        "evidenceId": "ev-night-pay-missing",
+        "fieldName": "wageStatement.earnings[NIGHT_WORK_PAY].amount",
+        "page": 1,
+        "confidence": 0.84,
+        "maskedExcerpt": "야간근로수당 [AMOUNT]원"
+      },
+      {
+        "evidenceId": "ev-dormitory-deduction",
+        "fieldName": "wageStatement.deductions[DORMITORY].amount",
+        "page": 1,
+        "confidence": 0.88,
+        "maskedExcerpt": "기숙사비 [AMOUNT]원 공제"
+      }
+    ],
+    "candidateChecklistItemCodes": [
+      "LRA_WAGE_STATEMENT_REQUIRED_ITEMS",
+      "LRA_OVERTIME_NIGHT_HOLIDAY_PREMIUM",
+      "LRA_DIRECT_FULL_WAGE_PAYMENT"
+    ]
+  },
+  "outputRequest": {
+    "languageCode": "ko",
+    "includeGeneratedAnalysis": false
+  }
+}

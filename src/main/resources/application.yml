@@ -52,6 +52,11 @@ app:
       endpoint: ${DOCUMENT_AI_ENDPOINT:}
       health-endpoint: ${DOCUMENT_AI_HEALTH_ENDPOINT:http://localhost:8000/health}
       health-timeout-millis: ${DOCUMENT_AI_HEALTH_TIMEOUT_MILLIS:2000}
+      chat-stream-endpoint: ${DOCUMENT_AI_CHAT_STREAM_ENDPOINT:http://localhost:8000/chat/stream}
+      internal-token: ${DOCUMENT_AI_INTERNAL_TOKEN:}
+      connect-timeout-millis: ${DOCUMENT_AI_CONNECT_TIMEOUT_MILLIS:3000}
+      read-timeout-millis: ${DOCUMENT_AI_READ_TIMEOUT_MILLIS:35000}
+      max-retries: ${DOCUMENT_AI_MAX_RETRIES:1}
     blockchain:
       chain-id: ${DOCUMENT_CHAIN_ID:11155111}
       contract-address: ${DOCUMENT_CONTRACT_ADDRESS:0x0000000000000000000000000000000000000000}

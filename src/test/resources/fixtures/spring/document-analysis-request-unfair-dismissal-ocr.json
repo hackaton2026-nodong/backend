@@ -1,0 +1,60 @@
+{
+  "requestId": "analysis-request-unfair-dismissal-ocr",
+  "documentId": "document-unfair-dismissal-uuid",
+  "caseId": "case-unfair-dismissal-uuid",
+  "documentHash": "sha256-hex",
+  "documentType": "TERMINATION_NOTICE",
+  "extractionId": "extraction-unfair-dismissal-uuid",
+  "extractionStatus": "EXTRACTED",
+  "schemaVersion": "termination-ocr-v1",
+  "sourceEngine": "PADDLE_OCR",
+  "sourceResultHash": "sha256-hex",
+  "aiPayloadHash": "sha256-hex",
+  "payload": {
+    "schemaVersion": "termination-ocr-v1",
+    "contractTerms": {
+      "termination": {
+        "status": "FOUND",
+        "eventType": "DISMISSAL",
+        "noticeDate": "2026-05-01",
+        "writtenNoticeProvided": false,
+        "reasonProvided": false,
+        "workerClaimsInvoluntary": true,
+        "reliefIntent": "LABOR_RELATIONS_COMMISSION"
+      }
+    },
+    "evidenceRefs": [
+      {
+        "evidenceId": "ev-dismissal-event",
+        "fieldName": "termination.eventType",
+        "page": 1,
+        "boundingBox": {
+          "x": 0.1,
+          "y": 0.2,
+          "width": 0.4,
+          "height": 0.06
+        },
+        "confidence": 0.88,
+        "maskedExcerpt": "사유 없이 즉시 해고 통보"
+      },
+      {
+        "evidenceId": "ev-dismissal-written-notice",
+        "fieldName": "termination.writtenNoticeProvided",
+        "page": 1,
+        "boundingBox": {
+          "x": 0.1,
+          "y": 0.3,
+          "width": 0.4,
+          "height": 0.06
+        },
+        "confidence": 0.83,
+        "maskedExcerpt": "서면통지 없음"
+      }
+    ],
+    "candidateChecklistItemCodes": [
+      "LRA_JUST_CAUSE_DISMISSAL",
+      "LRA_WRITTEN_DISMISSAL_NOTICE",
+      "LRA_UNFAIR_DISMISSAL_RELIEF"
+    ]
+  }
+}

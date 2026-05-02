@@ -1,0 +1,141 @@
+{
+  "requestId": "analysis-request-hash",
+  "documentId": "document-uuid",
+  "caseId": "case-uuid",
+  "documentHash": "sha256-hex",
+  "documentType": "EMPLOYMENT_CONTRACT",
+  "extractionId": "extraction-uuid",
+  "extractionStatus": "EXTRACTED",
+  "schemaVersion": "employment-contract-v1",
+  "sourceEngine": "PADDLE_OCR",
+  "sourceResultHash": "sha256-hex",
+  "aiPayloadHash": "sha256-hex",
+  "payload": {
+    "schemaVersion": "employment-contract-v1",
+    "contractTerms": {
+      "document": {
+        "documentForm": "STANDARD_LABOR_CONTRACT",
+        "standardContractUsed": true
+      },
+      "contractPeriod": {
+        "status": "FOUND",
+        "contractStartDate": "2026-06-01",
+        "contractEndDate": "2027-05-31"
+      },
+      "probation": {
+        "status": "FOUND",
+        "included": true,
+        "months": 1
+      },
+      "work": {
+        "industryCategory": "MANUFACTURING",
+        "workplaceRegion": "GYEONGGI_ANSAN",
+        "businessCategory": "AUTOMOTIVE_METAL_PARTS",
+        "jobCategory": "METAL_PARTS_ASSEMBLY_INSPECTION_PACKAGING"
+      },
+      "workingHours": {
+        "status": "FOUND",
+        "startTime": "08:30",
+        "endTime": "17:30",
+        "overtimeHoursPerDay": 1,
+        "maxVariableHoursPerDay": 2,
+        "shiftSystem": false
+      },
+      "breakTime": {
+        "status": "FOUND",
+        "minutesPerDay": 30
+      },
+      "holidays": {
+        "status": "FOUND",
+        "sunday": true,
+        "legalHoliday": true,
+        "legalHolidayPaid": true,
+        "everySaturday": true,
+        "otherHoliday": false
+      },
+      "wage": {
+        "status": "FOUND",
+        "amount": 2300000,
+        "currency": "KRW",
+        "period": "MONTHLY",
+        "basePay": 2150000,
+        "bonusAmount": 0,
+        "paymentDay": 10,
+        "paymentMethod": "BANK_TRANSFER",
+        "overtimeNightHolidayPremiumMentioned": true,
+        "fixedAllowances": [
+          {
+            "type": "PRODUCTION",
+            "amount": 100000
+          },
+          {
+            "type": "MEAL",
+            "amount": 50000
+          }
+        ]
+      },
+      "dormitory": {
+        "status": "FOUND",
+        "provided": true,
+        "typeCategory": "DORMITORY",
+        "deductionAmount": 150000
+      },
+      "meals": {
+        "status": "FOUND",
+        "provided": true,
+        "notProvided": false,
+        "providedMeals": [
+          "LUNCH"
+        ],
+        "deductionAmount": 0
+      },
+      "signature": {
+        "status": "FOUND",
+        "signedDate": "2026-06-01",
+        "employerSignaturePresent": true,
+        "workerSignaturePresent": true
+      }
+    },
+    "evidenceRefs": [
+      {
+        "evidenceId": "ev-1",
+        "fieldName": "wage.amount",
+        "page": 1,
+        "boundingBox": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "confidence": 0.8,
+        "maskedExcerpt": "월 통상임금 [AMOUNT]원"
+      },
+      {
+        "evidenceId": "ev-2",
+        "fieldName": "breakTime.minutesPerDay",
+        "page": 1,
+        "boundingBox": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "confidence": 0.8,
+        "maskedExcerpt": "휴게 [MINUTES]분"
+      }
+    ],
+    "candidateChecklistItemCodes": [
+      "FEA_STANDARD_EMPLOYMENT_CONTRACT",
+      "LRA_WRITTEN_CONDITIONS",
+      "LRA_MINIMUM_WAGE",
+      "LRA_DIRECT_FULL_WAGE_PAYMENT",
+      "LRA_REGULAR_PAYDAY",
+      "LRA_OVERTIME_NIGHT_HOLIDAY_PREMIUM",
+      "LRA_STATUTORY_WORKING_HOURS",
+      "LRA_REST_BREAKS",
+      "LRA_WEEKLY_PAID_HOLIDAY",
+      "FEA_DORMITORY_INFO_DISCLOSURE",
+      "FEA_DORMITORY_STANDARD"
+    ]
+  }
+}

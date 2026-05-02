@@ -1,0 +1,29 @@
+{
+  "requestId": "analysis-request-dismissal-notice-pay-ocr",
+  "documentId": "document-dismissal-notice-pay-uuid",
+  "caseId": "case-dismissal-notice-pay-uuid",
+  "documentHash": "sha256-hex",
+  "documentType": "TERMINATION_NOTICE",
+  "extractionId": "extraction-dismissal-notice-pay-uuid",
+  "extractionStatus": "EXTRACTED",
+  "schemaVersion": "termination-ocr-v1",
+  "sourceEngine": "PADDLE_OCR",
+  "sourceResultHash": "sha256-hex",
+  "aiPayloadHash": "sha256-hex",
+  "payload": {
+    "schemaVersion": "termination-ocr-v1",
+    "contractTerms": {},
+    "evidenceRefs": [
+      {
+        "evidenceId": "ev-dismissal-notice-pay",
+        "fieldName": "termination.noticePay",
+        "page": 1,
+        "confidence": 0.87,
+        "maskedExcerpt": "해고예고수당 미지급, 30일 전 예고 없음"
+      }
+    ],
+    "candidateChecklistItemCodes": [
+      "LRA_DISMISSAL_NOTICE_PAY"
+    ]
+  }
+}

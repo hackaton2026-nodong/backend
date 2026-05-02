@@ -1,0 +1,106 @@
+{
+  "requestId": "analysis-request-hash",
+  "document": {
+    "documentId": "document-uuid",
+    "caseId": "case-uuid",
+    "documentHash": "sha256-hex",
+    "documentType": "EMPLOYMENT_CONTRACT"
+  },
+  "status": "COMPLETED",
+  "summary": "최저임금, 연장근로수당, 휴게시간 등 항목에서 추가 확인이 필요합니다.",
+  "riskFlags": [
+    {
+      "code": "MINIMUM_WAGE_REVIEW_REQUIRED",
+      "severity": "HIGH",
+      "message": "최저임금 관련 확인이 필요합니다. 아래 판단 기준과 근거를 확인하세요.",
+      "evidenceIds": [
+        "ev-1"
+      ]
+    }
+  ],
+  "analysisMode": "EMPLOYMENT_CONTRACT_GRAPH_RAG",
+  "issueCandidates": [
+    "MINIMUM_WAGE",
+    "OVERTIME_PAY",
+    "BREAK_TIME",
+    "DORMITORY_DEDUCTION"
+  ],
+  "findings": [
+    {
+      "issueCode": "MINIMUM_WAGE",
+      "issueName": "최저임금",
+      "severity": "HIGH",
+      "message": "최저임금 관련 확인이 필요합니다. 아래 판단 기준과 근거를 확인하세요.",
+      "criteria": [],
+      "evidenceRefs": [
+        {
+          "evidenceId": "ev-1",
+          "fieldName": "wage.amount",
+          "page": 1,
+          "confidence": 0.8,
+          "maskedExcerpt": "월 통상임금 [AMOUNT]원"
+        }
+      ]
+    }
+  ],
+  "fieldFindings": [],
+  "citations": [
+    {
+      "sourceType": "ARTICLE",
+      "articleId": "article:LABOR_STANDARDS_ACT:43",
+      "statuteName": "근로기준법",
+      "articleNo": "43",
+      "title": "임금 지급"
+    },
+    {
+      "sourceType": "CASE",
+      "caseId": "case:precedent-id",
+      "caseName": "관련 판례 예시",
+      "caseNumber": "2021다000000",
+      "courtName": "대법원",
+      "decisionDate": "20260129",
+      "sourceUrl": "/DRF/lawService.do?target=prec&ID=precedent-id&type=HTML&mobileYn="
+    }
+  ],
+  "recommendedActions": [
+    {
+      "remedyId": "remedy:LABOR_OFFICE_WAGE_CLAIM",
+      "nameKo": "임금체불 진정",
+      "institutionId": "institution:MOEL",
+      "institutionName": "고용노동부"
+    }
+  ],
+  "relatedInstitutions": [
+    {
+      "institutionId": "institution:MOEL",
+      "institutionName": "고용노동부"
+    }
+  ],
+  "caseStatus": "관련 판례 N건을 함께 검토했습니다.",
+  "retrievalPlan": {
+    "mode": "HYBRID_GRAPH_VECTOR",
+    "query": "문서 facts와 masked evidence로 구성한 검색 질의",
+    "topK": 5,
+    "issueCandidates": [
+      "MINIMUM_WAGE",
+      "OVERTIME_PAY",
+      "BREAK_TIME",
+      "DORMITORY_DEDUCTION"
+    ]
+  },
+  "analysisContext": {
+    "mode": "DOCUMENT_GRAPH_RAG_CONTEXT",
+    "retrievalMode": "HYBRID_GRAPH_VECTOR",
+    "documentSignals": {},
+    "issueSummaries": [],
+    "legalGrounds": [],
+    "precedentSummaries": [],
+    "actionPlan": [],
+    "vectorEvidence": [],
+    "generationContext": {}
+  },
+  "generatedAnalysis": {
+    "status": "SKIPPED",
+    "reason": "outputRequest.includeGeneratedAnalysis is not true"
+  }
+}
