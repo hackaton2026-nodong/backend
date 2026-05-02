@@ -115,6 +115,22 @@ AI 설명 품질과 추적성을 위해 제한적으로 전달한다.
 - 채팅 streaming은 Spring `POST /api/ai/chat/stream` proxy로 제공하고, FastAPI `DOCUMENT_AI_CHAT_STREAM_ENDPOINT`로만 서버 간 호출한다.
 - Spring chat proxy는 JWT 인증 후 `plan`, `citation`, `action`, `answer_delta`, `final`, `error` SSE event를 프론트로 중계한다.
 
+### AI Runtime Handoff (2026-05-02)
+
+Spring `feat/api-connect`에서 AI enabled 로컬 smoke test를 수행한 결과, 현재 `localhost:8000` AI 런타임은 `/health`만 계약과 일치한다. OpenAPI path는 `/api/v1/entries`, `/api/v1/entries/{entry_id}/analyze`, `/api/v1/entries/{entry_id}/cards/chat` 계열이며, Spring 계약 endpoint인 `/document-analysis`, `/chat/stream`은 노출되지 않는다.
+
+AI 세션에서 맞춰야 할 항목은 아래와 같다.
+
+- `POST /document-analysis`: Spring이 보내는 sanitized envelope를 받아 `status`, `summary`, `riskFlags`, `issueCandidates`, `generatedAnalysis`, `findings`, `fieldFindings`, `citations`, `recommendedActions`, `relatedInstitutions`, `caseStatus`를 JSON으로 반환한다.
+- `POST /chat/stream`: Spring `POST /api/ai/chat/stream` proxy가 서버 간 호출할 SSE endpoint를 제공하고, `plan`, `citation`, `action`, `answer_delta`, `final`, `error` event를 반환한다.
+- 필요하면 `X-AI-Internal-Token`을 검증하되, 브라우저가 아니라 Spring 서버 간 호출에서만 사용한다.
+
+Smoke 결과:
+
+- `GET http://localhost:8000/health` -> 200
+- `POST http://localhost:8000/document-analysis` -> 404
+- `POST http://localhost:8000/chat/stream` -> 404
+
 ## AI Request Schema
 
 현재 팀 합의상 백엔드가 DB에 저장한 sanitized extraction payload를 AI 레이어 endpoint로 `POST`한다. 아래 schema는 AI 레이어로 전달하는 논리적 입력 구조다.
