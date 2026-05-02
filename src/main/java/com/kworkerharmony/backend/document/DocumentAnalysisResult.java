@@ -48,28 +48,28 @@ public class DocumentAnalysisResult extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String summary;
 
-    @Column(name = "risk_flags", columnDefinition = "TEXT")
+    @Column(name = "risk_flags", columnDefinition = "LONGTEXT")
     private String riskFlags;
 
-    @Column(name = "issue_candidates", columnDefinition = "TEXT")
+    @Column(name = "issue_candidates", columnDefinition = "LONGTEXT")
     private String issueCandidates;
 
-    @Column(name = "generated_analysis", columnDefinition = "TEXT")
+    @Column(name = "generated_analysis", columnDefinition = "LONGTEXT")
     private String generatedAnalysis;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String findings;
 
-    @Column(name = "field_findings", columnDefinition = "TEXT")
+    @Column(name = "field_findings", columnDefinition = "LONGTEXT")
     private String fieldFindings;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String citations;
 
-    @Column(name = "recommended_actions", columnDefinition = "TEXT")
+    @Column(name = "recommended_actions", columnDefinition = "LONGTEXT")
     private String recommendedActions;
 
-    @Column(name = "related_institutions", columnDefinition = "TEXT")
+    @Column(name = "related_institutions", columnDefinition = "LONGTEXT")
     private String relatedInstitutions;
 
     @Column(name = "case_status", columnDefinition = "TEXT")
