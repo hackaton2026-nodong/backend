@@ -187,6 +187,7 @@ Swagger UI:
 
 기본 문서 저장 경로는 프로젝트 루트 기준 `./storage/documents`입니다.
 프론트에서는 `GET /api/ai/health`로 AI 연결 상태를 확인합니다. 로컬 프론트 기본 포트인 `5173`, 현재 Vite 대체 포트인 `5174`는 CORS 기본 허용 origin에 포함되어 있습니다.
+노동 상담 챗봇은 `POST /api/ai/chat/stream`을 호출하며, 백엔드는 FastAPI `DOCUMENT_AI_CHAT_STREAM_ENDPOINT`로 SSE 이벤트를 프록시합니다. FastAPI internal token은 브라우저에 노출하지 않습니다.
 
 ## 테스트
 
