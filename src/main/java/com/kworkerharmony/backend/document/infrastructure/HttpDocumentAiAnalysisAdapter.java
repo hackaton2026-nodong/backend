@@ -113,22 +113,48 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
     private AiAnalysisResult placeholderResult(AiAnalysisCommand command, String requestJson) {
         String inputHash = DocumentCrypto.sha256Hex(requestJson);
         String canonical = "placeholder-analysis|" + command.documentId() + "|" + inputHash;
+        String summary = "Placeholder analysis result for document " + command.documentId();
+        ObjectNode detail = objectMapper.createObjectNode();
+        detail.put("status", "COMPLETED");
+        detail.put("summary", summary);
+        detail.putArray("riskFlags");
         return new AiAnalysisResult(
                 inputHash,
                 DocumentCrypto.sha256Hex(canonical),
-                "Placeholder analysis result for document " + command.documentId(),
-                "[]"
+                summary,
+                "[]",
+                "[]",
+                "{\"status\":\"SKIPPED\",\"reason\":\"AI integration is disabled\"}",
+                "[]",
+                "[]",
+                "[]",
+                "[]",
+                "[]",
+                null,
+                writeJson(detail),
+                null
         );
     }
 
     private AiAnalysisResult parseResponse(AiAnalysisCommand command, String requestJson, String responseJson) {
         String inputHash = DocumentCrypto.sha256Hex(requestJson);
         if (responseJson == null || responseJson.isBlank()) {
+            String summary = "AI analysis completed";
             return new AiAnalysisResult(
                     inputHash,
                     DocumentCrypto.sha256Hex("empty-ai-response|" + command.documentId() + "|" + inputHash),
-                    "AI analysis completed",
-                    "[]"
+                    summary,
+                    "[]",
+                    "[]",
+                    "{}",
+                    "[]",
+                    "[]",
+                    "[]",
+                    "[]",
+                    "[]",
+                    null,
+                    "{\"status\":\"COMPLETED\",\"summary\":\"AI analysis completed\"}",
+                    null
             );
         }
         try {
@@ -149,9 +175,39 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
             if (analysisResultHash.isBlank()) {
                 analysisResultHash = DocumentCrypto.sha256Hex(objectMapper.writeValueAsString(response));
             }
-            return new AiAnalysisResult(inputHash, analysisResultHash, summary, riskFlags);
+            return new AiAnalysisResult(
+                    inputHash,
+                    analysisResultHash,
+                    summary,
+                    riskFlags,
+                    jsonField(response, "issueCandidates", "[]"),
+                    jsonField(response, "generatedAnalysis", "{}"),
+                    jsonField(response, "findings", "[]"),
+                    jsonField(response, "fieldFindings", "[]"),
+                    jsonField(response, "citations", "[]"),
+                    jsonField(response, "recommendedActions", "[]"),
+                    jsonField(response, "relatedInstitutions", "[]"),
+                    response.path("caseStatus").isMissingNode() ? null : response.path("caseStatus").asText(null),
+                    objectMapper.writeValueAsString(response),
+                    response.path("failedReason").asText(null)
+            );
         } catch (JsonProcessingException ex) {
             throw new IllegalStateException("Invalid AI analysis response", ex);
+        }
+    }
+
+    private String jsonField(JsonNode node, String fieldName, String defaultJson) throws JsonProcessingException {
+        JsonNode value = node.path(fieldName);
+        return value.isMissingNode() || value.isNull()
+                ? defaultJson
+                : objectMapper.writeValueAsString(value);
+    }
+
+    private String writeJson(JsonNode node) {
+        try {
+            return objectMapper.writeValueAsString(node);
+        } catch (JsonProcessingException ex) {
+            throw new IllegalStateException("Failed to serialize AI analysis placeholder", ex);
         }
     }
 

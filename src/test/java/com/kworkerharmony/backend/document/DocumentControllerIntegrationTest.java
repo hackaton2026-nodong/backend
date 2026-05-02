@@ -1,6 +1,7 @@
 package com.kworkerharmony.backend.document;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,8 @@ import com.kworkerharmony.backend.enterprise.EnterpriseRepository;
 import com.kworkerharmony.backend.enterprise.EnterpriseStatus;
 import com.kworkerharmony.backend.global.security.JwtProvider;
 import com.kworkerharmony.backend.global.security.RedisTokenRepository;
+import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort;
+import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort.AiAnalysisResult;
 import com.kworkerharmony.backend.document.port.DocumentOcrPort;
 import com.kworkerharmony.backend.user.Role;
 import com.kworkerharmony.backend.user.User;
@@ -66,6 +69,9 @@ class DocumentControllerIntegrationTest {
 
     @MockitoBean
     private RedisTokenRepository redisTokenRepository;
+
+    @MockitoBean
+    private DocumentAiAnalysisPort documentAiAnalysisPort;
 
     @MockitoBean
     private DocumentOcrPort documentOcrPort;
@@ -619,6 +625,126 @@ class DocumentControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value(DocumentExtractionStatus.CORRECTED.name()))
                 .andExpect(jsonPath("$.data.correctedPayload.contractTerms.wage.amount").value(2400000));
+    }
+
+    @Test
+    void analysisApiStoresAndReturnsFrontendShape() throws Exception {
+        Enterprise company = enterpriseRepository.save(new Enterprise(
+                "Harmony Co",
+                "123-45-67890",
+                "Manufacturing",
+                "KR",
+                "ko",
+                EnterpriseStatus.ACTIVE
+        ));
+        User employer = userRepository.save(new User(
+                "analysis-employer@example.com",
+                "encoded",
+                "Employer",
+                Role.EMPLOYER,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        User worker = userRepository.save(new User(
+                "analysis-worker@example.com",
+                "encoded",
+                "Worker",
+                Role.WORKER,
+                UserType.WORKER,
+                UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        Case caseEntity = caseRepository.save(new Case(
+                company,
+                employer,
+                worker,
+                CaseStatus.ACTIVE,
+                "Manufacturing",
+                "Seoul"
+        ));
+        String accessToken = jwtProvider.generateAccessToken(employer);
+        String uploadResponse = mockMvc.perform(multipart("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .file(new MockMultipartFile("file", "contract.pdf", "application/pdf", "sample-pdf".getBytes()))
+                        .param("documentType", DocumentType.EMPLOYMENT_CONTRACT.name())
+                        .param("issuedAt", "2026-01-01")
+                        .param("expiresAt", "2027-01-01")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String documentId = objectMapper.readTree(uploadResponse).path("data").path("id").asText();
+
+        String correctionRequest = """
+                {
+                  "correctedPayload": {
+                    "schemaVersion": "employment-contract-v1",
+                    "contractTerms": {
+                      "wage": {
+                        "status": "FOUND",
+                        "amount": 1850000,
+                        "currency": "KRW",
+                        "period": "MONTHLY"
+                      }
+                    },
+                    "evidenceRefs": [],
+                    "candidateChecklistItemCodes": ["LRA_MINIMUM_WAGE"]
+                  }
+                }
+                """;
+
+        mockMvc.perform(put("/api/documents/{documentId}/extraction/correction", documentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(correctionRequest)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value(DocumentExtractionStatus.CORRECTED.name()));
+
+        when(documentAiAnalysisPort.analyze(any())).thenReturn(new AiAnalysisResult(
+                "input-hash",
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "최저임금과 휴게시간 확인이 필요합니다.",
+                "[{\"code\":\"MINIMUM_WAGE_REVIEW_REQUIRED\",\"severity\":\"HIGH\"}]",
+                "[\"MINIMUM_WAGE\",\"BREAK_TIME\"]",
+                "{\"status\":\"COMPLETED\",\"text\":\"사용자 표시용 생성 분석입니다.\"}",
+                "[{\"issueCode\":\"MINIMUM_WAGE\",\"severity\":\"HIGH\"}]",
+                "[{\"fieldName\":\"wage.amount\",\"status\":\"FOUND\"}]",
+                "[{\"sourceType\":\"ARTICLE\",\"statuteName\":\"근로기준법\",\"articleNo\":\"43\"}]",
+                "[{\"nameKo\":\"임금체불 진정\",\"institutionName\":\"고용노동부\"}]",
+                "[{\"institutionName\":\"고용노동부\"}]",
+                "관련 판례 1건을 함께 검토했습니다.",
+                "{\"status\":\"COMPLETED\",\"summary\":\"최저임금과 휴게시간 확인이 필요합니다.\"}",
+                null
+        ));
+
+        mockMvc.perform(post("/api/documents/{documentId}/analysis", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.analysisId").isNotEmpty())
+                .andExpect(jsonPath("$.data.caseId").value(caseEntity.getId()))
+                .andExpect(jsonPath("$.data.status").value(DocumentAnalysisStatus.COMPLETED.name()))
+                .andExpect(jsonPath("$.data.summary").value("최저임금과 휴게시간 확인이 필요합니다."))
+                .andExpect(jsonPath("$.data.riskFlags[0].code").value("MINIMUM_WAGE_REVIEW_REQUIRED"))
+                .andExpect(jsonPath("$.data.issueCandidates[0]").value("MINIMUM_WAGE"))
+                .andExpect(jsonPath("$.data.generatedAnalysis.text").value("사용자 표시용 생성 분석입니다."))
+                .andExpect(jsonPath("$.data.findings[0].issueCode").value("MINIMUM_WAGE"))
+                .andExpect(jsonPath("$.data.fieldFindings[0].fieldName").value("wage.amount"))
+                .andExpect(jsonPath("$.data.citations[0].sourceType").value("ARTICLE"))
+                .andExpect(jsonPath("$.data.recommendedActions[0].nameKo").value("임금체불 진정"))
+                .andExpect(jsonPath("$.data.relatedInstitutions[0].institutionName").value("고용노동부"))
+                .andExpect(jsonPath("$.data.caseStatus").value("관련 판례 1건을 함께 검토했습니다."))
+                .andExpect(jsonPath("$.data.detailJson.status").value("COMPLETED"));
+
+        mockMvc.perform(get("/api/documents/{documentId}/analysis", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.generatedAnalysis.status").value("COMPLETED"))
+                .andExpect(jsonPath("$.data.citations[0].statuteName").value("근로기준법"));
     }
 
     @Test

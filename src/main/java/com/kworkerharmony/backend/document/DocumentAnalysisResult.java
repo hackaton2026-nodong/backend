@@ -51,6 +51,36 @@ public class DocumentAnalysisResult extends BaseEntity {
     @Column(name = "risk_flags", columnDefinition = "TEXT")
     private String riskFlags;
 
+    @Column(name = "issue_candidates", columnDefinition = "TEXT")
+    private String issueCandidates;
+
+    @Column(name = "generated_analysis", columnDefinition = "TEXT")
+    private String generatedAnalysis;
+
+    @Column(columnDefinition = "TEXT")
+    private String findings;
+
+    @Column(name = "field_findings", columnDefinition = "TEXT")
+    private String fieldFindings;
+
+    @Column(columnDefinition = "TEXT")
+    private String citations;
+
+    @Column(name = "recommended_actions", columnDefinition = "TEXT")
+    private String recommendedActions;
+
+    @Column(name = "related_institutions", columnDefinition = "TEXT")
+    private String relatedInstitutions;
+
+    @Column(name = "case_status", columnDefinition = "TEXT")
+    private String caseStatus;
+
+    @Column(name = "detail_json", columnDefinition = "LONGTEXT")
+    private String detailJson;
+
+    @Column(name = "failed_reason", columnDefinition = "TEXT")
+    private String failedReason;
+
     @Column(name = "analyzed_at")
     private LocalDateTime analyzedAt;
 
@@ -59,12 +89,37 @@ public class DocumentAnalysisResult extends BaseEntity {
         this.status = DocumentAnalysisStatus.PENDING;
     }
 
-    public void markCompleted(String extractedTextHash, String analysisResultHash, String summary, String riskFlags) {
+    public void markCompleted(
+            String extractedTextHash,
+            String analysisResultHash,
+            String summary,
+            String riskFlags,
+            String issueCandidates,
+            String generatedAnalysis,
+            String findings,
+            String fieldFindings,
+            String citations,
+            String recommendedActions,
+            String relatedInstitutions,
+            String caseStatus,
+            String detailJson,
+            String failedReason
+    ) {
         this.status = DocumentAnalysisStatus.COMPLETED;
         this.extractedTextHash = extractedTextHash;
         this.analysisResultHash = analysisResultHash;
         this.summary = summary;
         this.riskFlags = riskFlags;
+        this.issueCandidates = issueCandidates;
+        this.generatedAnalysis = generatedAnalysis;
+        this.findings = findings;
+        this.fieldFindings = fieldFindings;
+        this.citations = citations;
+        this.recommendedActions = recommendedActions;
+        this.relatedInstitutions = relatedInstitutions;
+        this.caseStatus = caseStatus;
+        this.detailJson = detailJson;
+        this.failedReason = failedReason;
         this.analyzedAt = LocalDateTime.now();
     }
 
@@ -74,6 +129,16 @@ public class DocumentAnalysisResult extends BaseEntity {
         this.analysisResultHash = null;
         this.summary = summary;
         this.riskFlags = "[]";
+        this.issueCandidates = "[]";
+        this.generatedAnalysis = "{\"status\":\"FAILED\"}";
+        this.findings = "[]";
+        this.fieldFindings = "[]";
+        this.citations = "[]";
+        this.recommendedActions = "[]";
+        this.relatedInstitutions = "[]";
+        this.caseStatus = null;
+        this.detailJson = null;
+        this.failedReason = summary;
         this.analyzedAt = LocalDateTime.now();
     }
 }

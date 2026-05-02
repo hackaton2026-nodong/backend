@@ -212,6 +212,16 @@ Enum: `DocumentAnchorStatus = PENDING, ANCHORED, FAILED`
 | `analysis_result_hash` | `VARCHAR(64)` | YES |  | 분석 결과 해시 |
 | `summary` | `TEXT` | YES |  | 요약 |
 | `risk_flags` | `TEXT` | YES |  | 위험 플래그 JSON 문자열 |
+| `issue_candidates` | `TEXT` | YES |  | AI가 식별한 이슈 후보 JSON 배열 |
+| `generated_analysis` | `TEXT` | YES |  | 사용자 표시용 생성 분석 JSON 객체 |
+| `findings` | `TEXT` | YES |  | 분석 finding JSON 배열 |
+| `field_findings` | `TEXT` | YES |  | 필드별 finding JSON 배열 |
+| `citations` | `TEXT` | YES |  | 법령/판례/가이드 citation JSON 배열 |
+| `recommended_actions` | `TEXT` | YES |  | 추천 조치 JSON 배열 |
+| `related_institutions` | `TEXT` | YES |  | 관련 기관 JSON 배열 |
+| `case_status` | `TEXT` | YES |  | 판례/검색 상태 사용자 표시 문구 |
+| `detail_json` | `LONGTEXT` | YES |  | FastAPI AI 응답 전체 JSON |
+| `failed_reason` | `TEXT` | YES |  | AI 호출/분석 실패 사유 |
 | `analyzed_at` | `DATETIME(6)` | YES |  | 분석 완료 시각 |
 | `created_at` | `DATETIME(6)` | NO |  | 생성 시각 |
 | `updated_at` | `DATETIME(6)` | NO |  | 수정 시각 |

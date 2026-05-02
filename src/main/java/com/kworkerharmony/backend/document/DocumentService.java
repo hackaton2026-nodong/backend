@@ -300,13 +300,23 @@ public class DocumentService {
                     analysisResult.inputHash(),
                     analysisResult.analysisResultHash(),
                     analysisResult.summary(),
-                    analysisResult.riskFlags()
+                    analysisResult.riskFlags(),
+                    analysisResult.issueCandidates(),
+                    analysisResult.generatedAnalysis(),
+                    analysisResult.findings(),
+                    analysisResult.fieldFindings(),
+                    analysisResult.citations(),
+                    analysisResult.recommendedActions(),
+                    analysisResult.relatedInstitutions(),
+                    analysisResult.caseStatus(),
+                    analysisResult.detailJson(),
+                    analysisResult.failedReason()
             );
             markAnalyzedWithoutOverwritingOnchainTerminalState(document);
         } catch (RuntimeException ex) {
             result.markFailed(truncate(ex.getMessage(), 1000));
         }
-        return DocumentAnalysisResponse.from(result);
+        return DocumentAnalysisResponse.from(result, document, objectMapper);
     }
 
     @Transactional(readOnly = true)
@@ -314,7 +324,7 @@ public class DocumentService {
         Document document = getAccessibleDocument(documentId, userPrincipal);
         DocumentAnalysisResult result = documentAnalysisResultRepository.findByDocumentId(document.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document analysis not found"));
-        return DocumentAnalysisResponse.from(result);
+        return DocumentAnalysisResponse.from(result, document, objectMapper);
     }
 
     @Transactional

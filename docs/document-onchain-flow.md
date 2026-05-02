@@ -206,7 +206,7 @@ event DocumentAnchored(
 
 오프체인 OCR/AI 분석 결과 저장을 위한 테이블이다.
 
-- 주요 필드: `document_id`, `status`, `extracted_text_hash`, `analysis_result_hash`, `summary`, `risk_flags`, `analyzed_at`
+- 주요 필드: `document_id`, `status`, `extracted_text_hash`, `analysis_result_hash`, `summary`, `risk_flags`, `issue_candidates`, `generated_analysis`, `findings`, `citations`, `recommended_actions`, `related_institutions`, `case_status`, `detail_json`, `failed_reason`, `analyzed_at`
 - Unique: `(document_id)`
 - `extracted_text_hash`는 필터링 전 OCR 전문의 hash가 아니라, 마스킹/정규화된 AI request 또는 normalized terms의 hash로 사용한다.
 

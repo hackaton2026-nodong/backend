@@ -26,7 +26,17 @@ public interface DocumentAiAnalysisPort {
             String inputHash,
             String analysisResultHash,
             String summary,
-            String riskFlags
+            String riskFlags,
+            String issueCandidates,
+            String generatedAnalysis,
+            String findings,
+            String fieldFindings,
+            String citations,
+            String recommendedActions,
+            String relatedInstitutions,
+            String caseStatus,
+            String detailJson,
+            String failedReason
     ) {
     }
 }
