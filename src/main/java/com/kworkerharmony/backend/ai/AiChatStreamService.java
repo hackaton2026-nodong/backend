@@ -2,6 +2,7 @@ package com.kworkerharmony.backend.ai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kworkerharmony.backend.ai.dto.request.AiChatStreamRequest;
 import com.kworkerharmony.backend.document.config.DocumentAiProperties;
@@ -55,8 +56,20 @@ public class AiChatStreamService {
     }
 
     private boolean isSafeRequest(AiChatStreamRequest request) {
-        String normalized = request.message().toLowerCase(Locale.ROOT);
-        return FORBIDDEN_MESSAGE_HINTS.stream().noneMatch(normalized::contains);
+        if (containsForbiddenHint(request.message())) {
+            return false;
+        }
+        if (request.history() == null) {
+            return true;
+        }
+        return request.history().stream()
+                .map(AiChatStreamRequest.ChatHistoryMessage::content)
+                .noneMatch(this::containsForbiddenHint);
+    }
+
+    private boolean containsForbiddenHint(String value) {
+        String normalized = value == null ? "" : value.toLowerCase(Locale.ROOT);
+        return FORBIDDEN_MESSAGE_HINTS.stream().anyMatch(normalized::contains);
     }
 
     private void proxy(AiChatStreamRequest request, SseEmitter emitter) {
@@ -111,6 +124,14 @@ public class AiChatStreamService {
                 ? "ko"
                 : request.languageCode());
         root.put("topK", request.topK() == null ? 3 : request.topK());
+        ArrayNode history = root.putArray("history");
+        if (request.history() != null) {
+            for (AiChatStreamRequest.ChatHistoryMessage message : request.history()) {
+                ObjectNode item = history.addObject();
+                item.put("role", message.role());
+                item.put("content", message.content());
+            }
+        }
         try {
             return objectMapper.writeValueAsString(root);
         } catch (JsonProcessingException ex) {

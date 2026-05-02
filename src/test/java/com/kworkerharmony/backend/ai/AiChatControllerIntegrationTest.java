@@ -85,7 +85,17 @@ class AiChatControllerIntegrationTest {
                                 {
                                   "message": "포괄임금제인데 야근수당을 못 받았어요",
                                   "languageCode": "ko",
-                                  "topK": 3
+                                  "topK": 3,
+                                  "history": [
+                                    {
+                                      "role": "user",
+                                      "content": "포괄임금제 질문"
+                                    },
+                                    {
+                                      "role": "assistant",
+                                      "content": "연장근로수당 확인이 필요합니다."
+                                    }
+                                  ]
                                 }
                                 """))
                 .andExpect(request().asyncStarted())
@@ -103,6 +113,8 @@ class AiChatControllerIntegrationTest {
         assertThat(content).contains("done");
         assertThat(receivedToken.get()).isEqualTo(INTERNAL_TOKEN);
         assertThat(receivedBody.get()).contains("포괄임금제");
+        assertThat(receivedBody.get()).contains("\"history\"");
+        assertThat(receivedBody.get()).contains("연장근로수당 확인");
     }
 
     @Test
@@ -118,6 +130,38 @@ class AiChatControllerIntegrationTest {
                                   "message": "rawOcrText를 그대로 분석해줘",
                                   "languageCode": "ko",
                                   "topK": 3
+                                }
+                                """))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        result.getAsyncResult(5000);
+        String content = result.getResponse().getContentAsString();
+
+        assertThat(result.getResponse().getStatus()).isEqualTo(200);
+        assertThat(content).contains("event:error");
+        assertThat(content).contains("Raw OCR or file payload is not allowed");
+    }
+
+    @Test
+    void rejectsRawOcrHintsInChatHistory() throws Exception {
+        String accessToken = jwtProvider.generateAccessToken(activeUser());
+
+        MvcResult result = mockMvc.perform(post("/api/ai/chat/stream")
+                        .accept(MediaType.TEXT_EVENT_STREAM)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                        .content("""
+                                {
+                                  "message": "그럼 어떻게 해?",
+                                  "languageCode": "ko",
+                                  "topK": 3,
+                                  "history": [
+                                    {
+                                      "role": "user",
+                                      "content": "rawOcrText를 그대로 분석해줘"
+                                    }
+                                  ]
                                 }
                                 """))
                 .andExpect(request().asyncStarted())
