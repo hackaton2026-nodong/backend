@@ -19,13 +19,13 @@ public class PaddleOcrEmploymentContractExtractor {
     public static final String SCHEMA_VERSION = "employment-contract-v1";
     public static final String SOURCE_ENGINE = "PADDLE_OCR";
 
-    private static final Pattern CONTRACT_PERIOD = Pattern.compile("(\\d{2})년\\s*(\\d{1,2})\\s*월\\s*(\\d{1,2})\\s*일\\s*~\\s*(\\d{2})년\\s*(\\d{1,2})\\s*월\\s*(\\d{1,2})\\s*일");
+    private static final Pattern CONTRACT_PERIOD = Pattern.compile("(\\d{2})\\s*년\\s*(\\d{1,2})\\s*월\\s*(\\d{1,2})\\s*일\\s*~\\s*(\\d{2})\\s*년\\s*(\\d{1,2})\\s*월\\s*(\\d{1,2})\\s*일");
     private static final Pattern CONTRACT_PERIOD_EN = Pattern.compile("from\\((\\d{2})/(\\d{1,2})/(\\d{1,2})\\s*YY/MM/DD\\)\\s*to\\((\\d{2})/(\\d{1,2})/(\\d{1,2})\\s*YY/MM/DD\\)", Pattern.CASE_INSENSITIVE);
     private static final Pattern WORKING_HOURS_RANGE = Pattern.compile("(\\d{1,2})\\s*(?::|시|時|人)\\s*(\\d{1,2})\\s*(?:분|是)?\\s*\\)?\\s*(?:~|to\\s*\\(?|-)\\s*\\(?\\s*(\\d{1,2})\\s*(?::|시|時|人)\\s*(\\d{1,2})\\s*(?:분|是)?", Pattern.CASE_INSENSITIVE);
-    private static final Pattern OVERTIME = Pattern.compile("1일 평균 시간외 근로시간:\\s*(\\d+)시간|average daily over time:\\s*(\\d+)\\s*hours", Pattern.CASE_INSENSITIVE);
-    private static final Pattern VARIABLE_HOURS = Pattern.compile("변동 가능:\\s*(\\d+)시간 이내|up to\\s*(\\d+)\\s*hours", Pattern.CASE_INSENSITIVE);
-    private static final Pattern BREAK_TIME = Pattern.compile("휴게시간\\s*1일\\s*(\\d+)분");
-    private static final Pattern BREAK_TIME_EN = Pattern.compile("\\(\\s*(\\d+)\\s*\\) minutes per day", Pattern.CASE_INSENSITIVE);
+    private static final Pattern OVERTIME = Pattern.compile("1일 평균 시간외 근로시간:\\s*(\\d+)\\s*시간|average daily over time:\\s*(\\d+)\\s*hours", Pattern.CASE_INSENSITIVE);
+    private static final Pattern VARIABLE_HOURS = Pattern.compile("변동 가능:\\s*(\\d+)\\s*시간 이내|up to\\s*(\\d+)\\s*hours", Pattern.CASE_INSENSITIVE);
+    private static final Pattern BREAK_TIME = Pattern.compile("휴게시간\\s*1\\s*일\\s*(\\d+)\\s*분");
+    private static final Pattern BREAK_TIME_EN = Pattern.compile("\\(\\s*(\\d+)\\s*\\)\\s*minutes per day", Pattern.CASE_INSENSITIVE);
     private static final Pattern MONTHLY_WAGE = Pattern.compile("월\\s*통상임금\\s*\\(\\s*([0-9,]+)\\s*\\)\\s*원|monthly normal wages\\s*\\(\\s*([0-9,]+)\\s*\\)\\s*won", Pattern.CASE_INSENSITIVE);
     private static final Pattern BASE_PAY = Pattern.compile("기본급\\s*\\[\\s*월급\\s*]\\s*\\(\\s*([0-9,]+)\\s*\\)\\s*원|basic pay\\s*\\[?\\s*\\(?\\s*monthly\\s*\\)?\\s*wage\\s*]?\\s*\\(\\s*([0-9,]+)\\s*\\)\\s*won", Pattern.CASE_INSENSITIVE);
     private static final Pattern PRODUCTION_ALLOWANCE = Pattern.compile("생산\\s*수당\\s*:\\s*([0-9,oO]+)\\s*(?:\\)?\\s*원|\\)\\s*won)|production benefits\\s*:\\s*([0-9,oO]+)\\s*\\)?\\s*won", Pattern.CASE_INSENSITIVE);
@@ -461,11 +461,12 @@ public class PaddleOcrEmploymentContractExtractor {
     }
 
     private boolean checkedAfter(String text, String anchor, String value, int maxChars) {
-        String quotedAnchor = Pattern.quote(anchor);
-        String quotedValue = Pattern.quote(value);
-        return Pattern.compile(quotedAnchor + "[^\\n]{0," + maxChars + "}[\\[\\(]?\\s*√\\s*[\\]\\)]?\\s*" + quotedValue, Pattern.CASE_INSENSITIVE)
-                .matcher(text)
-                .find();
+        int anchorIndex = text.toLowerCase().indexOf(anchor.toLowerCase());
+        if (anchorIndex < 0) {
+            return false;
+        }
+        String optionWindow = text.substring(anchorIndex, Math.min(text.length(), anchorIndex + maxChars));
+        return checkedOption(optionWindow, value);
     }
 
     private String paymentMethod(String text) {

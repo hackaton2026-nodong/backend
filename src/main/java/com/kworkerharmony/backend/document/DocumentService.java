@@ -13,6 +13,7 @@ import com.kworkerharmony.backend.document.dto.request.CreatePaddleOcrExtraction
 import com.kworkerharmony.backend.document.dto.request.ReceivePaddleOcrResultRequest;
 import com.kworkerharmony.backend.document.dto.request.SubmitDocumentSignatureRequest;
 import com.kworkerharmony.backend.document.dto.response.DocumentAnalysisResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentAnalysisTestResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentAnchorResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentExtractionResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentResponse;
@@ -33,6 +34,7 @@ import com.kworkerharmony.backend.document.support.DocumentCrypto;
 import com.kworkerharmony.backend.document.support.DocumentTypedDataFactory;
 import com.kworkerharmony.backend.document.support.EmploymentContractExtractionPayload;
 import com.kworkerharmony.backend.document.support.PaddleOcrEmploymentContractExtractor;
+import com.kworkerharmony.backend.document.support.PdfTextOcrResultFactory;
 import com.kworkerharmony.backend.enterprise.Enterprise;
 import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
@@ -73,6 +75,7 @@ public class DocumentService {
     private final DocumentOcrPort documentOcrPort;
     private final DocumentAiPayloadBuilder documentAiPayloadBuilder;
     private final PaddleOcrEmploymentContractExtractor paddleOcrEmploymentContractExtractor;
+    private final PdfTextOcrResultFactory pdfTextOcrResultFactory;
     private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
@@ -134,6 +137,37 @@ public class DocumentService {
             document.markFailed();
             throw ex;
         }
+    }
+
+    @Transactional
+    public DocumentAnalysisTestResponse uploadPdfTextAndAnalyze(
+            String caseId,
+            MultipartFile file,
+            String testCase,
+            LocalDate issuedAt,
+            LocalDate expiresAt,
+            UserPrincipal userPrincipal
+    ) {
+        DocumentResponse documentResponse = uploadDocument(
+                caseId,
+                file,
+                DocumentType.EMPLOYMENT_CONTRACT,
+                issuedAt,
+                expiresAt,
+                userPrincipal
+        );
+        Document document = documentRepository.findById(documentResponse.id())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document not found"));
+
+        DocumentExtraction extraction = applyPaddleOcrExtraction(document, pdfTextOcrResultFactory.create(file));
+        DocumentAnalysisResponse analysis = analyzeDocument(document.getId(), userPrincipal);
+
+        return new DocumentAnalysisTestResponse(
+                testCase,
+                toResponse(document),
+                DocumentExtractionResponse.from(extraction, objectMapper),
+                analysis
+        );
     }
 
     @Transactional
@@ -526,7 +560,11 @@ public class DocumentService {
                 || extraction.getStatus() == DocumentExtractionStatus.FAILED
                 || extraction.getAiPayloadHash() == null
                 || extraction.getAiPayloadHash().isBlank()) {
-            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document extraction requires correction");
+            String reason = extraction.getReviewRequiredReason();
+            String message = reason == null || reason.isBlank()
+                    ? "Document extraction requires correction"
+                    : "Document extraction requires correction: " + reason;
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, message);
         }
     }
 

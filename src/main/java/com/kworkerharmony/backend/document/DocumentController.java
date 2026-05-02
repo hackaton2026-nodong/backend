@@ -6,6 +6,7 @@ import com.kworkerharmony.backend.document.dto.request.CreatePaddleOcrExtraction
 import com.kworkerharmony.backend.document.dto.request.ReceivePaddleOcrResultRequest;
 import com.kworkerharmony.backend.document.dto.request.SubmitDocumentSignatureRequest;
 import com.kworkerharmony.backend.document.dto.response.DocumentAnalysisResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentAnalysisTestResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentAnchorResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentExtractionResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentResponse;
@@ -67,6 +68,25 @@ public class DocumentController {
                 caseId,
                 file,
                 documentType,
+                issuedAt,
+                expiresAt,
+                userPrincipal
+        ));
+    }
+
+    @PostMapping("/cases/{caseId}/documents/pdf-text-analysis-test")
+    public ApiResponse<DocumentAnalysisTestResponse> uploadPdfTextAndAnalyze(
+            @PathVariable String caseId,
+            @RequestPart("file") MultipartFile file,
+            @RequestParam(defaultValue = "CONTRACT_TEST") String testCase,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate issuedAt,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expiresAt,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ApiResponse.success(documentService.uploadPdfTextAndAnalyze(
+                caseId,
+                file,
+                testCase,
                 issuedAt,
                 expiresAt,
                 userPrincipal
