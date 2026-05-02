@@ -143,7 +143,7 @@ public class DocumentService {
     public DocumentAnalysisTestResponse uploadPdfTextAndAnalyze(
             String caseId,
             MultipartFile file,
-            String testCase,
+            String scenario,
             LocalDate issuedAt,
             LocalDate expiresAt,
             UserPrincipal userPrincipal
@@ -163,7 +163,7 @@ public class DocumentService {
         DocumentAnalysisResponse analysis = analyzeDocument(document.getId(), userPrincipal);
 
         return new DocumentAnalysisTestResponse(
-                testCase,
+                scenario,
                 toResponse(document),
                 DocumentExtractionResponse.from(extraction, objectMapper),
                 analysis

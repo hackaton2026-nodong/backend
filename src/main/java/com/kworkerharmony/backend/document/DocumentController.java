@@ -74,11 +74,11 @@ public class DocumentController {
         ));
     }
 
-    @PostMapping("/cases/{caseId}/documents/pdf-text-analysis-test")
+    @PostMapping("/cases/{caseId}/documents/pdf-text-analysis")
     public ApiResponse<DocumentAnalysisTestResponse> uploadPdfTextAndAnalyze(
             @PathVariable String caseId,
             @RequestPart("file") MultipartFile file,
-            @RequestParam(defaultValue = "CONTRACT_TEST") String testCase,
+            @RequestParam(defaultValue = "EMPLOYMENT_CONTRACT") String scenario,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate issuedAt,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expiresAt,
             @AuthenticationPrincipal UserPrincipal userPrincipal
@@ -86,7 +86,7 @@ public class DocumentController {
         return ApiResponse.success(documentService.uploadPdfTextAndAnalyze(
                 caseId,
                 file,
-                testCase,
+                scenario,
                 issuedAt,
                 expiresAt,
                 userPrincipal
