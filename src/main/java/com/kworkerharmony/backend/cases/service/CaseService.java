@@ -23,12 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CaseService {
 
+    private static final List<CaseStatus> FRONTEND_VISIBLE_STATUSES = List.of(CaseStatus.ACTIVE, CaseStatus.PENDING);
+
     private final CaseRepository caseRepository;
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public List<CaseResponse> getActiveCases(UserPrincipal userPrincipal) {
-        return caseRepository.findActiveCasesByUserId(userPrincipal.getId(), CaseStatus.ACTIVE).stream()
+        return caseRepository.findVisibleCasesByUserId(userPrincipal.getId(), FRONTEND_VISIBLE_STATUSES).stream()
                 .map(CaseResponse::from)
                 .toList();
     }

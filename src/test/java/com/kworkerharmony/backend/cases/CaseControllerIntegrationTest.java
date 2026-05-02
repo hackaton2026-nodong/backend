@@ -123,6 +123,23 @@ class CaseControllerIntegrationTest {
     }
 
     @Test
+    void getActiveCasesIncludesPendingCasesForFrontendContractList() throws Exception {
+        Enterprise company = saveEnterprise("Company A", "111-11-11111");
+        User employer = saveUser("employer@company-a.com", Role.EMPLOYER, UserType.EMPLOYER, company);
+        caseRepository.save(new Case(company, employer, null, CaseStatus.PENDING, "Manufacturing", "Seoul"));
+        caseRepository.save(new Case(company, employer, null, CaseStatus.ACTIVE, "Logistics", "Busan"));
+        caseRepository.save(new Case(company, employer, null, CaseStatus.CLOSED, "Food", "Incheon"));
+
+        mockMvc.perform(get("/api/cases/active")
+                        .header("Authorization", bearerToken(employer)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[?(@.status == 'PENDING')]").exists())
+                .andExpect(jsonPath("$.data[?(@.status == 'ACTIVE')]").exists());
+    }
+
+    @Test
     void connectMembersRejectsUserFromAnotherCompany() throws Exception {
         Enterprise companyA = saveEnterprise("Company A", "111-11-11111");
         Enterprise companyB = saveEnterprise("Company B", "222-22-22222");

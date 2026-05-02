@@ -31,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DashboardService {
 
+    private static final List<CaseStatus> EMPLOYER_IN_PROGRESS_STATUSES = List.of(CaseStatus.ACTIVE, CaseStatus.PENDING);
+
     private final CaseRepository caseRepository;
     private final CaseChecklistStatusRepository caseChecklistStatusRepository;
     private final AlertRepository alertRepository;
@@ -95,7 +97,7 @@ public class DashboardService {
         return new EmployerDashboardResponse(
                 user.getId(),
                 user.getUserType(),
-                caseRepository.countByEmployerIdAndStatus(user.getId(), CaseStatus.ACTIVE),
+                caseRepository.countByEmployerIdAndStatusIn(user.getId(), EMPLOYER_IN_PROGRESS_STATUSES),
                 caseChecklistStatusRepository.countByCaseEntityEmployerId(user.getId()),
                 caseChecklistStatusRepository.countByCaseEntityEmployerIdAndStatus(user.getId(), ChecklistStatus.COMPLETED),
                 alertRepository.countByUserIdAndIsReadFalse(user.getId())
