@@ -117,19 +117,21 @@ AI 설명 품질과 추적성을 위해 제한적으로 전달한다.
 
 ### AI Runtime Handoff (2026-05-02)
 
-Spring `feat/api-connect`에서 AI enabled 로컬 smoke test를 수행한 결과, 현재 `localhost:8000` AI 런타임은 `/health`만 계약과 일치한다. OpenAPI path는 `/api/v1/entries`, `/api/v1/entries/{entry_id}/analyze`, `/api/v1/entries/{entry_id}/cards/chat` 계열이며, Spring 계약 endpoint인 `/document-analysis`, `/chat/stream`은 노출되지 않는다.
+Spring `feat/api-connect`의 초기 smoke에서는 FastAPI 계약 endpoint가 아직 맞지 않았으나, AI 레포 `feat/graph-rag-foundation` 기준 런타임은 Spring 계약과 일치한다. Spring은 아래 endpoint만 서버 간 호출 대상으로 사용한다.
 
-AI 세션에서 맞춰야 할 항목은 아래와 같다.
+AI 런타임에서 현재 확인된 항목은 아래와 같다.
 
 - `POST /document-analysis`: Spring이 보내는 sanitized envelope를 받아 `status`, `summary`, `riskFlags`, `issueCandidates`, `generatedAnalysis`, `findings`, `fieldFindings`, `citations`, `recommendedActions`, `relatedInstitutions`, `caseStatus`를 JSON으로 반환한다.
 - `POST /chat/stream`: Spring `POST /api/ai/chat/stream` proxy가 서버 간 호출할 SSE endpoint를 제공하고, `plan`, `citation`, `action`, `answer_delta`, `final`, `error` event를 반환한다.
 - 필요하면 `X-AI-Internal-Token`을 검증하되, 브라우저가 아니라 Spring 서버 간 호출에서만 사용한다.
 
-Smoke 결과:
+현재 smoke 결과:
 
 - `GET http://localhost:8000/health` -> 200
-- `POST http://localhost:8000/document-analysis` -> 404
-- `POST http://localhost:8000/chat/stream` -> 404
+- `GET http://localhost:8000/ready` -> 200
+- `POST http://localhost:8000/document-analysis` -> 200 with sanitized fixtures
+- `POST http://localhost:8000/document-analysis` with blocked raw OCR fixture -> 400
+- `POST http://localhost:8000/chat/stream` -> SSE `plan`, `citation`, `action`, `answer_delta`, `final`
 
 ## AI Request Schema
 
