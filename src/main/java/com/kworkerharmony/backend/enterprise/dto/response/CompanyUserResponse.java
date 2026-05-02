@@ -1,6 +1,7 @@
 package com.kworkerharmony.backend.enterprise.dto.response;
 
 import com.kworkerharmony.backend.user.User;
+import java.time.LocalDate;
 
 public record CompanyUserResponse(
         Long id,
@@ -8,7 +9,14 @@ public record CompanyUserResponse(
         String name,
         String phoneNumber,
         String role,
-        String status
+        String userType,
+        String status,
+        String countryCode,
+        String languageCode,
+        LocalDate birthDate,
+        LocalDate visaExpiresAt,
+        Long enterpriseId,
+        String enterpriseName
 ) {
 
     public static CompanyUserResponse from(User user) {
@@ -18,7 +26,14 @@ public record CompanyUserResponse(
                 user.getName(),
                 user.getPhoneNumber(),
                 user.getRole().name(),
-                user.getStatus().name()
+                user.getUserType().name(),
+                user.getStatus().name(),
+                user.getCountryCode(),
+                user.getLanguageCode(),
+                user.getBirthDate(),
+                user.getVisaExpiresAt(),
+                user.getEnterprise() == null ? null : user.getEnterprise().getId(),
+                user.getEnterprise() == null ? null : user.getEnterprise().getName()
         );
     }
 }

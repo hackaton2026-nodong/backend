@@ -159,3 +159,49 @@ from (
 where not exists (
     select 1 from company_invite_codes where code = concat('KOHAMO-WORKER-', n)
 );
+
+update enterprises
+set name = '한국제조',
+    industry = '제조업 / 금속부품 가공',
+    address = '경기도 안산시 단원구 산단로 125, 한국제조',
+    updated_at = current_timestamp
+where business_number = '214-86-73951';
+
+update users
+set name = '김민수',
+    country_code = 'KR',
+    language_code = 'ko',
+    updated_at = current_timestamp
+where email = 'minsukim@hankukmanufacturing.co.kr';
+
+update users
+set country_code = case email
+        when 'minh.nguyen97@example.com' then 'VN'
+        when 'somchai.phanit95@example.com' then 'TH'
+        when 'maria.santos98@example.com' then 'PH'
+        when 'dewi.lestari96@example.com' then 'ID'
+        when 'ram.thapa94@example.com' then 'NP'
+        else country_code
+    end,
+    language_code = case email
+        when 'minh.nguyen97@example.com' then 'vi'
+        when 'somchai.phanit95@example.com' then 'th'
+        when 'maria.santos98@example.com' then 'fil'
+        when 'dewi.lestari96@example.com' then 'id'
+        when 'ram.thapa94@example.com' then 'ne'
+        else language_code
+    end,
+    updated_at = current_timestamp
+where email in (
+    'minh.nguyen97@example.com',
+    'somchai.phanit95@example.com',
+    'maria.santos98@example.com',
+    'dewi.lestari96@example.com',
+    'ram.thapa94@example.com'
+);
+
+update cases
+set industry = '제조업 / 금속부품 가공',
+    region = '경기도 안산시',
+    updated_at = current_timestamp
+where enterprise_id = (select id from enterprises where business_number = '214-86-73951');
