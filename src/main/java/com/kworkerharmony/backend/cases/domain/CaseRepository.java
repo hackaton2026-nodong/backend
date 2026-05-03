@@ -16,6 +16,14 @@ public interface CaseRepository extends JpaRepository<Case, String> {
             """)
     List<Case> findActiveCasesByUserId(Long userId, CaseStatus status);
 
+    @Query("""
+            select c from Case c
+            where c.status in :statuses
+            and (c.employer.id = :userId or c.worker.id = :userId)
+            order by c.createdAt desc
+            """)
+    List<Case> findCurrentCasesByUserId(Long userId, List<CaseStatus> statuses);
+
     long countByEmployerIdAndStatus(Long employerId, CaseStatus status);
 
     long countByWorkerIdAndStatus(Long workerId, CaseStatus status);

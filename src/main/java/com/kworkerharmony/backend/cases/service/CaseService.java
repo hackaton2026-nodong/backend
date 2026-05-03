@@ -29,7 +29,11 @@ public class CaseService {
 
     @Transactional(readOnly = true)
     public List<CaseResponse> getActiveCases(UserPrincipal userPrincipal) {
-        return caseRepository.findActiveCasesByUserId(userPrincipal.getId(), CaseStatus.ACTIVE).stream()
+        return caseRepository.findCurrentCasesByUserId(
+                        userPrincipal.getId(),
+                        List.of(CaseStatus.ACTIVE, CaseStatus.PENDING)
+                )
+                .stream()
                 .map(CaseResponse::from)
                 .toList();
     }

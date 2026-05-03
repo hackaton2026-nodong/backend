@@ -3,6 +3,8 @@ package com.kworkerharmony.backend.document;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kworkerharmony.backend.cases.domain.CaseRepository;
 import com.kworkerharmony.backend.cases.entity.Case;
 import com.kworkerharmony.backend.document.config.DocumentBlockchainProperties;
@@ -13,6 +15,7 @@ import com.kworkerharmony.backend.document.dto.request.CreatePaddleOcrExtraction
 import com.kworkerharmony.backend.document.dto.request.ReceivePaddleOcrResultRequest;
 import com.kworkerharmony.backend.document.dto.request.SubmitDocumentSignatureRequest;
 import com.kworkerharmony.backend.document.dto.response.DocumentAnalysisResponse;
+import com.kworkerharmony.backend.document.dto.response.DocumentAnalysisUploadResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentAnchorResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentExtractionResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentResponse;
@@ -140,6 +143,39 @@ public class DocumentService {
             document.markFailed();
             throw ex;
         }
+    }
+
+    @Transactional
+    public DocumentAnalysisUploadResponse uploadEmploymentContractAndAnalyze(
+            String caseId,
+            MultipartFile file,
+            String scenario,
+            LocalDate issuedAt,
+            LocalDate expiresAt,
+            UserPrincipal userPrincipal
+    ) {
+        String normalizedScenario = normalizeUploadScenario(scenario, file == null ? null : file.getOriginalFilename());
+        DocumentResponse uploaded = uploadDocument(
+                caseId,
+                file,
+                DocumentType.EMPLOYMENT_CONTRACT,
+                issuedAt,
+                expiresAt,
+                userPrincipal
+        );
+        Document document = documentRepository.findById(uploaded.id())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document not found"));
+        DocumentExtraction extraction = applyPaddleOcrExtraction(document, sampleOcrResultForScenario(normalizedScenario));
+        DocumentAnalysisResponse analysis = analyzeDocument(document.getId(), userPrincipal);
+        Document refreshedDocument = documentRepository.findById(document.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document not found"));
+        return new DocumentAnalysisUploadResponse(
+                normalizedScenario,
+                caseId,
+                toResponse(refreshedDocument),
+                DocumentExtractionResponse.from(extraction, objectMapper),
+                analysis
+        );
     }
 
     @Transactional
@@ -387,6 +423,67 @@ public class DocumentService {
         validateSanitizedPayload(correctedPayload);
         extraction.markCorrected(correctedPayload, DocumentCrypto.sha256Hex(correctedPayload));
         return DocumentExtractionResponse.from(extraction, objectMapper);
+    }
+
+    private String normalizeUploadScenario(String scenario, String originalFilename) {
+        if (scenario != null && scenario.equalsIgnoreCase("ILLEGAL")) {
+            return "ILLEGAL";
+        }
+        if (originalFilename != null && originalFilename.contains("위법")) {
+            return "ILLEGAL";
+        }
+        return "NORMAL";
+    }
+
+    private JsonNode sampleOcrResultForScenario(String scenario) {
+        List<String> lines = "ILLEGAL".equals(scenario)
+                ? List.of(
+                        "STANDARD EMPLOYMENT CONTRACT",
+                        "from(26/6/1 YY/MM/DD) to(27/5/31 YY/MM/DD)",
+                        "business category: manufacturing",
+                        "place of work: Ansan manufacturing factory",
+                        "job description: other user instructed tasks overall factory work",
+                        "working hours: 09:00 to 18:00",
+                        "(60) minutes per day",
+                        "monthly normal wages (2500000) won",
+                        "basic pay [monthly wage] (2500000) won",
+                        "average daily over time: 3 hours",
+                        "cost of accommodation paid by employee: 200000 won",
+                        "cost of meals paid by employee: 0 won"
+                )
+                : List.of(
+                        "STANDARD EMPLOYMENT CONTRACT",
+                        "from(26/6/1 YY/MM/DD) to(27/5/31 YY/MM/DD)",
+                        "business category: manufacturing",
+                        "place of work: Ansan manufacturing factory",
+                        "job description: metal parts assembly inspection packaging",
+                        "working hours: 09:00 to 18:00",
+                        "(60) minutes per day",
+                        "holidays: Sunday Legal holiday Paid",
+                        "monthly normal wages (2500000) won",
+                        "basic pay [monthly wage] (2500000) won",
+                        "every (last) day",
+                        "cost of accommodation paid by employee: 0 won"
+                );
+
+        ObjectNode root = objectMapper.createObjectNode();
+        ArrayNode layoutResults = root.putArray("layoutParsingResults");
+        ObjectNode pageResult = layoutResults.addObject();
+        pageResult.put("page", 1);
+        pageResult.putObject("markdown").put("text", String.join("\n", lines));
+        ArrayNode blocks = pageResult.putObject("prunedResult").putArray("parsing_res_list");
+        for (int index = 0; index < lines.size(); index++) {
+            ObjectNode block = blocks.addObject();
+            block.put("page", 1);
+            block.put("block_content", lines.get(index));
+            block.put("confidence", 0.98);
+            ArrayNode box = block.putArray("block_bbox");
+            box.add(0.08);
+            box.add(0.08 + (index * 0.04));
+            box.add(0.84);
+            box.add(0.03);
+        }
+        return root;
     }
 
     private DocumentResponse toResponse(Document document) {
