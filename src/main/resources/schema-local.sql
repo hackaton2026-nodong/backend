@@ -140,3 +140,40 @@ create table if not exists document_extractions (
     constraint fk_document_extractions_document
         foreign key (document_id) references documents (id)
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists consultations (
+    id bigint not null auto_increment,
+    diagnose varchar(1000) not null,
+    uid bigint not null,
+    created_at datetime(6) not null,
+    updated_at datetime(6) not null,
+    primary key (id),
+    constraint fk_consultations_user
+        foreign key (uid) references users (id)
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists consultation_sessions (
+    id varchar(36) not null,
+    title varchar(100) not null,
+    case_id varchar(36) null,
+    user_id bigint not null,
+    created_at datetime(6) not null,
+    updated_at datetime(6) not null,
+    primary key (id),
+    constraint fk_consultation_sessions_user
+        foreign key (user_id) references users (id),
+    constraint fk_consultation_sessions_case
+        foreign key (case_id) references cases (id)
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists consultation_messages (
+    id varchar(36) not null,
+    session_id varchar(36) not null,
+    role varchar(20) not null,
+    content varchar(4000) not null,
+    created_at datetime(6) not null,
+    updated_at datetime(6) not null,
+    primary key (id),
+    constraint fk_consultation_messages_session
+        foreign key (session_id) references consultation_sessions (id)
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
