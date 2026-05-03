@@ -18,7 +18,9 @@ public record AiChatStreamRequest(
         @Max(10)
         Integer topK,
         @Size(max = 12)
-        List<@Valid ChatHistoryMessage> history
+        List<@Valid ChatHistoryMessage> history,
+        @Valid
+        CaseContext caseContext
 ) {
     public record ChatHistoryMessage(
             @NotBlank
@@ -27,6 +29,22 @@ public record AiChatStreamRequest(
             @NotBlank
             @Size(max = 3000)
             String content
+    ) {
+    }
+
+    public record CaseContext(
+            @Size(max = 120)
+            String documentId,
+            @Size(max = 80)
+            String documentStatus,
+            @Size(max = 40)
+            String riskLevel,
+            @Size(max = 120)
+            String contractPeriod,
+            @Size(max = 80)
+            String analysisStatus,
+            @Size(max = 8)
+            List<@Size(max = 80) String> issueCandidates
     ) {
     }
 }

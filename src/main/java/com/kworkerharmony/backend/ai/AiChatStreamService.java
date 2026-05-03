@@ -59,12 +59,27 @@ public class AiChatStreamService {
         if (containsForbiddenHint(request.message())) {
             return false;
         }
-        if (request.history() == null) {
+        if (request.history() != null && request.history().stream()
+                .map(AiChatStreamRequest.ChatHistoryMessage::content)
+                .anyMatch(this::containsForbiddenHint)) {
+            return false;
+        }
+        return isSafeCaseContext(request.caseContext());
+    }
+
+    private boolean isSafeCaseContext(AiChatStreamRequest.CaseContext context) {
+        if (context == null) {
             return true;
         }
-        return request.history().stream()
-                .map(AiChatStreamRequest.ChatHistoryMessage::content)
-                .noneMatch(this::containsForbiddenHint);
+        if (containsForbiddenHint(context.documentId())
+                || containsForbiddenHint(context.documentStatus())
+                || containsForbiddenHint(context.riskLevel())
+                || containsForbiddenHint(context.contractPeriod())
+                || containsForbiddenHint(context.analysisStatus())) {
+            return false;
+        }
+        return context.issueCandidates() == null
+                || context.issueCandidates().stream().noneMatch(this::containsForbiddenHint);
     }
 
     private boolean containsForbiddenHint(String value) {
@@ -132,10 +147,28 @@ public class AiChatStreamService {
                 item.put("content", message.content());
             }
         }
+        if (request.caseContext() != null) {
+            ObjectNode context = root.putObject("caseContext");
+            putIfPresent(context, "documentId", request.caseContext().documentId());
+            putIfPresent(context, "documentStatus", request.caseContext().documentStatus());
+            putIfPresent(context, "riskLevel", request.caseContext().riskLevel());
+            putIfPresent(context, "contractPeriod", request.caseContext().contractPeriod());
+            putIfPresent(context, "analysisStatus", request.caseContext().analysisStatus());
+            ArrayNode issueCandidates = context.putArray("issueCandidates");
+            if (request.caseContext().issueCandidates() != null) {
+                request.caseContext().issueCandidates().forEach(issueCandidates::add);
+            }
+        }
         try {
             return objectMapper.writeValueAsString(root);
         } catch (JsonProcessingException ex) {
             throw new IllegalStateException("Invalid chat stream request", ex);
+        }
+    }
+
+    private void putIfPresent(ObjectNode node, String field, String value) {
+        if (value != null && !value.isBlank()) {
+            node.put(field, value);
         }
     }
 

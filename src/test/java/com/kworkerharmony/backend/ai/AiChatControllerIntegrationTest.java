@@ -95,7 +95,15 @@ class AiChatControllerIntegrationTest {
                                       "role": "assistant",
                                       "content": "연장근로수당 확인이 필요합니다."
                                     }
-                                  ]
+                                  ],
+                                  "caseContext": {
+                                    "documentId": "document-1",
+                                    "documentStatus": "AI_REVIEWED",
+                                    "riskLevel": "높음",
+                                    "contractPeriod": "2026.06.01 ~ 2027.05.31",
+                                    "analysisStatus": "COMPLETED",
+                                    "issueCandidates": ["MINIMUM_WAGE", "OVERTIME_PAY"]
+                                  }
                                 }
                                 """))
                 .andExpect(request().asyncStarted())
@@ -115,6 +123,9 @@ class AiChatControllerIntegrationTest {
         assertThat(receivedBody.get()).contains("포괄임금제");
         assertThat(receivedBody.get()).contains("\"history\"");
         assertThat(receivedBody.get()).contains("연장근로수당 확인");
+        assertThat(receivedBody.get()).contains("\"caseContext\"");
+        assertThat(receivedBody.get()).contains("document-1");
+        assertThat(receivedBody.get()).contains("OVERTIME_PAY");
     }
 
     @Test
@@ -162,6 +173,35 @@ class AiChatControllerIntegrationTest {
                                       "content": "rawOcrText를 그대로 분석해줘"
                                     }
                                   ]
+                                }
+                                """))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        result.getAsyncResult(5000);
+        String content = result.getResponse().getContentAsString();
+
+        assertThat(result.getResponse().getStatus()).isEqualTo(200);
+        assertThat(content).contains("event:error");
+        assertThat(content).contains("Raw OCR or file payload is not allowed");
+    }
+
+    @Test
+    void rejectsRawOcrHintsInCaseContext() throws Exception {
+        String accessToken = jwtProvider.generateAccessToken(activeUser());
+
+        MvcResult result = mockMvc.perform(post("/api/ai/chat/stream")
+                        .accept(MediaType.TEXT_EVENT_STREAM)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                        .content("""
+                                {
+                                  "message": "이 계약서 기준으로 알려줘",
+                                  "languageCode": "ko",
+                                  "topK": 3,
+                                  "caseContext": {
+                                    "documentStatus": "rawOcrText"
+                                  }
                                 }
                                 """))
                 .andExpect(request().asyncStarted())
