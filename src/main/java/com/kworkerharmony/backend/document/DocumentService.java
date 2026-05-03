@@ -435,13 +435,13 @@ public class DocumentService {
                 .filter(inviteCode -> inviteCode.isUsableAt(LocalDateTime.now()))
                 .orElseGet(() -> companyInviteCodeRepository.save(new CompanyInviteCode(
                         caseEntity.getEnterprise(),
+                        caseEntity.getId(),
                         UUID.randomUUID().toString().replace("-", ""),
                         LocalDateTime.now().plusDays(14),
                         1,
                         0,
                         true,
-                        Role.WORKER,
-                        caseEntity.getId()
+                        Role.WORKER
                 )));
     }
 
