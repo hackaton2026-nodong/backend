@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
 class HttpDocumentAiAnalysisAdapterTest {
@@ -97,6 +98,24 @@ class HttpDocumentAiAnalysisAdapterTest {
 
             assertThat(calls).hasValue(2);
             assertThat(result.summary()).contains("최저임금");
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void acceptsJsonBodyEvenWhenAiServerUsesOctetStreamContentType() throws Exception {
+        JsonNode request = fixture("document-analysis-request-employment-contract.json");
+        String responseJson = fixtureText("document-analysis-response-completed-minimum.json");
+        HttpServer server = startServer(exchange -> respond(exchange, 200, responseJson, MediaType.APPLICATION_OCTET_STREAM_VALUE));
+
+        try {
+            HttpDocumentAiAnalysisAdapter adapter = adapter(properties(server, true, "", 0));
+
+            AiAnalysisResult result = adapter.analyze(commandFrom(request));
+
+            assertThat(result.summary()).contains("최저임금");
+            assertThat(result.riskFlags()).contains("MINIMUM_WAGE_REVIEW_REQUIRED");
         } finally {
             server.stop(0);
         }
@@ -183,8 +202,12 @@ class HttpDocumentAiAnalysisAdapterTest {
     }
 
     private void respond(HttpExchange exchange, int status, String body) throws IOException {
+        respond(exchange, status, body, MediaType.APPLICATION_JSON_VALUE);
+    }
+
+    private void respond(HttpExchange exchange, int status, String body, String contentType) throws IOException {
         byte[] response = body.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.getResponseHeaders().set("Content-Type", contentType);
         exchange.sendResponseHeaders(status, response.length);
         exchange.getResponseBody().write(response);
     }

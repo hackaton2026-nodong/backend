@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kworkerharmony.backend.document.config.DocumentAiProperties;
 import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort;
 import com.kworkerharmony.backend.document.support.DocumentCrypto;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
@@ -79,7 +80,7 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
         int attempts = properties.maxRetries() + 1;
         for (int attempt = 1; attempt <= attempts; attempt += 1) {
             try {
-                return restClient.post()
+                byte[] body = restClient.post()
                         .uri(properties.endpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -90,7 +91,8 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
                         })
                         .body(requestJson)
                         .retrieve()
-                        .body(String.class);
+                        .body(byte[].class);
+                return body == null ? "" : new String(body, StandardCharsets.UTF_8);
             } catch (RestClientResponseException ex) {
                 if (!shouldRetry(ex.getStatusCode(), attempt, attempts)) {
                     throw new IllegalStateException("AI analysis request failed with HTTP " + ex.getStatusCode().value(), ex);
