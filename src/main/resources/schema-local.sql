@@ -22,6 +22,47 @@ alter table documents
 alter table documents
     add column analyzed_at datetime(6) null;
 
+alter table document_analysis_results
+    add column issue_candidates text null;
+
+alter table document_analysis_results
+    add column generated_analysis text null;
+
+alter table document_analysis_results
+    add column findings text null;
+
+alter table document_analysis_results
+    add column field_findings text null;
+
+alter table document_analysis_results
+    add column citations text null;
+
+alter table document_analysis_results
+    add column recommended_actions text null;
+
+alter table document_analysis_results
+    add column related_institutions text null;
+
+alter table document_analysis_results
+    add column case_status text null;
+
+alter table document_analysis_results
+    add column detail_json longtext null;
+
+alter table document_analysis_results
+    add column failed_reason text null;
+
+alter table document_analysis_results
+    modify column risk_flags longtext null,
+    modify column issue_candidates longtext null,
+    modify column generated_analysis longtext null,
+    modify column findings longtext null,
+    modify column field_findings longtext null,
+    modify column citations longtext null,
+    modify column recommended_actions longtext null,
+    modify column related_institutions longtext null,
+    modify column detail_json longtext null;
+
 alter table company_invite_codes
     add column case_id varchar(36) null;
 

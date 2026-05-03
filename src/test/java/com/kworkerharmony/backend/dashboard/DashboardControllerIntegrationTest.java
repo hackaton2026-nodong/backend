@@ -130,7 +130,7 @@ class DashboardControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.summaryCards.length()").value(4))
                 .andExpect(jsonPath("$.data.summaryCards[0].key").value("risks"))
                 .andExpect(jsonPath("$.data.todayActions.length()").value(3))
-                .andExpect(jsonPath("$.data.recommendationSlot.title").value("추천 기관 · 교육"))
+                .andExpect(jsonPath("$.data.recommendationSlot.title").value("추천 교육장"))
                 .andExpect(jsonPath("$.data.noticePanel.severity").value("high"));
     }
 

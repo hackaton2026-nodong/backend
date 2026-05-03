@@ -19,7 +19,7 @@ public class PaddleOcrEmploymentContractExtractor {
     public static final String SCHEMA_VERSION = "employment-contract-v1";
     public static final String SOURCE_ENGINE = "PADDLE_OCR";
 
-    private static final Pattern CONTRACT_PERIOD = Pattern.compile("(\\d{2})년\\s*(\\d{1,2})월\\s*(\\d{1,2})일\\s*~\\s*(\\d{2})년\\s*(\\d{1,2})월\\s*(\\d{1,2})일");
+    private static final Pattern CONTRACT_PERIOD = Pattern.compile("(\\d{2})\\s*년\\s*(\\d{1,2})\\s*월\\s*(\\d{1,2})\\s*일\\s*~\\s*(\\d{2})\\s*년\\s*(\\d{1,2})\\s*월\\s*(\\d{1,2})\\s*일");
     private static final Pattern CONTRACT_PERIOD_EN = Pattern.compile("from\\((\\d{2})/(\\d{1,2})/(\\d{1,2})\\s*YY/MM/DD\\)\\s*to\\((\\d{2})/(\\d{1,2})/(\\d{1,2})\\s*YY/MM/DD\\)", Pattern.CASE_INSENSITIVE);
     private static final Pattern WORKING_HOURS_RANGE = Pattern.compile("(\\d{1,2})\\s*(?::|시|時|人)\\s*(\\d{1,2})\\s*(?:분|是)?\\s*\\)?\\s*(?:~|to\\s*\\(?|-)\\s*\\(?\\s*(\\d{1,2})\\s*(?::|시|時|人)\\s*(\\d{1,2})\\s*(?:분|是)?", Pattern.CASE_INSENSITIVE);
     private static final Pattern OVERTIME = Pattern.compile("1일 평균 시간외 근로시간:\\s*(\\d+)시간|average daily over time:\\s*(\\d+)\\s*hours", Pattern.CASE_INSENSITIVE);

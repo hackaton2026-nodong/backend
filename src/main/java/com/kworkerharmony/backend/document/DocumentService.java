@@ -22,13 +22,13 @@ import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort;
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort.AnchorCommand;
 import com.kworkerharmony.backend.document.port.DocumentAnchorRelayerPort.AnchorReceipt;
 import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort;
-import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort.AiAnalysisCommand;
 import com.kworkerharmony.backend.document.port.DocumentAiAnalysisPort.AiAnalysisResult;
 import com.kworkerharmony.backend.document.port.DocumentHashPort;
 import com.kworkerharmony.backend.document.port.DocumentOcrPort;
 import com.kworkerharmony.backend.document.port.DocumentOcrPort.OcrCommand;
 import com.kworkerharmony.backend.document.port.FileStoragePort;
 import com.kworkerharmony.backend.document.port.FileStoragePort.StoredFile;
+import com.kworkerharmony.backend.document.support.DocumentAiPayloadBuilder;
 import com.kworkerharmony.backend.document.support.DocumentCrypto;
 import com.kworkerharmony.backend.document.support.DocumentTypedDataFactory;
 import com.kworkerharmony.backend.document.support.EmploymentContractExtractionPayload;
@@ -76,6 +76,7 @@ public class DocumentService {
     private final DocumentAnchorRelayerPort anchorRelayerPort;
     private final DocumentAiAnalysisPort documentAiAnalysisPort;
     private final DocumentOcrPort documentOcrPort;
+    private final DocumentAiPayloadBuilder documentAiPayloadBuilder;
     private final PaddleOcrEmploymentContractExtractor paddleOcrEmploymentContractExtractor;
     private final ObjectMapper objectMapper;
 
@@ -300,18 +301,28 @@ public class DocumentService {
         DocumentAnalysisResult result = documentAnalysisResultRepository.findByDocumentId(document.getId())
                 .orElseGet(() -> documentAnalysisResultRepository.save(new DocumentAnalysisResult(document.getId())));
         try {
-            AiAnalysisResult analysisResult = documentAiAnalysisPort.analyze(aiAnalysisCommand(document, extraction));
+            AiAnalysisResult analysisResult = documentAiAnalysisPort.analyze(documentAiPayloadBuilder.build(document, extraction));
             result.markCompleted(
                     analysisResult.inputHash(),
                     analysisResult.analysisResultHash(),
                     analysisResult.summary(),
-                    analysisResult.riskFlags()
+                    analysisResult.riskFlags(),
+                    analysisResult.issueCandidates(),
+                    analysisResult.generatedAnalysis(),
+                    analysisResult.findings(),
+                    analysisResult.fieldFindings(),
+                    analysisResult.citations(),
+                    analysisResult.recommendedActions(),
+                    analysisResult.relatedInstitutions(),
+                    analysisResult.caseStatus(),
+                    analysisResult.detailJson(),
+                    analysisResult.failedReason()
             );
             markAnalyzedWithoutOverwritingOnchainTerminalState(document);
         } catch (RuntimeException ex) {
             result.markFailed(truncate(ex.getMessage(), 1000));
         }
-        return DocumentAnalysisResponse.from(result);
+        return DocumentAnalysisResponse.from(result, document, objectMapper);
     }
 
     @Transactional(readOnly = true)
@@ -319,7 +330,7 @@ public class DocumentService {
         Document document = getAccessibleDocument(documentId, userPrincipal);
         DocumentAnalysisResult result = documentAnalysisResultRepository.findByDocumentId(document.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Document analysis not found"));
-        return DocumentAnalysisResponse.from(result);
+        return DocumentAnalysisResponse.from(result, document, objectMapper);
     }
 
     @Transactional
@@ -549,36 +560,6 @@ public class DocumentService {
                 || extraction.getAiPayloadHash() == null
                 || extraction.getAiPayloadHash().isBlank()) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Document extraction requires correction");
-        }
-    }
-
-    private AiAnalysisCommand aiAnalysisCommand(Document document, DocumentExtraction extraction) {
-        String payloadJson = extraction.getCorrectedPayload() == null || extraction.getCorrectedPayload().isBlank()
-                ? extraction.getExtractedPayload()
-                : extraction.getCorrectedPayload();
-        JsonNode payload = readJson(payloadJson);
-        String aiPayloadHash = DocumentCrypto.sha256Hex(canonicalJson(payload));
-        return new AiAnalysisCommand(
-                DocumentCrypto.sha256Hex("analysis-request|" + document.getId() + "|" + aiPayloadHash),
-                document.getId(),
-                document.getCaseId(),
-                document.getSha256Hash(),
-                document.getDocumentType(),
-                extraction.getId(),
-                extraction.getStatus().name(),
-                extraction.getSchemaVersion(),
-                extraction.getSourceEngine(),
-                extraction.getSourceResultHash(),
-                aiPayloadHash,
-                payload
-        );
-    }
-
-    private JsonNode readJson(String value) {
-        try {
-            return objectMapper.readTree(value);
-        } catch (JsonProcessingException ex) {
-            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Invalid extraction payload JSON");
         }
     }
 
