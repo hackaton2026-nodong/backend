@@ -6,8 +6,7 @@ import com.kworkerharmony.backend.auth.dto.request.ReissueRequest;
 import com.kworkerharmony.backend.auth.dto.request.SignupRequest;
 import com.kworkerharmony.backend.auth.dto.response.LoginResponse;
 import com.kworkerharmony.backend.auth.dto.response.ReissueResponse;
-import com.kworkerharmony.backend.cases.domain.CaseRepository;
-import com.kworkerharmony.backend.cases.entity.Case;
+import com.kworkerharmony.backend.cases.service.CaseService;
 import com.kworkerharmony.backend.enterprise.CompanyInviteCode;
 import com.kworkerharmony.backend.enterprise.CompanyInviteCodeRepository;
 import com.kworkerharmony.backend.enterprise.Enterprise;
@@ -37,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final CaseRepository caseRepository;
+    private final CaseService caseService;
     private final EnterpriseRepository enterpriseRepository;
     private final CompanyInviteCodeRepository companyInviteCodeRepository;
     private final CountryCatalog countryCatalog;
@@ -74,7 +73,7 @@ public class AuthService {
         );
 
         userRepository.save(user);
-        connectInviteCaseIfNeeded(signupTarget.inviteCode(), user);
+        caseService.connectWorkerFromInviteCode(signupTarget.inviteCode(), user);
     }
 
     private SignupTarget resolveSignupTarget(SignupRequest request) {
@@ -171,24 +170,6 @@ public class AuthService {
             UserType userType,
             CompanyInviteCode inviteCode
     ) {
-    }
-
-    private void connectInviteCaseIfNeeded(CompanyInviteCode inviteCode, User user) {
-        if (inviteCode == null || inviteCode.getCaseId() == null || inviteCode.getCaseId().isBlank()) {
-            return;
-        }
-        if (inviteCode.getDefaultRole() != Role.WORKER || user.getUserType() != UserType.WORKER) {
-            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Case invite code can only connect worker users");
-        }
-        Case caseEntity = caseRepository.findById(inviteCode.getCaseId())
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Case not found"));
-        if (!caseEntity.getEnterprise().getId().equals(inviteCode.getEnterprise().getId())) {
-            throw new CustomException(ErrorCode.ACCESS_DENIED, "Invite code belongs to another company");
-        }
-        if (caseEntity.getWorker() != null && !caseEntity.getWorker().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Case already has a worker");
-        }
-        caseEntity.connectWorker(user);
     }
 
     private void validateCountryCode(String countryCode) {

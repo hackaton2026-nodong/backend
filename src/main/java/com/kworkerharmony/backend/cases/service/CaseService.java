@@ -6,6 +6,7 @@ import com.kworkerharmony.backend.cases.domain.dto.request.ConnectCaseMembersReq
 import com.kworkerharmony.backend.cases.domain.dto.response.CaseResponse;
 import com.kworkerharmony.backend.cases.domain.CaseStatus;
 import com.kworkerharmony.backend.cases.entity.Case;
+import com.kworkerharmony.backend.enterprise.CompanyInviteCode;
 import com.kworkerharmony.backend.enterprise.Enterprise;
 import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
@@ -105,6 +106,25 @@ public class CaseService {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "User is not assigned to a company");
         }
         return user.getEnterprise();
+    }
+
+    @Transactional
+    public void connectWorkerFromInviteCode(CompanyInviteCode inviteCode, User user) {
+        if (inviteCode == null || inviteCode.getCaseId() == null || inviteCode.getCaseId().isBlank()) {
+            return;
+        }
+        if (inviteCode.getDefaultRole() != Role.WORKER || user.getUserType() != UserType.WORKER) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Case invite code can only connect worker users");
+        }
+        Case caseEntity = caseRepository.findById(inviteCode.getCaseId())
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "Case not found"));
+        if (!caseEntity.getEnterprise().getId().equals(inviteCode.getEnterprise().getId())) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED, "Invite code belongs to another company");
+        }
+        if (caseEntity.getWorker() != null && !caseEntity.getWorker().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "Case already has a worker");
+        }
+        caseEntity.connectWorker(user);
     }
 
     private void validateCompanyAccess(Case caseEntity, User user) {
