@@ -37,9 +37,6 @@ import com.kworkerharmony.backend.document.support.DocumentTypedDataFactory;
 import com.kworkerharmony.backend.document.support.EmploymentContractExtractionPayload;
 import com.kworkerharmony.backend.document.support.PaddleOcrEmploymentContractExtractor;
 import com.kworkerharmony.backend.enterprise.Enterprise;
-import com.kworkerharmony.backend.enterprise.CompanyInviteCode;
-import com.kworkerharmony.backend.enterprise.CompanyInviteCodeRepository;
-import com.kworkerharmony.backend.enterprise.dto.response.CompanyInviteCodeResponse;
 import com.kworkerharmony.backend.global.exception.CustomException;
 import com.kworkerharmony.backend.global.exception.ErrorCode;
 import com.kworkerharmony.backend.global.security.UserPrincipal;
@@ -53,7 +50,6 @@ import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +68,6 @@ public class DocumentService {
     private final DocumentAnchorRepository documentAnchorRepository;
     private final DocumentAnalysisResultRepository documentAnalysisResultRepository;
     private final DocumentExtractionRepository documentExtractionRepository;
-    private final CompanyInviteCodeRepository companyInviteCodeRepository;
     private final DocumentBlockchainProperties blockchainProperties;
     private final DocumentOcrProperties ocrProperties;
     private final DocumentTypedDataFactory typedDataFactory;
@@ -137,8 +132,7 @@ public class DocumentService {
             document.markHashed(documentHashPort.hash(storedFile.absolutePath()));
             createPendingExtraction(document);
             requestOcr(document);
-            CompanyInviteCode inviteCode = createWorkerInviteCodeIfNeeded(caseEntity, document);
-            return toResponse(document, inviteCode);
+            return toResponse(document);
         } catch (RuntimeException ex) {
             document.markFailed();
             throw ex;
@@ -490,14 +484,6 @@ public class DocumentService {
         return DocumentResponse.from(document, fileStoragePort.exists(document.getStorageKey()));
     }
 
-    private DocumentResponse toResponse(Document document, CompanyInviteCode inviteCode) {
-        return DocumentResponse.from(
-                document,
-                fileStoragePort.exists(document.getStorageKey()),
-                inviteCode == null ? null : CompanyInviteCodeResponse.from(inviteCode)
-        );
-    }
-
     private void createPendingExtraction(Document document) {
         if (!DocumentType.EMPLOYMENT_CONTRACT.name().equals(document.getDocumentType())) {
             return;
@@ -532,25 +518,6 @@ public class DocumentService {
         }
         return ocrProperties.callbackBaseUrl().replaceAll("/+$", "")
                 + "/api/internal/documents/" + documentId + "/ocr-result";
-    }
-
-    private CompanyInviteCode createWorkerInviteCodeIfNeeded(Case caseEntity, Document document) {
-        if (document.getDocumentType() == null || !document.getDocumentType().equals(DocumentType.EMPLOYMENT_CONTRACT.name())) {
-            return null;
-        }
-        return companyInviteCodeRepository
-                .findFirstByCaseIdAndDefaultRoleAndActiveTrueOrderByCreatedAtDesc(caseEntity.getId(), Role.WORKER)
-                .filter(inviteCode -> inviteCode.isUsableAt(LocalDateTime.now()))
-                .orElseGet(() -> companyInviteCodeRepository.save(new CompanyInviteCode(
-                        caseEntity.getEnterprise(),
-                        caseEntity.getId(),
-                        UUID.randomUUID().toString().replace("-", ""),
-                        LocalDateTime.now().plusDays(14),
-                        1,
-                        0,
-                        true,
-                        Role.WORKER
-                )));
     }
 
     private DocumentExtraction applyPaddleOcrExtraction(Document document, JsonNode ocrResult) {
