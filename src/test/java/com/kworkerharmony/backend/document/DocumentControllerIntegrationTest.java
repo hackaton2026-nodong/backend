@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kworkerharmony.backend.cases.domain.CaseStatus;
 import com.kworkerharmony.backend.cases.domain.CaseRepository;
@@ -27,6 +28,7 @@ import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserRepository;
 import com.kworkerharmony.backend.user.UserStatus;
 import com.kworkerharmony.backend.user.UserType;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,6 +137,125 @@ class DocumentControllerIntegrationTest {
         mockMvc.perform(get("/document-upload-test.html"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("step-upload")));
+    }
+
+    @Test
+    void signatureRequestSubmitAndAnchorDocument() throws Exception {
+        Enterprise company = enterpriseRepository.save(new Enterprise(
+                "Harmony Chain Co",
+                "123-45-67891",
+                "Manufacturing",
+                "KR",
+                "ko",
+                EnterpriseStatus.ACTIVE
+        ));
+        User employer = userRepository.save(new User(
+                "chain-employer@example.com",
+                "encoded",
+                "Employer",
+                Role.EMPLOYER,
+                UserType.EMPLOYER,
+                UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        User worker = userRepository.save(new User(
+                "chain-worker@example.com",
+                "encoded",
+                "Worker",
+                Role.WORKER,
+                UserType.WORKER,
+                UserStatus.ACTIVE,
+                "KR",
+                "ko",
+                company
+        ));
+        Case caseEntity = caseRepository.save(new Case(
+                company,
+                employer,
+                worker,
+                CaseStatus.ACTIVE,
+                "Manufacturing",
+                "Seoul"
+        ));
+        String accessToken = jwtProvider.generateAccessToken(employer);
+
+        String uploadResponse = mockMvc.perform(multipart("/api/cases/{caseId}/documents", caseEntity.getId())
+                        .file(new MockMultipartFile("file", "contract.pdf", "application/pdf", "sample-pdf".getBytes()))
+                        .param("documentType", DocumentType.EMPLOYMENT_CONTRACT.name())
+                        .param("issuedAt", "2026-01-01")
+                        .param("expiresAt", "2027-01-01")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value(DocumentStatus.HASHED.name()))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String documentId = objectMapper.readTree(uploadResponse).path("data").path("id").asText();
+
+        String signatureRequestResponse = mockMvc.perform(get("/api/documents/{documentId}/signature-request", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.documentId").value(documentId))
+                .andExpect(jsonPath("$.data.expectedChainId").value(11155111))
+                .andExpect(jsonPath("$.data.message.nonce").isNotEmpty())
+                .andExpect(jsonPath("$.data.typedDataHash").isNotEmpty())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        JsonNode signatureRequest = objectMapper.readTree(signatureRequestResponse).path("data");
+        String nonce = signatureRequest.path("message").path("nonce").asText();
+        long expectedChainId = signatureRequest.path("expectedChainId").asLong();
+        String typedDataHash = signatureRequest.path("typedDataHash").asText();
+        String walletAddress = "0x1111111111111111111111111111111111111111";
+        String signature = "0x" + "ab".repeat(65);
+
+        String signatureResponse = mockMvc.perform(post("/api/documents/{documentId}/signatures", documentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "walletAddress", walletAddress,
+                                "chainId", expectedChainId,
+                                "signature", signature,
+                                "typedDataHash", typedDataHash,
+                                "nonce", nonce
+                        )))
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.documentId").value(documentId))
+                .andExpect(jsonPath("$.data.walletAddress").value(walletAddress))
+                .andExpect(jsonPath("$.data.status").value(DocumentSignatureStatus.SIGNED.name()))
+                .andExpect(jsonPath("$.data.signedAt").isNotEmpty())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String signatureId = objectMapper.readTree(signatureResponse).path("data").path("signatureId").asText();
+
+        String anchorResponse = mockMvc.perform(post("/api/documents/{documentId}/anchor", documentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("signatureId", signatureId)))
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.documentId").value(documentId))
+                .andExpect(jsonPath("$.data.status").value(DocumentStatus.ANCHORED_ON_CHAIN.name()))
+                .andExpect(jsonPath("$.data.txHash").isNotEmpty())
+                .andExpect(jsonPath("$.data.blockNumber").value(1))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        JsonNode anchor = objectMapper.readTree(anchorResponse).path("data");
+
+        mockMvc.perform(get("/api/documents/{documentId}/anchor", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.anchorId").value(anchor.path("anchorId").asText()))
+                .andExpect(jsonPath("$.data.txHash").value(anchor.path("txHash").asText()));
+
+        mockMvc.perform(get("/api/documents/{documentId}", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value(DocumentStatus.ANCHORED_ON_CHAIN.name()))
+                .andExpect(jsonPath("$.data.anchoredTxId").value(anchor.path("txHash").asText()));
     }
 
     @Test
