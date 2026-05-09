@@ -4,7 +4,7 @@
 
 ## Scope
 
-현재 구현은 PaddleOCR worker callback을 통해 `document_extractions`에 구조화 계약 필드를 저장한다. `POST /api/documents/{documentId}/analysis`는 아직 placeholder다. 이 문서는 저장된 extraction payload를 AI 레이어와 연결할 때 지켜야 할 입력/출력 규격이다.
+현재 구현은 PaddleOCR worker callback을 통해 `document_extractions`에 구조화 계약 필드를 저장한다. `POST /api/documents/{documentId}/analysis`는 저장된 sanitized extraction payload를 FastAPI `DOCUMENT_AI_ENDPOINT`로 전송한다. `DOCUMENT_AI_ENABLED=false` 또는 endpoint 미설정이면 완료 placeholder를 만들지 않고 `document_analysis_results.status=FAILED`와 HTTP 503으로 표면화한다.
 
 업로드 후 공통 기반은 아래와 같다.
 
@@ -45,7 +45,8 @@ HASHED document
 4. sanitizer가 개인정보, 사업장 식별정보, 상세주소, 문서번호, 계좌번호 등 식별 가능 값을 제거하거나 마스킹한다.
 5. 추출기는 허용된 근로조건 필드와 근거 참조만 `document_extractions.extracted_payload`에 저장한다.
 6. 백엔드는 저장된 extraction payload에 envelope를 씌워 AI 레이어 endpoint로 `POST`한다.
-7. AI response를 검증한 뒤 `document_analysis_results`와 후속 분석 테이블에 저장한다.
+7. 백엔드는 `outputRequest.includeGeneratedAnalysis=true`로 자연어 분석 생성을 요청한다. `generatedAnalysis.status=FAILED`는 구조화 분석 실패가 아니므로 최상위 `status=COMPLETED`이면 함께 저장한다.
+8. AI response를 검증한 뒤 `document_analysis_results`와 후속 분석 테이블에 저장한다.
 
 ## Field Policy
 

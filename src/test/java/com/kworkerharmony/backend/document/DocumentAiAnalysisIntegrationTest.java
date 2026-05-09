@@ -1,6 +1,7 @@
 package com.kworkerharmony.backend.document;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
@@ -143,6 +144,60 @@ class DocumentAiAnalysisIntegrationTest {
                 .getContentAsString();
 
         assertThat(getResponse).doesNotContain("layoutParsingResults", "rawOcrText", "markdown");
+    }
+
+    @Test
+    void analyzeDocumentReturnsFailureResponseAndPersistsFailedAnalysisWhenAiFails() throws Exception {
+        TestCase testCase = activeCase();
+        String accessToken = jwtProvider.generateAccessToken(testCase.employer());
+
+        String uploadResponse = mockMvc.perform(multipart("/api/cases/{caseId}/documents", testCase.caseEntity().getId())
+                        .file(new MockMultipartFile("file", "contract.pdf", "application/pdf", "sample-pdf".getBytes()))
+                        .param("documentType", DocumentType.EMPLOYMENT_CONTRACT.name())
+                        .param("issuedAt", "2026-06-01")
+                        .param("expiresAt", "2027-05-31")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String documentId = objectMapper.readTree(uploadResponse).path("data").path("id").asText();
+
+        mockMvc.perform(post("/api/documents/{documentId}/extraction/paddle-ocr", documentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "ocrResult": {
+                                    "layoutParsingResults": [
+                                      {
+                                        "markdown": {
+                                          "text": "표준근로계약서 26년 06월 01일 ~ 27년 05월 31일 09시 00분 ~ 18시 00분 5. 휴게시간 1일 60분 월 통상임금 ( 2,500,000 )원"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                                """)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value(DocumentExtractionStatus.EXTRACTED.name()));
+
+        when(documentAiAnalysisPort.analyze(any()))
+                .thenThrow(new IllegalStateException("AI analysis is disabled or DOCUMENT_AI_ENDPOINT is not configured"));
+
+        mockMvc.perform(post("/api/documents/{documentId}/analysis", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("AI_503"))
+                .andExpect(jsonPath("$.error.message").value("AI analysis is disabled or DOCUMENT_AI_ENDPOINT is not configured"));
+
+        mockMvc.perform(get("/api/documents/{documentId}/analysis", documentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value(DocumentAnalysisStatus.FAILED.name()))
+                .andExpect(jsonPath("$.data.failedReason").value("AI analysis is disabled or DOCUMENT_AI_ENDPOINT is not configured"));
     }
 
     private DocumentAiAnalysisPort.AiAnalysisResult aiResult(String documentId) throws Exception {

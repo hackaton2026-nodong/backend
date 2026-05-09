@@ -76,7 +76,7 @@ src/main/java/com/kworkerharmony/backend
 - SHA-256 해시 생성
 - 문서 해시 기반 EIP-712 서명 요청/저장 MVP
 - Stub relayer 기반 문서 앵커링 MVP
-- 오프체인 분석 결과 placeholder 저장
+- FastAPI 기반 오프체인 AI 분석 결과 저장
 
 문서 업로드와 앵커링 MVP에서 현재 확인 가능한 주요 상태 전이는 아래와 같습니다.
 
@@ -95,7 +95,7 @@ src/main/java/com/kworkerharmony/backend
 - 지갑 서명 요청/제출 API와 Stub 앵커링 API는 동작합니다.
 - 실제 Sepolia 트랜잭션 전송은 아직 구현하지 않았습니다.
 - `local` 프로필은 Docker Compose의 PaddleOCR worker로 업로드 후 OCR callback과 필드 추출 저장까지 검증할 수 있습니다.
-- 오프체인 분석 API는 placeholder이며 실제 AI 호출은 아직 구현하지 않았습니다.
+- 오프체인 분석 API는 `DOCUMENT_AI_ENABLED=true`와 `DOCUMENT_AI_ENDPOINT`가 설정된 경우 FastAPI에 sanitized extraction payload를 전송합니다. 비활성 또는 endpoint 미설정 상태는 완료 placeholder로 저장하지 않고 `FAILED` 분석과 HTTP 503으로 반환합니다.
 - 오프체인 분석에서 원문 파일과 필터링 전 OCR 결과는 AI 레이어로 전달하지 않으며, 세부 입력 규격은 `docs/offchain-analysis-contract.md`를 따릅니다.
 - 실제 PaddleOCR 전환 중 겪은 worker 분리, warm-up, 모델 선택, runtime 오류, 추출기 일반화 이슈는 `docs/ocr-troubleshooting-notes.md`에 작업 노트로 정리했습니다.
 - 정적 테스트 페이지는 MVP 검증용이며, 실제 제품 UX에서는 업로드 후 분석 자동 시작과 서명 후 앵커링 자동 진행으로 분리하는 것이 좋습니다.
@@ -191,7 +191,7 @@ Swagger UI:
 - 업로드 파일이 `storage/documents` 아래 저장되는지
 - 업로드 응답에서 `stored=true`, `status=HASHED`가 반환되는지
 - `document-upload-test.html`에서 문서 업로드 후 OCR 대기, 지갑 서명, Stub 앵커링이 연쇄 실행되는지
-- `분석 요청`으로 OCR 추출 payload hash 기반 placeholder 분석 결과가 저장되는지
+- `분석 요청`으로 sanitized extraction payload 기반 FastAPI 분석 결과가 저장되는지. AI 비활성/미설정이면 `FAILED` 분석과 HTTP 503이 반환되는지
 
 ## 예시 시나리오
 
@@ -240,7 +240,7 @@ Swagger UI:
 6. MetaMask를 Sepolia로 맞춘 뒤 `http://localhost:8080/document-upload-test.html` 접속
 7. 근로계약서 PDF를 선택하고 `업로드 및 서명 시작`을 누른 뒤 지갑 연결/서명 팝업 승인
 8. 화면에서 업로드, OCR, 서명, Stub 앵커링 단계가 완료되는지 확인
-9. `분석 요청`으로 OCR 추출 payload hash 기반 placeholder 분석 저장 확인
+9. `분석 요청`으로 FastAPI 분석 저장을 확인한다. 로컬에서 AI endpoint를 켜지 않은 경우 HTTP 503과 `FAILED` 분석 기록을 확인한다.
 10. `storage/documents` 아래 실제 파일 생성 여부 확인
 
 ## 참고 문서

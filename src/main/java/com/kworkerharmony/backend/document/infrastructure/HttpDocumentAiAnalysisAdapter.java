@@ -61,7 +61,7 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
     public AiAnalysisResult analyze(AiAnalysisCommand command) {
         String requestJson = jsonBody(command);
         if (!properties.enabled() || properties.endpoint().isBlank()) {
-            return placeholderResult(command, requestJson);
+            throw new IllegalStateException("AI analysis is disabled or DOCUMENT_AI_ENDPOINT is not configured");
         }
 
         String responseJson = postWithRetry(requestJson);
@@ -110,32 +110,6 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
 
     private boolean shouldRetry(HttpStatusCode statusCode, int attempt, int attempts) {
         return attempt < attempts && statusCode.is5xxServerError();
-    }
-
-    private AiAnalysisResult placeholderResult(AiAnalysisCommand command, String requestJson) {
-        String inputHash = DocumentCrypto.sha256Hex(requestJson);
-        String canonical = "placeholder-analysis|" + command.documentId() + "|" + inputHash;
-        String summary = "Placeholder analysis result for document " + command.documentId();
-        ObjectNode detail = objectMapper.createObjectNode();
-        detail.put("status", "COMPLETED");
-        detail.put("summary", summary);
-        detail.putArray("riskFlags");
-        return new AiAnalysisResult(
-                inputHash,
-                DocumentCrypto.sha256Hex(canonical),
-                summary,
-                "[]",
-                "[]",
-                "{\"status\":\"SKIPPED\",\"reason\":\"AI integration is disabled\"}",
-                "[]",
-                "[]",
-                "[]",
-                "[]",
-                "[]",
-                null,
-                writeJson(detail),
-                null
-        );
     }
 
     private AiAnalysisResult parseResponse(AiAnalysisCommand command, String requestJson, String responseJson) {
@@ -209,7 +183,7 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
         try {
             return objectMapper.writeValueAsString(node);
         } catch (JsonProcessingException ex) {
-            throw new IllegalStateException("Failed to serialize AI analysis placeholder", ex);
+            throw new IllegalStateException("Failed to serialize AI analysis response", ex);
         }
     }
 
@@ -230,7 +204,7 @@ public class HttpDocumentAiAnalysisAdapter implements DocumentAiAnalysisPort {
         root.set("payload", command.payload());
         ObjectNode outputRequest = root.putObject("outputRequest");
         outputRequest.put("languageCode", "ko");
-        outputRequest.put("includeGeneratedAnalysis", false);
+        outputRequest.put("includeGeneratedAnalysis", true);
         try {
             return objectMapper.writeValueAsString(root);
         } catch (JsonProcessingException ex) {

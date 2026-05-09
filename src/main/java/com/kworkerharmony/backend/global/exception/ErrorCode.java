@@ -9,6 +9,7 @@ public enum ErrorCode {
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "AUTH_403", "Access denied"),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON_404", "Resource not found"),
     DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "COMMON_409", "Resource already exists"),
+    AI_ANALYSIS_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "AI_503", "AI analysis failed"),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "AUTH_401_1", "Invalid email or password"),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_401_2", "Invalid token"),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "AUTH_401_3", "Refresh token not found"),

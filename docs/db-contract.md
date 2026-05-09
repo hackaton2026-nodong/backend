@@ -201,7 +201,7 @@ Enum: `DocumentAnchorStatus = PENDING, ANCHORED, FAILED`
 
 ### `document_analysis_results`
 
-오프체인 분석 결과 placeholder와 향후 AI 분석 결과 해시를 저장한다. 실제 OCR 추출 결과는 `document_extractions`에 저장하며, extraction payload와 AI 레이어 사이의 payload 규격은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다.
+오프체인 FastAPI 분석 결과와 해시를 저장한다. 실제 OCR 추출 결과는 `document_extractions`에 저장하며, extraction payload와 AI 레이어 사이의 payload 규격은 [offchain-analysis-contract.md](offchain-analysis-contract.md)를 따른다. AI 비활성/미설정 또는 upstream 실패는 `FAILED` 상태로 기록한다.
 
 | 컬럼 | 타입 | NULL | 키 | 설명 |
 | --- | --- | --- | --- | --- |
@@ -813,7 +813,7 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
 
 #### `POST /documents/{documentId}/analysis`
 
-인증 필요. 오프체인 분석 결과를 생성 또는 갱신한다. `document_extractions.corrected_payload`가 있으면 이를 우선 사용하고, 없으면 `extracted_payload`를 사용해 sanitized AI request를 구성한다. `DOCUMENT_AI_ENABLED=true`이면 `DOCUMENT_AI_ENDPOINT`로 POST하고, 비활성 상태에서는 placeholder 결과를 저장한다.
+인증 필요. 오프체인 분석 결과를 생성 또는 갱신한다. `document_extractions.corrected_payload`가 있으면 이를 우선 사용하고, 없으면 `extracted_payload`를 사용해 sanitized AI request를 구성한다. `DOCUMENT_AI_ENABLED=true`이면 `DOCUMENT_AI_ENDPOINT`로 POST하고, 비활성 또는 endpoint 미설정 상태에서는 placeholder 완료 결과를 저장하지 않고 `FAILED` 분석을 남긴 뒤 HTTP 503을 반환한다. Spring은 FastAPI 요청의 `outputRequest.includeGeneratedAnalysis`를 `true`로 설정한다.
 
 응답 데이터: `DocumentAnalysisResponse`
 
@@ -824,8 +824,9 @@ Enum: `ChecklistStatus = NOT_STARTED, IN_PROGRESS, COMPLETED, REVIEW_REQUIRED`
   "status": "COMPLETED",
   "extractedTextHash": "sha256",
   "analysisResultHash": "sha256",
-  "summary": "Placeholder analysis result for document document-uuid",
-  "riskFlags": "[]",
+  "summary": "근로계약서의 주요 근로조건은 확인되지만 추가 검토가 필요한 항목이 있습니다.",
+  "riskFlags": [{ "code": "MINIMUM_WAGE_REVIEW_REQUIRED", "severity": "HIGH" }],
+  "generatedAnalysis": { "status": "COMPLETED", "text": "사용자에게 표시할 자연어 분석 문장" },
   "analyzedAt": "2026-04-26T15:06:00"
 }
 ```

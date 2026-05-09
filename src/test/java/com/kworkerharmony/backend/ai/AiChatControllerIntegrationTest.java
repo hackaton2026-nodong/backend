@@ -102,7 +102,29 @@ class AiChatControllerIntegrationTest {
                                     "riskLevel": "높음",
                                     "contractPeriod": "2026.06.01 ~ 2027.05.31",
                                     "analysisStatus": "COMPLETED",
-                                    "issueCandidates": ["MINIMUM_WAGE", "OVERTIME_PAY"]
+                                    "analysisSummary": "근로시간과 휴일 항목 확인이 필요합니다.",
+                                    "issueCandidates": ["MINIMUM_WAGE", "OVERTIME_PAY"],
+                                    "riskFlags": [
+                                      {
+                                        "label": "연장근로수당 확인",
+                                        "level": "중간",
+                                        "description": "수당 항목 검토"
+                                      }
+                                    ],
+                                    "findings": [
+                                      {
+                                        "title": "휴일 항목 누락",
+                                        "description": "계약서에 휴일이 명확하지 않습니다.",
+                                        "severity": "중간"
+                                      }
+                                    ],
+                                    "recommendedActions": [
+                                      {
+                                        "label": "근로계약서 보완 요청",
+                                        "institutionName": "사업장",
+                                        "expectedPath": "누락 항목 확인 -> 보완 요청"
+                                      }
+                                    ]
                                   }
                                 }
                                 """))
@@ -126,6 +148,8 @@ class AiChatControllerIntegrationTest {
         assertThat(receivedBody.get()).contains("\"caseContext\"");
         assertThat(receivedBody.get()).contains("document-1");
         assertThat(receivedBody.get()).contains("OVERTIME_PAY");
+        assertThat(receivedBody.get()).contains("근로시간과 휴일 항목 확인");
+        assertThat(receivedBody.get()).contains("근로계약서 보완 요청");
     }
 
     @Test

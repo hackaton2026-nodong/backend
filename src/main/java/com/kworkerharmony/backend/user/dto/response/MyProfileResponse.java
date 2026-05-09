@@ -4,6 +4,7 @@ import com.kworkerharmony.backend.user.Role;
 import com.kworkerharmony.backend.user.User;
 import com.kworkerharmony.backend.user.UserStatus;
 import com.kworkerharmony.backend.user.UserType;
+import com.kworkerharmony.backend.enterprise.Enterprise;
 import java.time.LocalDate;
 
 public record MyProfileResponse(
@@ -17,10 +18,15 @@ public record MyProfileResponse(
         String languageCode,
         String phoneNumber,
         LocalDate visaExpiresAt,
-        Long enterpriseId
+        Long enterpriseId,
+        String enterpriseName,
+        String enterpriseIndustry,
+        String enterpriseAddress,
+        String businessNumber
 ) {
 
     public static MyProfileResponse from(User user) {
+        Enterprise enterprise = user.getEnterprise();
         return new MyProfileResponse(
                 user.getId(),
                 user.getEmail(),
@@ -32,7 +38,11 @@ public record MyProfileResponse(
                 user.getLanguageCode(),
                 user.getPhoneNumber(),
                 user.getVisaExpiresAt(),
-                user.getEnterprise() == null ? null : user.getEnterprise().getId()
+                enterprise == null ? null : enterprise.getId(),
+                enterprise == null ? null : enterprise.getName(),
+                enterprise == null ? null : enterprise.getIndustry(),
+                enterprise == null ? null : enterprise.getAddress(),
+                enterprise == null ? null : enterprise.getBusinessNumber()
         );
     }
 }

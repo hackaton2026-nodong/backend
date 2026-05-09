@@ -397,7 +397,7 @@ curl -X PUT http://localhost:8080/api/documents/{DOC_ID}/extraction/correction \
 POST /api/documents/{documentId}/analysis
 ```
 
-> `DOCUMENT_AI_ENABLED=true`일 때만 실제 분석 동작. `false`이면 stub 응답 반환.
+> `DOCUMENT_AI_ENABLED=true`와 `DOCUMENT_AI_ENDPOINT` 설정이 필요하다. `false` 또는 endpoint 미설정이면 분석 레코드는 `FAILED`로 저장되고 HTTP 503 / `success=false`가 반환된다.
 
 ```bash
 curl -X POST http://localhost:8080/api/documents/{DOC_ID}/analysis \

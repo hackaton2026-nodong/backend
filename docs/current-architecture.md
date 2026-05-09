@@ -17,7 +17,7 @@
 - 문서 해시 기반 EIP-712 서명 요청/제출 API가 연결되었다.
 - Stub relayer 기반 앵커링 API가 연결되어 `anchorId`, `txHash`, `blockNumber` 저장 흐름을 수동 검증할 수 있다.
 - PaddleOCR worker 기반 OCR callback과 근로계약서 필드 추출 저장 흐름이 연결되었다.
-- 오프체인 분석 결과 저장 모델과 placeholder 분석 API가 연결되었다.
+- 오프체인 분석 결과 저장 모델과 FastAPI 분석 호출 경로가 연결되었다. AI 비활성/미설정은 완료 placeholder가 아니라 `FAILED`로 기록한다.
 - 같은 회사 사용자만 케이스에 접근하도록 검사한다.
 - 문서 원문 접근을 케이스 당사자 또는 관리자 수준으로 제한한다.
 - 저장, 해시, 앵커링을 포트/어댑터 구조로 분리할 기반을 만들었다.
@@ -60,12 +60,12 @@
 - EIP-712 typed data hash, `caseIdHash`, `anchorId` 계산은 현재 MVP 내부 검증용 SHA-256 helper 기반이다.
 - 실제 ECDSA signer recovery 검증은 아직 없다.
 - OCR worker와 구조화 추출 저장은 실제 PaddleOCR 기반으로 전환됐다.
-- AI 분석 RPC는 아직 placeholder다.
+- AI 분석 RPC는 `DOCUMENT_AI_ENABLED=true`와 endpoint 설정 시 FastAPI를 호출한다. 미설정 상태는 배포 가능 성공으로 취급하지 않고 실패로 표면화한다.
 - 문서 업로드 후 분석과 온체인 증명은 같은 `documentId`/`sha256Hash`를 공유하는 별도 분기 플로우로 다뤄야 한다.
 
 의미:
 
-- 기준서의 `Document 중심 처리 축` 중 업로드/해시/서명/Stub 앵커링/OCR 추출 저장 축은 MVP로 연결됐고, 실제 체인 전송과 실제 AI 분석은 후속 구현이다.
+- 기준서의 `Document 중심 처리 축` 중 업로드/해시/서명/Stub 앵커링/OCR 추출 저장과 Spring -> FastAPI AI 분석 호출 축은 MVP로 연결됐다. 실제 체인 전송은 후속 구현이다.
 
 ## 3. 구조적으로 옳은 부분
 
@@ -157,7 +157,7 @@
 
 ### 4.5 제품용 오케스트레이션 정리 필요
 
-- 현재 테스트 페이지는 업로드 후 OCR polling, 지갑 서명, 서명 제출, 앵커링, 분석 placeholder 저장을 한 화면에서 연쇄적으로 수행한다.
+- 현재 테스트 페이지는 업로드 후 OCR polling, 지갑 서명, 서명 제출, 앵커링, AI 분석 요청을 한 화면에서 연쇄적으로 수행한다.
 - 이전의 업로드 화면과 extraction 화면은 사용자 관점의 단일 오케스트레이터 화면으로 정리됐다.
 - 실제 제품 UX에서는 현재 테스트 페이지의 개발자용 입력값과 상태 출력을 줄이고, 문서 업로드 후 OCR/서명/앵커링/분석 요청이 자연스럽게 이어지도록 다듬는 작업이 남아 있다.
 
@@ -168,7 +168,7 @@
 ### 4.6 오프체인 분석 데이터 경계
 
 - 실제 OCR 추출은 PaddleOCR worker와 sanitizer/extractor로 연결됐다.
-- AI 분석은 아직 placeholder지만, 원문 파일과 필터링 전 OCR 결과를 AI 레이어로 전달하지 않는 방향은 문서화되어 있다.
+- AI 분석은 저장된 sanitized extraction payload만 FastAPI로 전달한다. 원문 파일과 필터링 전 OCR 결과를 AI 레이어로 전달하지 않는다.
 - AI 레이어 입력은 allowlist 기반의 근로조건 필드와 마스킹된 근거 참조로 제한한다.
 - 세부 규격은 [offchain-analysis-contract.md](offchain-analysis-contract.md)에 정의한다.
 

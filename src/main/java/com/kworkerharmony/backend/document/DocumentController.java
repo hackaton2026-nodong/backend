@@ -12,12 +12,15 @@ import com.kworkerharmony.backend.document.dto.response.DocumentExtractionRespon
 import com.kworkerharmony.backend.document.dto.response.DocumentResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentSignatureRequestResponse;
 import com.kworkerharmony.backend.document.dto.response.DocumentSignatureResponse;
+import com.kworkerharmony.backend.global.exception.CustomException;
+import com.kworkerharmony.backend.global.exception.ErrorCode;
 import com.kworkerharmony.backend.global.response.ApiResponse;
 import com.kworkerharmony.backend.global.security.UserPrincipal;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,22 +78,33 @@ public class DocumentController {
     }
 
     @PostMapping("/cases/{caseId}/documents/pdf-text-analysis")
-    public ApiResponse<DocumentAnalysisUploadResponse> uploadPdfTextAnalysis(
+    public ResponseEntity<ApiResponse<DocumentAnalysisUploadResponse>> uploadPdfTextAnalysis(
             @PathVariable String caseId,
             @RequestPart("file") MultipartFile file,
             @RequestParam(required = false) String scenario,
+            @RequestParam(defaultValue = "false") boolean sampleShortcut,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate issuedAt,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expiresAt,
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        return ApiResponse.success(documentService.uploadEmploymentContractAndAnalyze(
+        if (!sampleShortcut) {
+            throw new CustomException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "Combined pdf-text-analysis is only for labeled sample shortcuts; use /api/cases/{caseId}/documents for real OCR uploads"
+            );
+        }
+        DocumentAnalysisUploadResponse response = documentService.uploadEmploymentContractAndAnalyze(
                 caseId,
                 file,
                 scenario,
                 issuedAt,
                 expiresAt,
                 userPrincipal
-        ));
+        );
+        if (response.analysis().status() == DocumentAnalysisStatus.FAILED) {
+            return analysisFailure(response.analysis().failedReason());
+        }
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/documents/{documentId}/signature-request")
@@ -128,11 +142,15 @@ public class DocumentController {
     }
 
     @PostMapping("/documents/{documentId}/analysis")
-    public ApiResponse<DocumentAnalysisResponse> analyzeDocument(
+    public ResponseEntity<ApiResponse<DocumentAnalysisResponse>> analyzeDocument(
             @PathVariable String documentId,
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        return ApiResponse.success(documentService.analyzeDocument(documentId, userPrincipal));
+        DocumentAnalysisResponse response = documentService.analyzeDocument(documentId, userPrincipal);
+        if (response.status() == DocumentAnalysisStatus.FAILED) {
+            return analysisFailure(response.failedReason());
+        }
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/documents/{documentId}/analysis")
@@ -176,5 +194,14 @@ public class DocumentController {
             @RequestHeader(name = "X-OCR-Callback-Token", required = false) String callbackToken
     ) {
         return ApiResponse.success(documentService.receivePaddleOcrResult(documentId, request, callbackToken));
+    }
+
+    private <T> ResponseEntity<ApiResponse<T>> analysisFailure(String reason) {
+        String message = reason == null || reason.isBlank()
+                ? ErrorCode.AI_ANALYSIS_FAILED.getMessage()
+                : reason;
+        return ResponseEntity
+                .status(ErrorCode.AI_ANALYSIS_FAILED.getStatus())
+                .body(ApiResponse.failure(ErrorCode.AI_ANALYSIS_FAILED.getCode(), message));
     }
 }
