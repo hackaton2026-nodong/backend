@@ -1,0 +1,541 @@
+{
+  "catalogCode": "MOEL_FOREIGN_WORKER_EMPLOYMENT_MANAGEMENT",
+  "version": "2020-06-19",
+  "title": "사업장 자율점검 체크리스트",
+  "sections": [
+    {
+      "code": "FOREIGN_EMPLOYMENT_ACT",
+      "title": "외국인고용법",
+      "displayOrder": 1,
+      "items": [
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_STANDARD_EMPLOYMENT_CONTRACT",
+          "title": "표준근로계약서 사용",
+          "description": "표준근로계약서를 사용하여 외국인근로자와 근로계약을 체결했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 1
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_EMPLOYMENT_TRAINING",
+          "title": "입국 후 취업교육 이수 조치",
+          "description": "외국인근로자가 입국일부터 15일 이내에 취업교육을 받을 수 있도록 조치했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 2
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_H2_SPECIAL_EMPLOYMENT_CONFIRMATION",
+          "title": "H-2 특례고용가능확인 후 고용",
+          "description": "방문취업(H-2) 외국인근로자를 특례고용가능확인서 발급 후 고용했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 3
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_H2_JOBSEEKER_REGISTRATION",
+          "title": "H-2 구직자명부 등록 여부",
+          "description": "방문취업(H-2) 외국인근로자가 취업교육 수료 후 구직등록을 했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 4
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_H2_CONSTRUCTION_CERTIFICATE",
+          "title": "건설업취업인정증 확인",
+          "description": "건설업의 경우 방문취업(H-2) 외국인근로자의 건설업취업인정증 소지 여부를 점검합니다.",
+          "required": true,
+          "displayOrder": 5
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_H2_WORK_COMMENCEMENT_REPORT",
+          "title": "H-2 근로개시신고",
+          "description": "방문취업(H-2) 외국인근로자에 대해 고용센터 또는 출입국관리사무소에 근로개시신고를 했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 6
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_DEPARTURE_INSURANCE_SUBSCRIPTION",
+          "title": "출국만기보험 가입",
+          "description": "모든 외국인근로자에 대해 출국만기보험에 가입했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 7
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_DEPARTURE_INSURANCE_PREMIUM",
+          "title": "출국만기보험료 월별 납부",
+          "description": "출국만기보험료를 매월 정상적으로 납부하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 8
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_RETURN_COST_INSURANCE",
+          "title": "귀국비용보험 가입",
+          "description": "외국인근로자가 귀국비용보험에 가입했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 9
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_PRE_RETURN_SETTLEMENT",
+          "title": "귀국 전 임금 등 청산 조치",
+          "description": "근로관계 종료나 체류기간 만료 등으로 귀국하는 경우 귀국 전에 임금 등 금품관계를 청산했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 10
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_EMPLOYMENT_CHANGE_REPORT",
+          "title": "고용변동 신고",
+          "description": "근로계약 해지, 사망, 무단결근, 소재불명, 근무처 변경 등 발생 시 15일 이내에 고용변동 신고를 했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 11
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_PERMIT_CANCELLATION_GROUNDS",
+          "title": "고용허가 또는 특례고용가능확인 취소사유 점검",
+          "description": "거짓 또는 부정한 방법으로 허가를 받았거나, 입국 전 계약 임금·근로조건 위반, 노동관계법 위반 등 취소사유가 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 12
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_TERMINATE_AFTER_CANCELLATION",
+          "title": "허가 취소 후 근로계약 종료",
+          "description": "고용허가 또는 특례고용가능확인이 취소된 경우 15일 이내에 근로계약관계를 종료했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 13
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_EMPLOYMENT_RESTRICTION_GROUNDS",
+          "title": "고용제한 사유 해당 여부",
+          "description": "무허가 고용, 외국인고용법·출입국관리법 위반 처벌, 내국인 고용조정, 계약 외 사업장 근로 제공, 교육 전 계약해지 등 고용제한 사유가 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 14
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_NON_DISCRIMINATION",
+          "title": "외국인근로자 차별 금지",
+          "description": "외국인근로자라는 이유로 부당하게 차별하여 처우하고 있지 않은지 점검합니다.",
+          "required": true,
+          "displayOrder": 15
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_DORMITORY_STANDARD",
+          "title": "기숙사 시설기준 준수",
+          "description": "근로기준법 시행령 기준에 맞는 구조, 설비, 설치장소, 주거환경, 면적, 사생활 보호 조치 등을 갖췄는지 점검합니다.",
+          "required": true,
+          "displayOrder": 16
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_DORMITORY_INFO_DISCLOSURE",
+          "title": "기숙사 정보 사전 제공",
+          "description": "기숙사를 제공하는 경우 근로계약 체결 시 외국인근로자에게 시설정보를 사전 제공하고 변경 시 변경정보도 안내했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 17
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_WAGE_GUARANTEE_INSURANCE",
+          "title": "보증보험 가입",
+          "description": "임금체불에 대비한 외국인근로자 보증보험에 가입했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 18
+        },
+        {
+          "sectionCode": "FOREIGN_EMPLOYMENT_ACT",
+          "sectionTitle": "외국인고용법",
+          "code": "FEA_WORKER_ACCIDENT_INSURANCE",
+          "title": "상해보험 가입",
+          "description": "외국인근로자가 질병·사망 등에 대비한 상해보험에 가입했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 19
+        }
+      ]
+    },
+    {
+      "code": "IMMIGRATION_AND_HEALTH_INSURANCE",
+      "title": "출입국관리법 및 국민건강보험법",
+      "displayOrder": 2,
+      "items": [
+        {
+          "sectionCode": "IMMIGRATION_AND_HEALTH_INSURANCE",
+          "sectionTitle": "출입국관리법 및 국민건강보험법",
+          "code": "IHI_ELIGIBLE_VISA_STATUS",
+          "title": "취업 가능 체류자격 확인",
+          "description": "취업 가능한 체류자격을 갖춘 외국인근로자를 고용했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 1
+        },
+        {
+          "sectionCode": "IMMIGRATION_AND_HEALTH_INSURANCE",
+          "sectionTitle": "출입국관리법 및 국민건강보험법",
+          "code": "IHI_WORKPLACE_CHANGE_PERMISSION",
+          "title": "근무처 변경 허가 확인",
+          "description": "근무처 변경 허가를 받지 않은 외국인근로자를 고용하고 있지 않은지 점검합니다.",
+          "required": true,
+          "displayOrder": 2
+        },
+        {
+          "sectionCode": "IMMIGRATION_AND_HEALTH_INSURANCE",
+          "sectionTitle": "출입국관리법 및 국민건강보험법",
+          "code": "IHI_NO_PASSPORT_RETENTION",
+          "title": "여권·외국인등록증 보관 금지",
+          "description": "사용자가 계약 이행 확보 등을 이유로 외국인근로자의 여권이나 외국인등록증을 보관하고 있지 않은지 점검합니다.",
+          "required": true,
+          "displayOrder": 3
+        },
+        {
+          "sectionCode": "IMMIGRATION_AND_HEALTH_INSURANCE",
+          "sectionTitle": "출입국관리법 및 국민건강보험법",
+          "code": "IHI_ALIEN_REGISTRATION",
+          "title": "외국인등록 이행",
+          "description": "외국인근로자가 입국일부터 90일 이내에 외국인등록을 완료했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 4
+        },
+        {
+          "sectionCode": "IMMIGRATION_AND_HEALTH_INSURANCE",
+          "sectionTitle": "출입국관리법 및 국민건강보험법",
+          "code": "IHI_NATIONAL_HEALTH_INSURANCE",
+          "title": "국민건강보험 가입",
+          "description": "외국인근로자를 피보험자로 국민건강보험에 가입시켰는지 점검합니다.",
+          "required": true,
+          "displayOrder": 5
+        }
+      ]
+    },
+    {
+      "code": "LABOR_RELATIONS_ACTS",
+      "title": "근로기준법 등 노동관계법 등",
+      "displayOrder": 3,
+      "items": [
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_WRITTEN_CONDITIONS",
+          "title": "근로조건 서면 명시",
+          "description": "근로계약 체결 시 임금, 근로시간, 주요 근로조건을 서면으로 명시했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 1
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_WORKER_ROSTER",
+          "title": "근로자명부 작성·관리",
+          "description": "시행령상 기재사항이 포함된 근로자명부를 작성·관리하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 2
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_CONTRACT_RECORD_RETENTION",
+          "title": "근로계약 관련 서류 3년 보존",
+          "description": "근로자명부와 근로계약에 관한 중요 서류를 3년간 보존하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 3
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_WAGE_LEDGER",
+          "title": "임금대장 작성·관리",
+          "description": "필수 기재사항이 포함된 임금대장을 작성·관리하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 4
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_FINAL_SETTLEMENT",
+          "title": "퇴직 시 금품청산",
+          "description": "퇴직자에 대한 임금, 보상금, 기타 일체의 금품을 법정 기일 내 지급했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 5
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_DIRECT_FULL_WAGE_PAYMENT",
+          "title": "임금의 통화 직접 전액 지급",
+          "description": "임금을 통화로 직접 근로자에게 전액 지급하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 6
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_REGULAR_PAYDAY",
+          "title": "정기 임금지급일 준수",
+          "description": "매월 1회 이상 일정한 기일을 정해 임금을 지급하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 7
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_SHUTDOWN_ALLOWANCE",
+          "title": "휴업수당 지급",
+          "description": "사용자 귀책사유로 휴업한 경우 휴업수당을 지급했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 8
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_OVERTIME_NIGHT_HOLIDAY_PREMIUM",
+          "title": "연장·야간·휴일근로수당 지급",
+          "description": "통상임금의 50%를 가산한 연장·야간·휴일근로수당을 지급했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 9
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_STATUTORY_WORKING_HOURS",
+          "title": "법정 근로시간 준수",
+          "description": "법정 근로시간을 준수하고 출퇴근 기록 등 근로시간 관리체계를 운영하는지 점검합니다.",
+          "required": true,
+          "displayOrder": 10
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_OVERTIME_LIMIT",
+          "title": "연장근로 한도 준수",
+          "description": "연장근로에 대한 합의를 받고 주 12시간 한도를 준수하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 11
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_REST_BREAKS",
+          "title": "휴게시간 부여",
+          "description": "근로시간 4시간당 30분 이상의 휴게시간을 부여하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 12
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_WEEKLY_PAID_HOLIDAY",
+          "title": "유급휴일 부여",
+          "description": "유급 주휴일을 포함한 유급휴일 규정을 준수하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 13
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_ANNUAL_LEAVE",
+          "title": "연차유급휴가 부여",
+          "description": "연차유급휴가 규정에 따라 적정한 연차를 부여하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 14
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_NIGHT_HOLIDAY_WORK_PROTECTION",
+          "title": "야간·휴일근로 제한 준수",
+          "description": "여성·임산부·18세 미만자에 대한 야간 및 휴일근로 제한과 인가·동의 절차를 준수했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 15
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_POSTPARTUM_OVERTIME_LIMIT",
+          "title": "산후 1년 미만 여성 시간외근로 제한",
+          "description": "산후 1년이 지나지 않은 여성의 시간외근로 한도를 초과하지 않았는지 점검합니다.",
+          "required": true,
+          "displayOrder": 16
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_PREGNANT_WORKER_PROTECTION",
+          "title": "임산부 보호조치",
+          "description": "출산전후휴가, 유산·사산휴가, 유급보장, 임신 중 시간외근로 금지, 쉬운 근로 전환 등 임산부 보호조치를 이행했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 17
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_PATERNITY_LEAVE",
+          "title": "배우자 출산휴가 부여",
+          "description": "배우자 출산휴가를 부여하고 이를 이유로 불이익 처분하지 않았는지 점검합니다.",
+          "required": true,
+          "displayOrder": 18
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_PARENTAL_LEAVE",
+          "title": "육아휴직 허용",
+          "description": "육아휴직을 허용하고 이를 이유로 해고나 불리한 처우를 하지 않았는지 점검합니다.",
+          "required": true,
+          "displayOrder": 19
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_CHILDCARE_WORK_HOURS_REDUCTION",
+          "title": "육아기 근로시간 단축 허용",
+          "description": "육아기 근로시간 단축을 허용하고 이를 이유로 불리한 처우를 하지 않았는지 점검합니다.",
+          "required": true,
+          "displayOrder": 20
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_RULES_OF_EMPLOYMENT_FILING",
+          "title": "취업규칙 작성·신고",
+          "description": "상시근로자 10인 이상 사업장에서 취업규칙을 작성하고 신고했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 21
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_RULES_OF_EMPLOYMENT_PROCEDURE",
+          "title": "취업규칙 작성·변경 절차 준수",
+          "description": "취업규칙 작성 또는 변경 시 의견청취와 불이익 변경 동의 등 법정 절차를 준수했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 22
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_RETIREMENT_PAY",
+          "title": "퇴직금 기한 내 지급",
+          "description": "퇴직일로부터 14일 이내에 법정 퇴직금을 지급했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 23
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_WORKPLACE_HARASSMENT_PREVENTION",
+          "title": "직장 내 괴롭힘 예방 및 조치",
+          "description": "직장 내 괴롭힘 예방 활동, 발생 시 조사·조치, 신고자·피해자 불이익 금지 등을 이행했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 24
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_MINIMUM_WAGE",
+          "title": "최저임금 이상 지급",
+          "description": "근로자에게 최저임금액 이상을 지급하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 25
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_MINIMUM_WAGE_NOTICE",
+          "title": "최저임금 주지",
+          "description": "최저임금액과 산입범위 등을 게시 또는 기타 적정한 방법으로 근로자에게 주지했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 26
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_SEXUAL_HARASSMENT_PROHIBITION",
+          "title": "직장 내 성희롱 금지",
+          "description": "직장 내 성희롱 사실이 존재하지 않는지 점검합니다.",
+          "required": true,
+          "displayOrder": 27
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_SEXUAL_HARASSMENT_EDUCATION",
+          "title": "직장 내 성희롱 예방교육",
+          "description": "직장 내 성희롱 예방교육을 적정한 방법으로 실시하고 있는지 점검합니다.",
+          "required": true,
+          "displayOrder": 28
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_SEXUAL_HARASSMENT_RESPONSE",
+          "title": "직장 내 성희롱 발생 시 조치",
+          "description": "직장 내 성희롱 발생 시 조사, 가해자 조치, 피해자 보호, 불이익 금지, 비밀누설 금지 등을 이행했는지 점검합니다.",
+          "required": true,
+          "displayOrder": 29
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_EQUAL_TREATMENT",
+          "title": "차별 금지",
+          "description": "성별, 국적, 신앙 또는 사회적 신분을 이유로 차별적 처우를 하지 않았는지 점검합니다.",
+          "required": true,
+          "displayOrder": 30
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_FORCED_LABOR_PROHIBITION",
+          "title": "강제근로 금지",
+          "description": "폭행, 협박, 감금 등으로 근로자의 자유의사에 반하여 근로를 강요하지 않았는지 점검합니다.",
+          "required": true,
+          "displayOrder": 31
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_VIOLENCE_PROHIBITION",
+          "title": "폭행 금지",
+          "description": "사고 발생 등 어떤 이유로도 근로자를 폭행하지 않았는지 점검합니다.",
+          "required": true,
+          "displayOrder": 32
+        },
+        {
+          "sectionCode": "LABOR_RELATIONS_ACTS",
+          "sectionTitle": "근로기준법 등 노동관계법 등",
+          "code": "LRA_DORMITORY_GENERAL_STANDARD",
+          "title": "근로기준법상 기숙사 시설기준 준수",
+          "description": "침실 인원, 화장실·세면·목욕시설, 채광·환기, 냉난방, 화재예방, 남녀 구분, 소독, 잠금장치, 수납공간, 1인당 면적 등 기숙사 기준을 준수하는지 점검합니다.",
+          "required": true,
+          "displayOrder": 33
+        }
+      ]
+    }
+  ]
+}

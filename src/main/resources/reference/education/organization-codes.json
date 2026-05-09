@@ -1,0 +1,940 @@
+﻿[
+    {
+        "org_cd":  "32000",
+        "name_ko":  "서울지역본부",
+        "name_en":  "Seoul Regional Headquarters",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "32010",
+        "name_ko":  "서울서부지사",
+        "name_en":  "Eastern Seoul Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "32020",
+        "name_ko":  "서울남부지사",
+        "name_en":  "Southern Seoul Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "32030",
+        "name_ko":  "인천지사",
+        "name_en":  "Gyeongin Regional Headquarters",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "32040",
+        "name_ko":  "경인지역본부(수원)",
+        "name_en":  "Gyeonggi Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "32041",
+        "name_ko":  "경기북부지사",
+        "name_en":  "Northern Gyeonggi Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "32050",
+        "name_ko":  "강원지사",
+        "name_en":  "Gangwon Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "32051",
+        "name_ko":  "강원동부지사",
+        "name_en":  "Gangneung Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "32060",
+        "name_ko":  "경기동부지사",
+        "name_en":  "SeongNam Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "32110",
+        "name_ko":  "한국폴리텍II대학남인천캠퍼스",
+        "name_en":  "Korea Polytechnic Ⅱ college(Incheon-South)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "32130",
+        "name_ko":  "한국폴리텍II대학화성캠퍼스",
+        "name_en":  "Korea Polytechnic Ⅱ college(Hwaseong)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "32140",
+        "name_ko":  "원주직업전문학교",
+        "name_en":  "Wonju Vocational Training Institute",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "32150",
+        "name_ko":  "강원직업전문학교",
+        "name_en":  "Gangwon Vocational Training Institute",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "33000",
+        "name_ko":  "부산지역본부",
+        "name_en":  "Busan Regional Headquarters",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "33010",
+        "name_ko":  "대구지역본부",
+        "name_en":  "Daegu Regional Headquarters",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "33020",
+        "name_ko":  "울산지사",
+        "name_en":  "Ulsan Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "33030",
+        "name_ko":  "경북지사",
+        "name_en":  "Gyeongbuk Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "33031",
+        "name_ko":  "경북동부지사",
+        "name_en":  "Pohang Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "33040",
+        "name_ko":  "경남지사(창원)",
+        "name_en":  "Gyeongnam Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "33050",
+        "name_ko":  "부산남부지사",
+        "name_en":  "Southern Busan Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "33110",
+        "name_ko":  "한독부산직업전문학교",
+        "name_en":  "HanDokBusan Vocational Training Institute",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "33170",
+        "name_ko":  "김천직업전문학교",
+        "name_en":  "Gimcheon Vocational Training Institute",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "36000",
+        "name_ko":  "광주지역본부",
+        "name_en":  "Gwangju Regional Headquarters",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "36010",
+        "name_ko":  "전북지사",
+        "name_en":  "Jeonbuk Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "36020",
+        "name_ko":  "전남지사",
+        "name_en":  "Jeonnam Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "36021",
+        "name_ko":  "전남서부지사",
+        "name_en":  "Mokpo Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "36030",
+        "name_ko":  "제주지사",
+        "name_en":  "Jeju Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "37000",
+        "name_ko":  "대전지역본부",
+        "name_en":  "Daejeon Regional Headquarters",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "37010",
+        "name_ko":  "충남지사",
+        "name_en":  "Chungnam Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "37020",
+        "name_ko":  "충북지사",
+        "name_en":  "Chungbuk Branch Office",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "37110",
+        "name_ko":  "한국폴리텍IV대학충주캠퍼스",
+        "name_en":  "Korea Polytechnic Ⅱ college(Chungju)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "37120",
+        "name_ko":  "충남직업전문학교",
+        "name_en":  "Chungnam Vocational Training Institute",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "37130",
+        "name_ko":  "외국인취업교육센터",
+        "name_en":  "Employment Training Center for Foreigners",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31000",
+        "name_ko":  "한국산업인력공단",
+        "name_en":  "Human Resources Development Service of Korea",
+        "sms_yn":  "N",
+        "use_yn":  "Y"
+    },
+    {
+        "org_cd":  "31110",
+        "name_ko":  "국제HRD센터",
+        "name_en":  "International HRD Center(SIVAT)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31300",
+        "name_ko":  "한국산업인력공단(파주)",
+        "name_en":  "HRD KOREA(Paju)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31320",
+        "name_ko":  "한국산업인력공단(강남)",
+        "name_en":  "HRD KOREA(Kangnam)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31330",
+        "name_ko":  "한국산업인력공단(서초역)",
+        "name_en":  "HRD KOREA",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31120",
+        "name_ko":  "한국산업인력공단(양주)",
+        "name_en":  "HRD KOREA(Yangju)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31160",
+        "name_ko":  "한국산업인력공단(마포)",
+        "name_en":  "HRD KOREA(Mapo)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31170",
+        "name_ko":  "한국산업인력공단(영등포)",
+        "name_en":  "HRD KOREA(Yeongdeungpo)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31190",
+        "name_ko":  "한국산업인력공단(대전)",
+        "name_en":  "HRD KOREA(Daejeon)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31200",
+        "name_ko":  "한국산업인력공단(광주)",
+        "name_en":  "HRD KOREA(Gwangju)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31210",
+        "name_ko":  "한국산업인력공단(독산)",
+        "name_en":  "HRD KOREA(Gwangju)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31230",
+        "name_ko":  "한국산업인력공단(신당)",
+        "name_en":  "HRD KOREA( Sindang)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31240",
+        "name_ko":  "한국산업인력공단(창천)",
+        "name_en":  "HRD KOREA(Changcheon)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31250",
+        "name_ko":  "한국산업인력공단(중국어반)",
+        "name_en":  "HRD KOREA",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31260",
+        "name_ko":  "한국산업인력공단(서초)",
+        "name_en":  "HRD KOREA",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31280",
+        "name_ko":  "한국산업인력공단(마포 러시아어)",
+        "name_en":  "HRD KOREA",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31290",
+        "name_ko":  "한국산업인력공단(금천)",
+        "name_en":  "HRD KOREA(Geumcheon)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31180",
+        "name_ko":  "한국산업인력공단(대구)",
+        "name_en":  "HRD KOREA(Daegu)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31220",
+        "name_ko":  "한국산업인력공단(수원)",
+        "name_en":  "HRD KOREA(Suwon)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31310",
+        "name_ko":  "대한건설협회교육장",
+        "name_en":  "THE CONSTRUCTION ASSOCIATION OF KOREA",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "33120",
+        "name_ko":  "한국산업인력공단(부산)",
+        "name_en":  "HRD KOREA(Busan)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31150",
+        "name_ko":  "한국산업인력공단(인천)",
+        "name_en":  "HRD KOREA(Incheon)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31270",
+        "name_ko":  "한국산업인력공단(성남)",
+        "name_en":  "HRD KOREA",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31130",
+        "name_ko":  "한국산업인력공단(시흥)",
+        "name_en":  "HRD KOREA(Siheung)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "36130",
+        "name_ko":  "전북직업전문학교",
+        "name_en":  "Jeonbuk Vocational Training Institute",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "41120",
+        "name_ko":  "노사발전재단(서교)",
+        "name_en":  "Seogyo Education Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "41121",
+        "name_ko":  "노사발전재단(광흥)",
+        "name_en":  "Gwangheung Educationn Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "41122",
+        "name_ko":  "노사발전재단(마포)",
+        "name_en":  "Mapo Education Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "41130",
+        "name_ko":  "노사발전재단(인천)",
+        "name_en":  "Incheon Education Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "17222",
+        "name_ko":  "보령종합고용지원센터",
+        "name_en":  "Boryeong General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "17211",
+        "name_ko":  "천안종합고용지원센터",
+        "name_en":  "Cheonan General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "14112",
+        "name_ko":  "경주고용지원센터",
+        "name_en":  "Gyeongju Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "14132",
+        "name_ko":  "영주고용지원센터",
+        "name_en":  "Yeongju Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "13141",
+        "name_ko":  "진주종합고용지원센터",
+        "name_en":  "Jinju General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "14011",
+        "name_ko":  "대구종합고용지원센터",
+        "name_en":  "Daegu General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "16221",
+        "name_ko":  "순천종합고용지원센터",
+        "name_en":  "",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "14111",
+        "name_ko":  "포항종합고용지원센터",
+        "name_en":  "Pohang General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "14121",
+        "name_ko":  "구미종합고용지원센터",
+        "name_en":  "Gumi General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15113",
+        "name_ko":  "용인고용지원센터",
+        "name_en":  "Yongin Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31370",
+        "name_ko":  "한국산업인력공단(포천)",
+        "name_en":  "HRD KOREA(Pocheon)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "13011",
+        "name_ko":  "부산동부종합고용지원센터",
+        "name_en":  "Busan Dongbu General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12003",
+        "name_ko":  "강남종합고용지원센터",
+        "name_en":  "Gangnam General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12012",
+        "name_ko":  "서울종합고용지원센터",
+        "name_en":  "Seoul General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12031",
+        "name_ko":  "서울서부종합고용지원센터",
+        "name_en":  "Seoul Seobu General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12042",
+        "name_ko":  "서울남부종합고용지원센터",
+        "name_en":  "Seoul Nambu General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12051",
+        "name_ko":  "서울북부종합고용지원센터",
+        "name_en":  "Seoul Bukbu General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12061",
+        "name_ko":  "서울관악종합고용지원센터",
+        "name_en":  "Seoul Gwanak Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12131",
+        "name_ko":  "강릉종합고용지원센터",
+        "name_en":  "Gangreung General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "13121",
+        "name_ko":  "울산종합고용지원센터",
+        "name_en":  "Ulsan Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "13131",
+        "name_ko":  "김해종합고용지원센터",
+        "name_en":  "Gimhea Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "14002",
+        "name_ko":  "대구북부종합고용지원센터",
+        "name_en":  "Daegu Bukbu Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "17111",
+        "name_ko":  "청주종합고용지원센터",
+        "name_en":  "Cheongju General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "14141",
+        "name_ko":  "안동고용지원센터",
+        "name_en":  "Andong Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15001",
+        "name_ko":  "경인종합고용지원센터",
+        "name_en":  "Gyeongin General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15011",
+        "name_ko":  "인천북부종합고용지원센터",
+        "name_en":  "Incheon Bukub General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15112",
+        "name_ko":  "수원종합고용지원센터",
+        "name_en":  "Suwon General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15132",
+        "name_ko":  "광명고용지원센터",
+        "name_en":  "Gwangmyeong Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15141",
+        "name_ko":  "시흥고용지원센터",
+        "name_en":  "Siheung Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31360",
+        "name_ko":  "한국산업인력공단(안산)",
+        "name_en":  "HRD KOREA(Ansan)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31460",
+        "name_ko":  "한국산업인력공단(마포 재입국)",
+        "name_en":  "HRD KOREA(Mapo-Reentry)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31440",
+        "name_ko":  "한국산업인력공단(당산 재입국)",
+        "name_en":  "HRD KOREA(Dangsan-Reentry)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31420",
+        "name_ko":  "한국산업인력공단(수원 재입국)",
+        "name_en":  "HRD KOREA(Suwon-Reentry)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31470",
+        "name_ko":  "한국산업인력공단(성남 재입국)",
+        "name_en":  "HRD KOREA(Seongnam-Reentry)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31450",
+        "name_ko":  "한국산업인력공단(부산 재입국)",
+        "name_en":  "HRD KOREA(Pusan-Reentry)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15152",
+        "name_ko":  "의정부종합고용지원센터",
+        "name_en":  "Uijeongbu Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15162",
+        "name_ko":  "성남종합고용지원센터(이천출장센터)",
+        "name_en":  "Seongnam General Job Center(Icheon)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "16001",
+        "name_ko":  "광주종합고용지원센터",
+        "name_en":  "Gwangju General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "17005",
+        "name_ko":  "대전종합고용지원센터",
+        "name_en":  "Daejeon General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12112",
+        "name_ko":  "춘천고용지원센터",
+        "name_en":  "Chuncheon Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12122",
+        "name_ko":  "태백고용지원센터",
+        "name_en":  "Taebaek Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "13113",
+        "name_ko":  "창원종합고용지원센터",
+        "name_en":  "Chengwon General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "13004",
+        "name_ko":  "부산종합고용지원센터",
+        "name_en":  "Busan General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15163",
+        "name_ko":  "성남종합고용지원센터",
+        "name_en":  "Seongnam General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "17122",
+        "name_ko":  "충주종합고용지원센터",
+        "name_en":  "Chungju General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "13133",
+        "name_ko":  "양산고용지원센터",
+        "name_en":  "Yangsan General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "16123",
+        "name_ko":  "익산종합고용지원센터",
+        "name_en":  "Iksan General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "16132",
+        "name_ko":  "군산종합고용지원센터",
+        "name_en":  "Gunsan General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "16212",
+        "name_ko":  "목포종합고용지원센터",
+        "name_en":  "Mokpo General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "16223",
+        "name_ko":  "여수종합고용지원센터",
+        "name_en":  "Yeosu General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31340",
+        "name_ko":  "한국산업인력공단(당산)",
+        "name_en":  "HRD KOREA(Dangsan)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31350",
+        "name_ko":  "한국산업인력공단(양평)",
+        "name_en":  "HRD KOREA(Yangpyeong)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31380",
+        "name_ko":  "한국산업인력공단(파주 러시아어)",
+        "name_en":  "HRD KOREA(Paju)",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "16113",
+        "name_ko":  "전주종합고용지원센터",
+        "name_en":  "Jeonju General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15123",
+        "name_ko":  "부천종합고용지원센터",
+        "name_en":  "Bucheon General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15134",
+        "name_ko":  "안양종합고용지원센터",
+        "name_en":  "Anyang General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15142",
+        "name_ko":  "안산고용지원센터",
+        "name_en":  "Ansan Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15153",
+        "name_ko":  "구리고용지원센터",
+        "name_en":  "Guri Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15181",
+        "name_ko":  "고양종합고용지원센터",
+        "name_en":  "Goyang Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12141",
+        "name_ko":  "원주고용지원센터",
+        "name_en":  "Wonju Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12151",
+        "name_ko":  "영월종합고용지원센터",
+        "name_en":  "Yeongwol Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "13023",
+        "name_ko":  "부산북부종합고용지원센터",
+        "name_en":  "Busanbukbu Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "16301",
+        "name_ko":  "제주특별자치도",
+        "name_en":  "jeju special self-governing province",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15171",
+        "name_ko":  "평택종합고용지원센터",
+        "name_en":  "Pyeongtaek General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15165",
+        "name_ko":  "광주고용지원센터",
+        "name_en":  "Gwangju Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31931",
+        "name_ko":  "한국산업인력공단(영등포 재입국)",
+        "name_en":  "",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31930",
+        "name_ko":  "한국산업인력공단(영등포_건설업)",
+        "name_en":  "",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "81120",
+        "name_ko":  "한국산업인력공단(태평로_건설회관_교육장)",
+        "name_en":  "",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "12023",
+        "name_ko":  "서울동부종합고용지원센터",
+        "name_en":  "Seoul Dongbu General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "15122",
+        "name_ko":  "김포고용지원센터",
+        "name_en":  "Gimpo Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "13151",
+        "name_ko":  "통영종합고용지원센터",
+        "name_en":  "Tongyeong General Job Center",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    },
+    {
+        "org_cd":  "31932",
+        "name_ko":  "한국산업인력공단(영등포 러시아어)",
+        "name_en":  "",
+        "sms_yn":  "N",
+        "use_yn":  "N"
+    }
+]

@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: ${LOCAL_MYSQL_URL:jdbc:mysql://localhost:3306/backend?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${LOCAL_MYSQL_USERNAME:root}
+    password: ${LOCAL_MYSQL_PASSWORD:1234}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${LOCAL_REDIS_HOST:localhost}
+      port: ${LOCAL_REDIS_PORT:6379}
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+      schema-locations: classpath:schema-local.sql
+      data-locations: classpath:data.sql,classpath:data-local.sql
+
+server:
+  port: ${LOCAL_SERVER_PORT:8080}
+
+app:
+  document:
+    ocr:
+      enabled: ${DOCUMENT_OCR_ENABLED:true}
+      endpoint: ${DOCUMENT_OCR_ENDPOINT:http://localhost:9000/ocr/jobs}
+      callback-token: ${DOCUMENT_OCR_CALLBACK_TOKEN:local-ocr-token}
+      callback-base-url: ${DOCUMENT_OCR_CALLBACK_BASE_URL:http://host.docker.internal:8080}

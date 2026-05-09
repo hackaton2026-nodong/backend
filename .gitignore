@@ -1,3 +1,18 @@
+HELP.md
+
+# Gradle / build output
+.gradle
+.gradle-user-home
+build/
+node_modules/
+__pycache__/
+*.py[cod]
+tmp_pdf/
+tmp_*.txt
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
 # Compiled class file
 *.class
 
@@ -10,7 +25,7 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files #
+# Package files
 *.jar
 *.war
 *.nar
@@ -19,6 +34,79 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Virtual machine crash logs
 hs_err_pid*
 replay_pid*
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Secrets ###
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_rsa.pub
+secrets/
+config/secrets/
+
+### Local config ###
+application-local.yml
+application-local.yaml
+application-local.properties
+application-dev.yml
+application-dev.yaml
+application-dev.properties
+application-prod.yml
+application-prod.yaml
+application-prod.properties
+src/main/resources/application-local.yml
+src/main/resources/application-local.yaml
+src/main/resources/application-local.properties
+src/main/resources/application-dev.yml
+src/main/resources/application-dev.yaml
+src/main/resources/application-dev.properties
+src/main/resources/application-prod.yml
+src/main/resources/application-prod.yaml
+src/main/resources/application-prod.properties
+!src/main/resources/application-local.yml
+!src/main/resources/application-dev.yml
+
+# Local runtime data
+storage/
+.codex

@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard API Preview</title>
+  <style>
+    :root {
+      --bg: #f5efe8;
+      --bg-strong: #efe4d7;
+      --panel: rgba(255, 251, 246, 0.92);
+      --panel-strong: #fff8f1;
+      --line: #e4c8a8;
+      --line-strong: #f17f2b;
+      --text: #231912;
+      --muted: #7f6a5a;
+      --accent: #ea6d1f;
+      --accent-soft: #fff0e6;
+      --success: #1e7a55;
+      --warn: #b36b00;
+      --danger: #bb2d24;
+      --info: #2b6cb0;
+      --shadow: 0 20px 48px rgba(67, 37, 12, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(234, 109, 31, 0.13), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(43, 108, 176, 0.09), transparent 28%),
+        linear-gradient(145deg, #faf5ef, #efe3d5);
+    }
+
+    .shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 22px;
+    }
+
+    .hero-copy h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+    }
+
+    .hero-copy p {
+      margin: 0;
+      max-width: 760px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .hero-chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 248, 241, 0.95);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.92rem;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(228, 200, 168, 0.9);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .control-panel {
+      padding: 24px;
+      position: sticky;
+      top: 18px;
+      align-self: start;
+    }
+
+    .section + .section {
+      margin-top: 22px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(228, 200, 168, 0.65);
+    }
+
+    .section h2 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+    }
+
+    .section p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.5;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    input,
+    textarea,
+    button,
+    select {
+      font: inherit;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid #d9bea1;
+      background: #fffdf9;
+      border-radius: 16px;
+      padding: 12px 14px;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: wait;
+      transform: none;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #ef7a2b, #d65b14);
+      color: #fffaf7;
+      box-shadow: 0 10px 24px rgba(214, 91, 20, 0.24);
+    }
+
+    .secondary {
+      background: #eadbca;
+      color: #38271d;
+    }
+
+    .ghost {
+      background: #fff7ef;
+      color: var(--accent);
+      border: 1px solid rgba(241, 127, 43, 0.34);
+    }
+
+    .status-box {
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: #fff9f3;
+      border: 1px dashed rgba(228, 200, 168, 0.95);
+      color: var(--muted);
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .status-box.error {
+      background: rgba(187, 45, 36, 0.06);
+      border-color: rgba(187, 45, 36, 0.24);
+      color: var(--danger);
+    }
+
+    .status-box.ok {
+      background: rgba(30, 122, 85, 0.08);
+      border-color: rgba(30, 122, 85, 0.26);
+      color: var(--success);
+    }
+
+    .preview-panel {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .preview-shell {
+      border: 1px solid rgba(228, 200, 168, 0.9);
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, rgba(255, 250, 245, 0.96), rgba(250, 243, 235, 0.92));
+      overflow: hidden;
+    }
+
+    .preview-header {
+      padding: 22px 22px 16px;
+      border-bottom: 1px solid rgba(228, 200, 168, 0.75);
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 18px;
+    }
+
+    .preview-header h2 {
+      margin: 0 0 8px;
+      font-size: 1.45rem;
+    }
+
+    .preview-header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .meta-stack {
+      display: grid;
+      gap: 8px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .agent-card,
+    .notice-card,
+    .json-card,
+    .structure-card {
+      border: 1px solid rgba(228, 200, 168, 0.95);
+      border-radius: 22px;
+      background: var(--panel-strong);
+    }
+
+    .agent-card {
+      padding: 18px;
+      background: linear-gradient(180deg, #fff3ea, #fffaf5);
+      border-color: rgba(241, 127, 43, 0.7);
+    }
+
+    .agent-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .agent-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #ef7b2c, #da6319);
+      color: white;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      flex: none;
+    }
+
+    .agent-card h3,
+    .section-title {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .agent-card p,
+    .notice-card p,
+    .empty-text,
+    .muted {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .chips,
+    .inline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mini-card {
+      padding: 16px;
+      border-radius: 20px;
+      background: #fffaf4;
+      border: 1px solid rgba(228, 200, 168, 0.9);
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .mini-card .value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .mini-card .subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 16px;
+    }
+
+    .stack-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: #fffaf4;
+      border: 1px solid rgba(228, 200, 168, 0.9);
+    }
+
+    .stack-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      background: #f3e0ca;
+      color: #95510b;
+    }
+
+    .item-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .action-item,
+    .recommendation-item {
+      display: grid;
+      gap: 6px;
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(228, 200, 168, 0.88);
+      background: #fffdf9;
+    }
+
+    .action-top,
+    .recommendation-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+    }
+
+    .action-title,
+    .recommendation-name {
+      font-weight: 800;
+    }
+
+    .priority,
+    .category-tag {
+      font-size: 0.78rem;
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: #f6e1cf;
+      color: #9b530f;
+      white-space: nowrap;
+    }
+
+    .notice-card {
+      padding: 18px;
+    }
+
+    .notice-card.high {
+      border-color: rgba(187, 45, 36, 0.45);
+      background: rgba(255, 241, 239, 0.92);
+    }
+
+    .notice-card.medium {
+      border-color: rgba(179, 107, 0, 0.42);
+      background: rgba(255, 247, 230, 0.94);
+    }
+
+    .notice-card.low {
+      border-color: rgba(30, 122, 85, 0.34);
+      background: rgba(241, 251, 247, 0.94);
+    }
+
+    .notice-card.info {
+      border-color: rgba(43, 108, 176, 0.34);
+      background: rgba(239, 246, 255, 0.94);
+    }
+
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .json-card,
+    .structure-card {
+      padding: 18px;
+    }
+
+    .json-card pre,
+    .structure-card pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: "Cascadia Code", "Consolas", monospace;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: #3a2d22;
+    }
+
+    .endpoint-label {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #fff2e7;
+      color: var(--accent);
+      border: 1px solid rgba(241, 127, 43, 0.3);
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1120px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .control-panel {
+        position: static;
+      }
+
+      .grid-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        display: block;
+      }
+
+      .hero-chip {
+        margin-top: 12px;
+        display: inline-block;
+      }
+
+      .grid-2,
+      .grid-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-header {
+        display: block;
+      }
+
+      .meta-stack {
+        margin-top: 14px;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+<main class="shell">
+  <section class="hero">
+    <div class="hero-copy">
+      <h1>Dashboard API Preview</h1>
+      <p>현재 백엔드가 내려주는 대시보드 응답 구조를 임시 화면으로 바로 확인하는 페이지입니다. Worker 상태판 응답과 Employer 요약 응답을 각각 호출하고, 렌더링 결과와 raw JSON을 동시에 볼 수 있습니다.</p>
+    </div>
+    <div class="hero-chip">static preview · `/dashboard-api-preview.html`</div>
+  </section>
+
+  <section class="layout">
+    <aside class="panel control-panel">
+      <div class="section">
+        <h2>1. 로그인 또는 토큰 입력</h2>
+        <p>토큰을 직접 붙여도 되고, 테스트 계정 이메일과 비밀번호로 로그인해서 토큰을 받아올 수도 있습니다.</p>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="worker@example.com">
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="password123">
+        </div>
+
+        <div class="actions">
+          <button id="loginButton" class="primary" type="button">로그인 후 토큰 받기</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>2. API 호출 설정</h2>
+        <p>worker는 상태판 구조, employer는 요약 구조입니다. 같은 토큰으로 두 엔드포인트를 각각 호출해 볼 수 있습니다.</p>
+
+        <div class="field">
+          <label for="token">Access Token</label>
+          <textarea id="token" placeholder="Bearer 접두사 없이 access token만 넣으세요"></textarea>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="dashboardType">Dashboard Type</label>
+            <select id="dashboardType">
+              <option value="worker">worker</option>
+              <option value="employer">employer</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="baseUrl">Base URL</label>
+            <input id="baseUrl" type="text" value="">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="fetchButton" class="primary" type="button">대시보드 호출</button>
+          <button id="sampleButton" class="ghost" type="button">샘플 데이터 보기</button>
+          <button id="resetButton" class="secondary" type="button">초기화</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>상태</h2>
+        <div id="statusBox" class="status-box">준비됨. 로그인하거나 토큰을 넣고 대시보드 API를 호출하세요.</div>
+      </div>
+    </aside>
+
+    <section class="preview-panel">
+      <div class="preview-shell">
+        <div class="preview-header">
+          <div>
+            <h2 id="screenTitle">Worker Dashboard Preview</h2>
+            <p id="screenDescription">대시보드 응답을 카드 단위로 분해해서 시각화합니다.</p>
+          </div>
+          <div class="meta-stack">
+            <div id="endpointLabel" class="endpoint-label">GET /api/dashboard/worker</div>
+            <div id="userMeta">사용자 정보 없음</div>
+            <div id="caseMeta">케이스 정보 없음</div>
+          </div>
+        </div>
+
+        <div style="padding: 18px; display: grid; gap: 16px;">
+          <section id="workerBlocks" style="display: grid; gap: 16px;">
+            <article class="agent-card">
+              <div class="agent-top">
+                <div class="agent-badge">AI</div>
+                <div>
+                  <div class="muted">Agent Center</div>
+                  <h3 id="agentTitle">응답을 불러오면 상단 카드가 표시됩니다.</h3>
+                </div>
+              </div>
+              <p id="agentDescription" class="muted">현재는 placeholder 상태입니다.</p>
+              <div id="agentReasons" class="chips"></div>
+              <div id="agentActions" class="inline-actions" style="margin-top: 12px;"></div>
+            </article>
+
+            <section>
+              <div class="stack-head">
+                <h3 class="section-title">Summary Cards</h3>
+                <span class="pill" id="summaryCount">0 cards</span>
+              </div>
+              <div id="summaryCards" class="grid-cards"></div>
+            </section>
+
+            <div class="main-grid">
+              <section class="stack-card">
+                <div class="stack-head">
+                  <h3 class="section-title">Today Actions</h3>
+                  <span class="pill" id="actionCount">0 items</span>
+                </div>
+                <div id="todayActions" class="item-list"></div>
+              </section>
+
+              <div style="display: grid; gap: 16px;">
+                <section class="stack-card">
+                  <div class="stack-head">
+                    <h3 class="section-title">Recommendation Slot</h3>
+                    <span class="pill" id="recommendationCount">0 items</span>
+                  </div>
+                  <p id="recommendationMessage" class="empty-text">추천 슬롯이 비어 있습니다.</p>
+                  <div id="recommendationReasons" class="chips" style="margin-bottom: 12px;"></div>
+                  <div id="recommendationItems" class="item-list"></div>
+                </section>
+
+                <section id="noticeCard" class="notice-card info">
+                  <div class="card-title-row">
+                    <h3 id="noticeTitle" class="section-title">Notice Panel</h3>
+                    <span id="noticeSeverity" class="pill">info</span>
+                  </div>
+                  <p id="noticeMessage" class="muted">안내 카드가 여기에 표시됩니다.</p>
+                  <div id="noticeAction" class="inline-actions"></div>
+                </section>
+              </div>
+            </div>
+          </section>
+
+          <section id="employerBlocks" style="display: none;">
+            <article class="stack-card">
+              <div class="stack-head">
+                <h3 class="section-title">Employer Summary</h3>
+                <span class="pill">summary response</span>
+              </div>
+              <div id="employerSummary" class="grid-cards"></div>
+            </article>
+          </section>
+        </div>
+      </div>
+
+      <section class="structure-card">
+        <div class="card-title-row">
+          <h3 class="section-title">구조 요약</h3>
+          <span id="structureMode" class="pill">worker</span>
+        </div>
+        <pre id="structureBox">worker:
+- header
+- agentCenter
+- summaryCards[]
+- todayActions[]
+- recommendationSlot
+- noticePanel</pre>
+      </section>
+
+      <section class="json-card">
+        <div class="card-title-row">
+          <h3 class="section-title">Raw JSON</h3>
+          <span class="pill">api response</span>
+        </div>
+        <pre id="jsonBox">아직 응답이 없습니다.</pre>
+      </section>
+    </section>
+  </section>
+</main>
+
+<script>
+  const sampleWorkerResponse = {
+    success: true,
+    data: {
+      header: {
+        userId: 7,
+        userName: "김민준",
+        userType: "WORKER",
+        baseDate: "2026-04-22",
+        caseId: "4b1d31a2-df6e-4e96-8e9a-d81d6f85a8a2"
+      },
+      agentCenter: {
+        title: "체크리스트 검토가 필요해요",
+        description: "문서 분석 결과와 연결된 점검 항목에 검토가 필요한 항목이 있습니다.",
+        actions: [
+          { label: "체크리스트 이동", targetPath: "/checklists?caseId=4b1d31a2-df6e-4e96-8e9a-d81d6f85a8a2" },
+          { label: "문서 분석 보기", targetPath: "/cases/4b1d31a2-df6e-4e96-8e9a-d81d6f85a8a2/documents" }
+        ],
+        reasonTypes: ["CHECKLIST", "DOCUMENT"]
+      },
+      summaryCards: [
+        { key: "risks", title: "미처리 위험 항목", value: "2", subtitle: "즉시 확인 필요", severity: "high" },
+        { key: "checklistProgress", title: "체크리스트 진행률", value: "58%", subtitle: "7 / 12 항목 완료", severity: "medium" },
+        { key: "analyzedDocuments", title: "분석된 문서 수", value: "3", subtitle: "최소 저장 성공 기준", severity: "low" },
+        { key: "nextSchedule", title: "다가오는 일정", value: "D-7", subtitle: "2026-04-29 기준", severity: "high" }
+      ],
+      todayActions: [
+        { type: "DOCUMENT", title: "문서 분석 결과 검토", description: "최근 업로드된 문서의 분석 결과와 근거를 확인해 주세요.", ctaLabel: "바로가기", targetPath: "/cases/4b1d31a2-df6e-4e96-8e9a-d81d6f85a8a2/documents", priority: "HIGH" },
+        { type: "CHECKLIST", title: "체크리스트 점검", description: "공식 체크리스트의 미완료 또는 검토 필요 항목을 확인해 주세요.", ctaLabel: "문항 보기", targetPath: "/checklists?caseId=4b1d31a2-df6e-4e96-8e9a-d81d6f85a8a2", priority: "HIGH" },
+        { type: "CONSULTATION", title: "AI 상담으로 문서 설명 받기", description: "이해하기 어려운 항목은 현재 케이스 문맥으로 상담할 수 있습니다.", ctaLabel: "상담하기", targetPath: "/consultations?caseId=4b1d31a2-df6e-4e96-8e9a-d81d6f85a8a2", priority: "MEDIUM" }
+      ],
+      recommendationSlot: {
+        title: "추천 기관 · 교육",
+        placeholderMessage: "기관/교육 추천 도메인 연결 전까지는 현재 케이스 상태를 기반으로 추천 슬롯만 제공합니다.",
+        reasonTags: ["region:Seoul", "language:ko", "industry:Manufacturing"],
+        items: []
+      },
+      noticePanel: {
+        title: "주의 사항",
+        message: "만료 일정이 30일 이내로 다가온 문서가 있습니다. 관련 문서를 먼저 확인해 주세요.",
+        severity: "high",
+        ctaLabel: "관련 문서 보기",
+        targetPath: "/cases/4b1d31a2-df6e-4e96-8e9a-d81d6f85a8a2/documents"
+      }
+    }
+  };
+
+  const sampleEmployerResponse = {
+    success: true,
+    data: {
+      userId: 3,
+      userType: "EMPLOYER",
+      activeCaseCount: 4,
+      totalChecklistCount: 18,
+      completedChecklistCount: 11,
+      unreadAlertCount: 2
+    }
+  };
+
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const tokenInput = document.getElementById("token");
+  const baseUrlInput = document.getElementById("baseUrl");
+  const dashboardTypeInput = document.getElementById("dashboardType");
+  const loginButton = document.getElementById("loginButton");
+  const fetchButton = document.getElementById("fetchButton");
+  const sampleButton = document.getElementById("sampleButton");
+  const resetButton = document.getElementById("resetButton");
+  const statusBox = document.getElementById("statusBox");
+  const jsonBox = document.getElementById("jsonBox");
+  const structureBox = document.getElementById("structureBox");
+  const structureMode = document.getElementById("structureMode");
+  const screenTitle = document.getElementById("screenTitle");
+  const screenDescription = document.getElementById("screenDescription");
+  const endpointLabel = document.getElementById("endpointLabel");
+  const userMeta = document.getElementById("userMeta");
+  const caseMeta = document.getElementById("caseMeta");
+  const workerBlocks = document.getElementById("workerBlocks");
+  const employerBlocks = document.getElementById("employerBlocks");
+  const agentTitle = document.getElementById("agentTitle");
+  const agentDescription = document.getElementById("agentDescription");
+  const agentReasons = document.getElementById("agentReasons");
+  const agentActions = document.getElementById("agentActions");
+  const summaryCards = document.getElementById("summaryCards");
+  const summaryCount = document.getElementById("summaryCount");
+  const todayActions = document.getElementById("todayActions");
+  const actionCount = document.getElementById("actionCount");
+  const recommendationMessage = document.getElementById("recommendationMessage");
+  const recommendationReasons = document.getElementById("recommendationReasons");
+  const recommendationItems = document.getElementById("recommendationItems");
+  const recommendationCount = document.getElementById("recommendationCount");
+  const noticeCard = document.getElementById("noticeCard");
+  const noticeTitle = document.getElementById("noticeTitle");
+  const noticeSeverity = document.getElementById("noticeSeverity");
+  const noticeMessage = document.getElementById("noticeMessage");
+  const noticeAction = document.getElementById("noticeAction");
+  const employerSummary = document.getElementById("employerSummary");
+
+  baseUrlInput.value = window.location.origin;
+
+  function setStatus(message, tone = "default") {
+    statusBox.textContent = message;
+    statusBox.className = tone === "error"
+      ? "status-box error"
+      : tone === "ok"
+        ? "status-box ok"
+        : "status-box";
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll("\"", "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function renderChips(container, values) {
+    container.innerHTML = values && values.length
+      ? values.map(value => `<span class="chip">${escapeHtml(value)}</span>`).join("")
+      : `<span class="chip">없음</span>`;
+  }
+
+  function renderActionLinks(container, actions) {
+    container.innerHTML = actions && actions.length
+      ? actions.map(action => `
+          <span class="chip">${escapeHtml(action.label)} · ${escapeHtml(action.targetPath)}</span>
+        `).join("")
+      : `<span class="chip">연결 액션 없음</span>`;
+  }
+
+  function renderWorker(data) {
+    workerBlocks.style.display = "grid";
+    employerBlocks.style.display = "none";
+
+    screenTitle.textContent = "Worker Dashboard Preview";
+    screenDescription.textContent = "상태판 구조를 실제 카드 형태로 임시 렌더링한 화면입니다.";
+    endpointLabel.textContent = "GET /api/dashboard/worker";
+    structureMode.textContent = "worker";
+    structureBox.textContent = [
+      "worker:",
+      "- header",
+      "- agentCenter",
+      "- summaryCards[]",
+      "- todayActions[]",
+      "- recommendationSlot",
+      "- noticePanel"
+    ].join("\n");
+
+    const header = data.header || {};
+    const agentCenter = data.agentCenter || {};
+    const cards = data.summaryCards || [];
+    const actions = data.todayActions || [];
+    const recommendationSlot = data.recommendationSlot || {};
+    const recommendationList = recommendationSlot.items || [];
+    const notice = data.noticePanel || {};
+
+    userMeta.textContent = `userId ${header.userId ?? "-"} · ${header.userName ?? "-"} · ${header.userType ?? "-"}`;
+    caseMeta.textContent = `caseId ${header.caseId ?? "없음"} · baseDate ${header.baseDate ?? "-"}`;
+
+    agentTitle.textContent = agentCenter.title || "Agent Center 정보 없음";
+    agentDescription.textContent = agentCenter.description || "설명 없음";
+    renderChips(agentReasons, agentCenter.reasonTypes || []);
+    renderActionLinks(agentActions, agentCenter.actions || []);
+
+    summaryCount.textContent = `${cards.length} cards`;
+    summaryCards.innerHTML = cards.length
+      ? cards.map(card => `
+          <article class="mini-card">
+            <strong>${escapeHtml(card.key)}</strong>
+            <div>${escapeHtml(card.title)}</div>
+            <div class="value">${escapeHtml(card.value)}</div>
+            <div class="subtitle">${escapeHtml(card.subtitle)}</div>
+          </article>
+        `).join("")
+      : `<article class="mini-card"><div class="muted">summaryCards가 비어 있습니다.</div></article>`;
+
+    actionCount.textContent = `${actions.length} items`;
+    todayActions.innerHTML = actions.length
+      ? actions.map(action => `
+          <article class="action-item">
+            <div class="action-top">
+              <div class="action-title">${escapeHtml(action.title)}</div>
+              <span class="priority">${escapeHtml(action.priority)}</span>
+            </div>
+            <div class="muted">${escapeHtml(action.description)}</div>
+            <div class="muted">${escapeHtml(action.type)} · ${escapeHtml(action.ctaLabel)} · ${escapeHtml(action.targetPath)}</div>
+          </article>
+        `).join("")
+      : `<div class="muted">todayActions가 비어 있습니다.</div>`;
+
+    recommendationMessage.textContent = recommendationSlot.placeholderMessage || "placeholderMessage 없음";
+    renderChips(recommendationReasons, recommendationSlot.reasonTags || []);
+    recommendationCount.textContent = `${recommendationList.length} items`;
+    recommendationItems.innerHTML = recommendationList.length
+      ? recommendationList.map(item => `
+          <article class="recommendation-item">
+            <div class="recommendation-top">
+              <div class="recommendation-name">${escapeHtml(item.name)}</div>
+              <span class="category-tag">${escapeHtml(item.category)}</span>
+            </div>
+            <div class="muted">${escapeHtml(item.description)}</div>
+            <div class="muted">${escapeHtml(item.targetPath)}</div>
+          </article>
+        `).join("")
+      : `<div class="muted">현재 recommendation items는 placeholder 상태입니다.</div>`;
+
+    noticeCard.className = `notice-card ${escapeHtml(notice.severity || "info")}`;
+    noticeTitle.textContent = notice.title || "Notice Panel";
+    noticeSeverity.textContent = notice.severity || "info";
+    noticeMessage.textContent = notice.message || "메시지 없음";
+    noticeAction.innerHTML = notice.ctaLabel
+      ? `<span class="chip">${escapeHtml(notice.ctaLabel)} · ${escapeHtml(notice.targetPath)}</span>`
+      : `<span class="chip">연결 액션 없음</span>`;
+  }
+
+  function renderEmployer(data) {
+    workerBlocks.style.display = "none";
+    employerBlocks.style.display = "block";
+
+    screenTitle.textContent = "Employer Dashboard Preview";
+    screenDescription.textContent = "현재 employer는 summary response 구조만 사용합니다.";
+    endpointLabel.textContent = "GET /api/dashboard/employer";
+    structureMode.textContent = "employer";
+    structureBox.textContent = [
+      "employer:",
+      "- userId",
+      "- userType",
+      "- activeCaseCount",
+      "- totalChecklistCount",
+      "- completedChecklistCount",
+      "- unreadAlertCount"
+    ].join("\n");
+
+    userMeta.textContent = `userId ${data.userId ?? "-"} · ${data.userType ?? "-"}`;
+    caseMeta.textContent = `activeCaseCount ${data.activeCaseCount ?? 0}`;
+
+    const summaryEntries = [
+      ["activeCaseCount", data.activeCaseCount],
+      ["totalChecklistCount", data.totalChecklistCount],
+      ["completedChecklistCount", data.completedChecklistCount],
+      ["unreadAlertCount", data.unreadAlertCount]
+    ];
+
+    employerSummary.innerHTML = summaryEntries.map(([key, value]) => `
+      <article class="mini-card">
+        <strong>${escapeHtml(key)}</strong>
+        <div class="value">${escapeHtml(value ?? 0)}</div>
+      </article>
+    `).join("");
+  }
+
+  function renderPayload(payload, type) {
+    jsonBox.textContent = JSON.stringify(payload, null, 2);
+
+    if (!payload || payload.success !== true) {
+      setStatus("API 응답이 success=true 형태가 아닙니다. raw JSON을 확인하세요.", "error");
+      return;
+    }
+
+    if (type === "worker") {
+      renderWorker(payload.data || {});
+    } else {
+      renderEmployer(payload.data || {});
+    }
+  }
+
+  async function login() {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const baseUrl = (baseUrlInput.value || window.location.origin).trim().replace(/\/$/, "");
+
+    if (!email || !password) {
+      setStatus("로그인을 하려면 email과 password가 필요합니다.", "error");
+      return;
+    }
+
+    loginButton.disabled = true;
+    setStatus("로그인 요청 중입니다...");
+
+    try {
+      const response = await fetch(`${baseUrl}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
+      const payload = await response.json();
+      jsonBox.textContent = JSON.stringify(payload, null, 2);
+
+      if (!response.ok || !payload.success) {
+        const message = payload?.error?.message || `로그인 실패: HTTP ${response.status}`;
+        setStatus(message, "error");
+        return;
+      }
+
+      tokenInput.value = payload.data.accessToken || "";
+      setStatus("로그인 성공. access token을 입력창에 반영했습니다.", "ok");
+    } catch (error) {
+      setStatus(`로그인 요청 실패: ${error.message}`, "error");
+    } finally {
+      loginButton.disabled = false;
+    }
+  }
+
+  async function fetchDashboard() {
+    const token = tokenInput.value.trim();
+    const type = dashboardTypeInput.value;
+    const baseUrl = (baseUrlInput.value || window.location.origin).trim().replace(/\/$/, "");
+
+    if (!token) {
+      setStatus("대시보드 호출에는 access token이 필요합니다.", "error");
+      return;
+    }
+
+    fetchButton.disabled = true;
+    setStatus(`${type} dashboard를 호출 중입니다...`);
+
+    try {
+      const response = await fetch(`${baseUrl}/api/dashboard/${type}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        jsonBox.textContent = JSON.stringify(payload, null, 2);
+        const message = payload?.error?.message || `호출 실패: HTTP ${response.status}`;
+        setStatus(message, "error");
+        return;
+      }
+
+      renderPayload(payload, type);
+      setStatus(`${type} dashboard 응답을 성공적으로 렌더링했습니다.`, "ok");
+    } catch (error) {
+      setStatus(`대시보드 요청 실패: ${error.message}`, "error");
+    } finally {
+      fetchButton.disabled = false;
+    }
+  }
+
+  function loadSample() {
+    const type = dashboardTypeInput.value;
+    if (type === "worker") {
+      renderPayload(sampleWorkerResponse, "worker");
+      setStatus("worker 샘플 데이터를 렌더링했습니다.", "ok");
+      return;
+    }
+
+    renderPayload(sampleEmployerResponse, "employer");
+    setStatus("employer 샘플 데이터를 렌더링했습니다.", "ok");
+  }
+
+  function resetView() {
+    emailInput.value = "";
+    passwordInput.value = "";
+    tokenInput.value = "";
+    dashboardTypeInput.value = "worker";
+    baseUrlInput.value = window.location.origin;
+    jsonBox.textContent = "아직 응답이 없습니다.";
+    workerBlocks.style.display = "grid";
+    employerBlocks.style.display = "none";
+    screenTitle.textContent = "Worker Dashboard Preview";
+    screenDescription.textContent = "대시보드 응답을 카드 단위로 분해해서 시각화합니다.";
+    endpointLabel.textContent = "GET /api/dashboard/worker";
+    userMeta.textContent = "사용자 정보 없음";
+    caseMeta.textContent = "케이스 정보 없음";
+    structureMode.textContent = "worker";
+    structureBox.textContent = [
+      "worker:",
+      "- header",
+      "- agentCenter",
+      "- summaryCards[]",
+      "- todayActions[]",
+      "- recommendationSlot",
+      "- noticePanel"
+    ].join("\n");
+    agentTitle.textContent = "응답을 불러오면 상단 카드가 표시됩니다.";
+    agentDescription.textContent = "현재는 placeholder 상태입니다.";
+    agentReasons.innerHTML = "";
+    agentActions.innerHTML = "";
+    summaryCards.innerHTML = "";
+    summaryCount.textContent = "0 cards";
+    todayActions.innerHTML = "";
+    actionCount.textContent = "0 items";
+    recommendationMessage.textContent = "추천 슬롯이 비어 있습니다.";
+    recommendationReasons.innerHTML = "";
+    recommendationItems.innerHTML = "";
+    recommendationCount.textContent = "0 items";
+    noticeCard.className = "notice-card info";
+    noticeTitle.textContent = "Notice Panel";
+    noticeSeverity.textContent = "info";
+    noticeMessage.textContent = "안내 카드가 여기에 표시됩니다.";
+    noticeAction.innerHTML = "";
+    employerSummary.innerHTML = "";
+    setStatus("초기화했습니다. 다시 로그인하거나 샘플 데이터를 볼 수 있습니다.");
+  }
+
+  loginButton.addEventListener("click", login);
+  fetchButton.addEventListener("click", fetchDashboard);
+  sampleButton.addEventListener("click", loadSample);
+  resetButton.addEventListener("click", resetView);
+  dashboardTypeInput.addEventListener("change", () => {
+    endpointLabel.textContent = dashboardTypeInput.value === "worker"
+      ? "GET /api/dashboard/worker"
+      : "GET /api/dashboard/employer";
+  });
+</script>
+</body>
+</html>

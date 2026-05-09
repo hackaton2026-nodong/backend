@@ -1,0 +1,67 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: backend-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: backend
+      TZ: Asia/Seoul
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p1234"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7.4
+    container_name: backend-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  ocr-worker:
+    build:
+      context: ./docker/ocr-worker
+    container_name: backend-ocr-worker
+    ports:
+      - "9000:9000"
+    environment:
+      OCR_WORKER_PORT: 9000
+      OCR_STORAGE_ROOT: /documents
+      OCR_CALLBACK_TOKEN: local-ocr-token
+      OCR_BACKEND_BASE_URL: http://host.docker.internal:8080
+      OCR_TEXT_DETECTION_MODEL: PP-OCRv5_mobile_det
+      OCR_TEXT_RECOGNITION_MODEL: korean_PP-OCRv5_mobile_rec
+      OCR_TEXT_DET_LIMIT_SIDE_LEN: 1280
+      OCR_TEXT_RECOGNITION_BATCH_SIZE: 8
+      OCR_WARMUP_ON_START: "true"
+      PADDLE_PDX_CPU_NUM_THREADS: 4
+      PADDLE_PDX_ENABLE_MKLDNN_BYDEFAULT: "False"
+      PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK: "True"
+    volumes:
+      - ./storage/documents:/documents:ro
+      - paddleocr-models:/root/.paddlex
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/health', timeout=2).read()"]
+      interval: 5s
+      timeout: 3s
+      retries: 240
+
+volumes:
+  mysql-data:
+  redis-data:
+  paddleocr-models:

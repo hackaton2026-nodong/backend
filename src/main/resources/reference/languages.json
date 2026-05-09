@@ -1,0 +1,23 @@
+{
+  "languages": [
+    { "code": "ko", "name": "Korean" },
+    { "code": "en", "name": "English" },
+    { "code": "bn", "name": "Bengali" },
+    { "code": "km", "name": "Khmer" },
+    { "code": "zh", "name": "Chinese" },
+    { "code": "id", "name": "Indonesian" },
+    { "code": "ky", "name": "Kyrgyz" },
+    { "code": "lo", "name": "Lao" },
+    { "code": "mn", "name": "Mongolian" },
+    { "code": "my", "name": "Burmese" },
+    { "code": "ne", "name": "Nepali" },
+    { "code": "ur", "name": "Urdu" },
+    { "code": "fil", "name": "Filipino" },
+    { "code": "si", "name": "Sinhala" },
+    { "code": "tg", "name": "Tajik" },
+    { "code": "th", "name": "Thai" },
+    { "code": "tet", "name": "Tetum" },
+    { "code": "uz", "name": "Uzbek" },
+    { "code": "vi", "name": "Vietnamese" }
+  ]
+}
