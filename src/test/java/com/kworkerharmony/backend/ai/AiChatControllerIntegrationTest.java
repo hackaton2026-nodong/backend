@@ -101,6 +101,17 @@ class AiChatControllerIntegrationTest {
                                     "documentStatus": "AI_REVIEWED",
                                     "riskLevel": "높음",
                                     "contractPeriod": "2026.06.01 ~ 2027.05.31",
+                                    "contractTerms": {
+                                      "wage": {
+                                        "amount": 2500000,
+                                        "period": "MONTHLY",
+                                        "paymentDay": 10
+                                      },
+                                      "workingHours": {
+                                        "startTime": "09:00",
+                                        "endTime": "18:00"
+                                      }
+                                    },
                                     "analysisStatus": "COMPLETED",
                                     "analysisSummary": "근로시간과 휴일 항목 확인이 필요합니다.",
                                     "issueCandidates": ["MINIMUM_WAGE", "OVERTIME_PAY"],
@@ -147,6 +158,8 @@ class AiChatControllerIntegrationTest {
         assertThat(receivedBody.get()).contains("연장근로수당 확인");
         assertThat(receivedBody.get()).contains("\"caseContext\"");
         assertThat(receivedBody.get()).contains("document-1");
+        assertThat(receivedBody.get()).contains("\"contractTerms\"");
+        assertThat(receivedBody.get()).contains("\"amount\":2500000");
         assertThat(receivedBody.get()).contains("OVERTIME_PAY");
         assertThat(receivedBody.get()).contains("근로시간과 휴일 항목 확인");
         assertThat(receivedBody.get()).contains("근로계약서 보완 요청");
@@ -225,6 +238,40 @@ class AiChatControllerIntegrationTest {
                                   "topK": 3,
                                   "caseContext": {
                                     "documentStatus": "rawOcrText"
+                                  }
+                                }
+                                """))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        result.getAsyncResult(5000);
+        String content = result.getResponse().getContentAsString();
+
+        assertThat(result.getResponse().getStatus()).isEqualTo(200);
+        assertThat(content).contains("event:error");
+        assertThat(content).contains("Raw OCR or file payload is not allowed");
+    }
+
+    @Test
+    void rejectsRawOcrHintsInContractTermsContext() throws Exception {
+        String accessToken = jwtProvider.generateAccessToken(activeUser());
+
+        MvcResult result = mockMvc.perform(post("/api/ai/chat/stream")
+                        .accept(MediaType.TEXT_EVENT_STREAM)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                        .content("""
+                                {
+                                  "message": "이 계약서 기준으로 알려줘",
+                                  "languageCode": "ko",
+                                  "topK": 3,
+                                  "caseContext": {
+                                    "contractTerms": {
+                                      "wage": {
+                                        "amount": 2500000,
+                                        "rawOcrText": "원문 OCR 전체"
+                                      }
+                                    }
                                   }
                                 }
                                 """))

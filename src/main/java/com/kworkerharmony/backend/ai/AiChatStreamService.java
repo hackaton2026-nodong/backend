@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kworkerharmony.backend.ai.dto.request.AiChatStreamRequest;
 import com.kworkerharmony.backend.document.config.DocumentAiProperties;
@@ -105,6 +106,7 @@ public class AiChatStreamService {
                 || containsForbiddenHint(context.documentStatus())
                 || containsForbiddenHint(context.riskLevel())
                 || containsForbiddenHint(context.contractPeriod())
+                || containsForbiddenHint(context.contractTerms())
                 || containsForbiddenHint(context.analysisStatus())
                 || containsForbiddenHint(context.analysisSummary())
                 || containsForbiddenHint(context.generatedAnalysisText())) {
@@ -159,6 +161,13 @@ public class AiChatStreamService {
     private boolean containsForbiddenHint(String value) {
         String normalized = value == null ? "" : value.toLowerCase(Locale.ROOT);
         return FORBIDDEN_MESSAGE_HINTS.stream().anyMatch(normalized::contains);
+    }
+
+    private boolean containsForbiddenHint(JsonNode node) {
+        if (node == null || node.isNull() || node.isMissingNode()) {
+            return false;
+        }
+        return containsForbiddenHint(node.toString());
     }
 
     private void proxy(AiChatStreamRequest request, SseEmitter emitter) {
@@ -276,6 +285,10 @@ public class AiChatStreamService {
             putIfPresent(context, "documentStatus", request.caseContext().documentStatus());
             putIfPresent(context, "riskLevel", request.caseContext().riskLevel());
             putIfPresent(context, "contractPeriod", request.caseContext().contractPeriod());
+            JsonNode contractTerms = sanitizedContractTerms(request.caseContext().contractTerms());
+            if (!contractTerms.isMissingNode()) {
+                context.set("contractTerms", contractTerms);
+            }
             putIfPresent(context, "analysisStatus", request.caseContext().analysisStatus());
             putIfPresent(context, "analysisSummary", request.caseContext().analysisSummary());
             putIfPresent(context, "generatedAnalysisText", request.caseContext().generatedAnalysisText());
@@ -372,6 +385,61 @@ public class AiChatStreamService {
             if (!data.isEmpty()) {
                 sendEvent(emitter, eventName, data.toString());
             }
+        }
+    }
+
+    private JsonNode sanitizedContractTerms(JsonNode terms) {
+        if (terms == null || !terms.isObject()) {
+            return MissingNode.getInstance();
+        }
+        ObjectNode sanitized = objectMapper.createObjectNode();
+        copyObjectFields(sanitized, terms, "contractPeriod", Set.of(
+                "contractStartDate", "contractEndDate"
+        ));
+        copyObjectFields(sanitized, terms, "wage", Set.of(
+                "amount", "basePay", "currency", "period", "paymentDay", "paymentMethod",
+                "overtimeNightHolidayPremiumMentioned"
+        ));
+        copyObjectFields(sanitized, terms, "workingHours", Set.of(
+                "startTime", "endTime", "hoursPerDay", "hoursPerWeek", "overtimeHoursPerDay",
+                "maxVariableHoursPerDay"
+        ));
+        copyObjectFields(sanitized, terms, "breakTime", Set.of("minutesPerDay"));
+        copyObjectFields(sanitized, terms, "holidays", Set.of("legalHolidayPaid", "otherHoliday"));
+        copyObjectFields(sanitized, terms, "dormitory", Set.of("provided", "typeCategory", "deductionAmount"));
+        copyObjectFields(sanitized, terms, "meals", Set.of("provided", "deductionAmount", "providedMeals"));
+        copyObjectFields(sanitized, terms, "work", Set.of("industryCategory", "jobCategory", "workplaceRegion"));
+        return sanitized.isEmpty() ? MissingNode.getInstance() : sanitized;
+    }
+
+    private void copyObjectFields(ObjectNode target, JsonNode source, String objectName, Set<String> allowedFields) {
+        JsonNode nested = source.path(objectName);
+        if (!nested.isObject()) {
+            return;
+        }
+        ObjectNode safeNested = objectMapper.createObjectNode();
+        allowedFields.forEach(field -> {
+            JsonNode value = nested.get(field);
+            if (value == null || value.isNull() || value.isMissingNode()) {
+                return;
+            }
+            if (value.isTextual()) {
+                String text = value.asText();
+                safeNested.put(field, text.length() > 160 ? text.substring(0, 160) : text);
+            } else if (value.isNumber() || value.isBoolean()) {
+                safeNested.set(field, value);
+            } else if (value.isArray() && "providedMeals".equals(field)) {
+                ArrayNode safeArray = safeNested.putArray(field);
+                value.forEach(item -> {
+                    if (item.isTextual() && safeArray.size() < 6) {
+                        String text = item.asText();
+                        safeArray.add(text.length() > 80 ? text.substring(0, 80) : text);
+                    }
+                });
+            }
+        });
+        if (!safeNested.isEmpty()) {
+            target.set(objectName, safeNested);
         }
     }
 

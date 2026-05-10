@@ -1,5 +1,6 @@
 package com.kworkerharmony.backend.ai.dto.request;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -43,6 +44,7 @@ public record AiChatStreamRequest(
             String riskLevel,
             @Size(max = 120)
             String contractPeriod,
+            JsonNode contractTerms,
             @Size(max = 80)
             String analysisStatus,
             @Size(max = 1000)

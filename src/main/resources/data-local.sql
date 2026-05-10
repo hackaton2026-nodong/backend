@@ -121,6 +121,45 @@ where not exists (
     select 1 from documents where id = concat('44444444-4444-4444-4444-44444444444', n)
 );
 
+insert into document_extractions (
+    id, document_id, status, schema_version, source_engine, source_result_hash,
+    extracted_payload, corrected_payload, ai_payload_hash, review_required_reason,
+    extracted_at, corrected_at, created_at, updated_at
+)
+select concat('66666666-6666-6666-6666-66666666666', n),
+       concat('44444444-4444-4444-4444-44444444444', n),
+       'EXTRACTED',
+       'employment-contract-v1',
+       'seed-structured-contract',
+       lpad(hex(300 + n), 64, '0'),
+       concat(
+           '{"contractTerms":{"contractPeriod":{"contractStartDate":"', current_date, '","contractEndDate":"', date_add(current_date, interval 1 year), '"},',
+           '"wage":{"amount":', wage_amount, ',"basePay":', base_pay, ',"currency":"KRW","period":"MONTHLY","paymentDay":10,"paymentMethod":"BANK_TRANSFER","overtimeNightHolidayPremiumMentioned":', overtime_mentioned, '},',
+           '"workingHours":{"startTime":"', start_time, '","endTime":"', end_time, '","hoursPerDay":8,"hoursPerWeek":40,"maxVariableHoursPerDay":', variable_hours, '},',
+           '"breakTime":{"minutesPerDay":60},',
+           '"holidays":{"legalHolidayPaid":true,"otherHoliday":', other_holiday, '},',
+           '"dormitory":{"provided":', dormitory_provided, ',"typeCategory":"DORMITORY","deductionAmount":', dormitory_deduction, '},',
+           '"meals":{"provided":true,"deductionAmount":', meal_deduction, ',"providedMeals":["LUNCH"]},',
+           '"work":{"industryCategory":"MANUFACTURING","jobCategory":"METAL_PARTS","workplaceRegion":"경기도 안산시"}}}'
+       ),
+       null,
+       lpad(hex(400 + n), 64, '0'),
+       null,
+       current_timestamp,
+       null,
+       current_timestamp,
+       current_timestamp
+from (
+    select 1 as n, 2600000 as wage_amount, 2450000 as base_pay, 0 as dormitory_deduction, 0 as meal_deduction, '08:30' as start_time, '17:30' as end_time, 2 as variable_hours, 'true' as overtime_mentioned, 'false' as other_holiday, 'false' as dormitory_provided
+    union all select 2, 2500000, 2300000, 200000, 0, '09:00', '18:00', 3, 'false', 'false', 'true'
+    union all select 3, 2400000, 2300000, 100000, 0, '08:00', '17:00', 2, 'true', 'true', 'true'
+    union all select 4, 2550000, 2400000, 150000, 50000, '08:30', '17:30', 1, 'true', 'false', 'true'
+    union all select 5, 2700000, 2600000, 0, 0, '08:00', '17:00', 2, 'false', 'false', 'false'
+) seed_extractions
+where not exists (
+    select 1 from document_extractions where document_id = concat('44444444-4444-4444-4444-44444444444', n)
+);
+
 insert into document_analysis_results (
     id, document_id, status, extracted_text_hash, analysis_result_hash,
     summary, risk_flags, analyzed_at, created_at, updated_at
