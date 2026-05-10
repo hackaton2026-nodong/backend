@@ -1,3 +1,6 @@
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 insert into enterprises (
     name, business_number, industry, address, foreign_worker_quota,
     employment_permit_cert_no, country_code, language_code, status, created_at, updated_at

@@ -1,4 +1,6 @@
 USE backend;
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
 
 insert into enterprises (
     name, business_number, industry, address, foreign_worker_quota,
