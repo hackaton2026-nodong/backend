@@ -196,9 +196,15 @@ public class DashboardService {
                 : Math.round((completedChecklistCount * 100.0) / totalChecklistItems) + "%";
 
         return List.of(
-                new WorkerDashboardResponse.SummaryCard("risks", "미처리 위험 항목", String.valueOf(riskCount), "즉시 확인 필요", riskCount > 0 ? "high" : "neutral"),
+                new WorkerDashboardResponse.SummaryCard(
+                        "risks",
+                        "확인 필요한 항목",
+                        String.valueOf(riskCount),
+                        riskCount > 0 ? "계약서·체크리스트 확인 필요" : "현재 추가 위험 없음",
+                        riskCount > 0 ? "high" : "neutral"
+                ),
                 new WorkerDashboardResponse.SummaryCard("checklistProgress", "체크리스트 진행률", checklistValue, completedChecklistCount + " / " + totalChecklistItems + " 항목 완료", "medium"),
-                new WorkerDashboardResponse.SummaryCard("analyzedDocuments", "분석된 문서 수", String.valueOf(analyzedDocumentCount), "최소 저장 성공 기준", "low"),
+                new WorkerDashboardResponse.SummaryCard("analyzedDocuments", "분석된 문서", String.valueOf(analyzedDocumentCount), "AI 분석 완료 기준", "low"),
                 new WorkerDashboardResponse.SummaryCard("nextSchedule", "다가오는 일정", dDayValue, dDaySubtitle, dDaySeverity)
         );
     }

@@ -55,17 +55,17 @@ select email,
        'WORKER',
        'WORKER',
        'ACTIVE',
-       'KR',
-       'ko',
+       country_code,
+       language_code,
        (select id from enterprises where business_number = '214-86-73951'),
        current_timestamp,
        current_timestamp
 from (
-    select 1 as n, 'minh.nguyen97@example.com' as email, 'NGUYEN VAN MINH' as name, date '1997-04-12' as birth_date, '010-7314-2568' as phone_number, date '2027-08-14' as visa_expires_at
-    union all select 2, 'somchai.phanit95@example.com', 'SOMCHAI PHANIT', date '1995-11-03', '010-8492-1176', date '2027-10-02'
-    union all select 3, 'maria.santos98@example.com', 'MARIA LUZ SANTOS', date '1998-07-21', '010-6258-9043', date '2028-01-19'
-    union all select 4, 'dewi.lestari96@example.com', 'DEWI LESTARI', date '1996-02-18', '010-3729-6815', date '2027-06-25'
-    union all select 5, 'ram.thapa94@example.com', 'RAM BAHADUR THAPA', date '1994-09-09', '010-9184-5632', date '2028-03-11'
+    select 1 as n, 'minh.nguyen97@example.com' as email, 'NGUYEN VAN MINH' as name, date '1997-04-12' as birth_date, '010-7314-2568' as phone_number, date '2027-08-14' as visa_expires_at, 'VN' as country_code, 'vi' as language_code
+    union all select 2, 'somchai.phanit95@example.com', 'SOMCHAI PHANIT', date '1995-11-03', '010-8492-1176', date '2027-10-02', 'TH', 'th'
+    union all select 3, 'maria.santos98@example.com', 'MARIA LUZ SANTOS', date '1998-07-21', '010-6258-9043', date '2028-01-19', 'PH', 'fil'
+    union all select 4, 'dewi.lestari96@example.com', 'DEWI LESTARI', date '1996-02-18', '010-3729-6815', date '2027-06-25', 'ID', 'id'
+    union all select 5, 'ram.thapa94@example.com', 'RAM BAHADUR THAPA', date '1994-09-09', '010-9184-5632', date '2028-03-11', 'NP', 'ne'
 ) seed_workers
 where not exists (
     select 1 from users where email = seed_workers.email
